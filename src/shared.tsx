@@ -8,6 +8,8 @@ export * from './components/ui/ConsultationModal'
 export * from './components/ui/BeforeAfterSlider'
 export * from './components/ui/Seo'
 export * from './components/ui/FaqSchema'
+export * from './components/ui/Placeholder'
+export * from './components/ui/Slider'
 
 // Layout
 export * from './components/layout/Header'

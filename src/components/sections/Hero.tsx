@@ -34,7 +34,7 @@ export function Hero() {
           className="animate-fade-up text-white/78 text-[16px] md:text-[18px] font-sans leading-[1.65] max-w-125 mb-10"
           style={{ animationDelay: '160ms' }}
         >
-          Приватні сади та комерційні простори у Львові. Від першого ескізу до бездоганної реалізації.
+          Приватні сади та комерційні простори у Львові. <br /> Від першого ескізу до бездоганної реалізації.
         </p>
 
         <div className="animate-fade-up flex flex-col sm:flex-row gap-4" style={{ animationDelay: '240ms' }}>

@@ -5,7 +5,7 @@ export function Segmentation() {
   const cards = [
     {
       to: '/private',
-      img: 'https://images.unsplash.com/photo-1772040942277-b194d9d0b648?w=900&h=600&fit=crop&auto=format',
+      img: 'https://images.unsplash.com/photo-1656646549757-17739c7a7e3b?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&dl=point3d-commercial-imaging-ltd-QelV3RY8UVY-unsplash.jpg',
       title: 'Приватна ділянка',
       desc: 'Сад вашої мрії біля заміського будинку або міської садиби. Від 3 до 100 соток.',
     },

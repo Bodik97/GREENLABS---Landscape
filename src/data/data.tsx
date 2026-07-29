@@ -19,15 +19,6 @@ export const SERVICES = [
   { img: 'https://images.unsplash.com/photo-1596481768453-8befafc2d7ae?w=400&h=280&fit=crop&auto=format', title: 'Мощення та тераси', desc: 'Бруківка, натуральний камінь, дерев\'яні настили' },
 ]
 
-export const PORTFOLIO = [
-  { img: 'https://images.unsplash.com/photo-1749803915455-a7642520d0d3?w=800&h=600&fit=crop&auto=format', loc: 'Личаківський р-н, Львів', area: '12 соток', tags: ['Озеленення', 'Газон', 'Освітлення'] },
-  { img: 'https://images.unsplash.com/photo-1772040942277-b194d9d0b648?w=800&h=600&fit=crop&auto=format', loc: 'Брюховичі, передмістя', area: '24 сотки', tags: ['Проектування', 'Тераса', 'Полив'] },
-  { img: 'https://images.unsplash.com/photo-1758450399245-0e1c5d4c2536?w=800&h=600&fit=crop&auto=format', loc: 'Франківський р-н, Львів', area: '8 соток', tags: ['Комерційний', 'Мощення', 'Водойма'] },
-  { img: 'https://images.unsplash.com/photo-1776025808938-dec3b01391ea?w=800&h=600&fit=crop&auto=format', loc: 'Пасіки-Зубрицькі', area: '18 соток', tags: ['Приватний', 'Газон', 'Освітлення'] },
-  { img: 'https://images.unsplash.com/photo-1771807536690-b0e53c9fb3bb?w=800&h=600&fit=crop&auto=format', loc: 'Сихівський р-н, Львів', area: '6 соток', tags: ['Озеленення', 'Тераса'] },
-  { img: 'https://images.unsplash.com/photo-1765129049887-bae454eecc92?w=800&h=600&fit=crop&auto=format', loc: 'Рясне-2, Львів', area: '30 соток', tags: ['Проектування', 'Полив', 'Посадка'] },
-]
-
 export const PROCESS = [
   { n: '01', title: 'Консультація', desc: 'Знайомство, аналіз ділянки та побажань', dur: '1 день' },
   { n: '02', title: 'Проектування', desc: 'Розробка концепції та 3D-візуалізації', dur: '7–14 днів' },
@@ -112,15 +103,6 @@ export const WHY_CHOOSE_US = [
   { icon: 'phone', title: 'Особистий контакт', desc: 'На зв\'язку з менеджером від першої консультації до здачі — жодних безликих кол-центрів.' },
 ]
 
-export const TEAM = [
-  { photo: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&auto=format', name: 'Роман Іваненко', role: 'Засновник, арх. ландшафту' },
-  { photo: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&auto=format', name: 'Юлія Мельник', role: 'Головний дизайнер' },
-  { photo: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&auto=format', name: 'Олексій Бойко', role: 'Керівник проектів' },
-  { photo: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=200&h=200&fit=crop&auto=format', name: 'Катерина Павленко', role: 'Дизайнер-декоратор' },
-  { photo: 'https://images.unsplash.com/photo-1757744705465-ea08b0ddc38a?w=200&h=200&fit=crop&auto=format', name: 'Василь Сторожук', role: 'Інженер систем поливу' },
-  { photo: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop&auto=format', name: 'Наталя Кравченко', role: 'Менеджер клієнтів' },
-]
-
 export const FAQ = [
   { q: 'Скільки коштує розробка ландшафтного проекту?', a: 'Вартість залежить від площі та складності ділянки і визначається індивідуально після виїзду фахівця. Перша консультація та виїзд на ділянку — безкоштовно.' },
   { q: 'Які роботи входять до базового обслуговування?', a: 'Базове обслуговування включає стрижку газону, збір листя та прибирання, полив за графіком і підживлення рослин. Точний перелік робіт узгоджуємо індивідуально під ваш сад.' },
@@ -134,8 +116,3 @@ export const FAQ = [
   { q: 'Чи є у вас власний розплідник рослин?', a: 'Так, маємо партнерський розплідник у Яворівському районі, де вирощуємо акліматизовані для Львівщини рослини. Це дозволяє пропонувати кращу якість за ринковою ціною.' },
 ]
 
-export const BLOG = [
-  { img: 'https://images.unsplash.com/photo-1749803915455-a7642520d0d3?w=700&h=420&fit=crop&auto=format', date: '15 квітня 2024', title: 'Як обрати стиль саду для вашого будинку у Львові', excerpt: 'Від класичного англійського до мінімалістичного японського — розповідаємо, як знайти стиль, що гармонує з архітектурою будинку.' },
-  { img: 'https://images.unsplash.com/photo-1596481768453-8befafc2d7ae?w=700&h=420&fit=crop&auto=format', date: '2 березня 2024', title: '5 рослин, які прикрасять сад у будь-яку пору року', excerpt: 'Вічнозелені, декоративно-листяні та сезонно-цвітучі — добираємо рослини, що зберігають декоративність із весни до пізньої осені.' },
-  { img: 'https://images.unsplash.com/photo-1668120089662-42642838cfef?w=700&h=420&fit=crop&auto=format', date: '18 лютого 2024', title: 'Тренди ландшафтного дизайну 2024 у приватних садибах', excerpt: 'Біофільний дизайн, дощові сади та smart-полив — аналізуємо головні тренди зі Скандинавії та Нідерландів.' },
-]

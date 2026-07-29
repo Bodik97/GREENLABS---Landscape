@@ -9,6 +9,8 @@ const PrivatePage = lazy(() => import('./pages/PrivatePage'))
 const CommercialPage = lazy(() => import('./pages/CommercialPage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
+const WorkPage = lazy(() => import('./pages/WorkPage'))
+const PostPage = lazy(() => import('./pages/PostPage'))
 
 function PageCurtain() {
   const location = useLocation()
@@ -16,7 +18,7 @@ function PageCurtain() {
     <AnimatePresence>
       <m.div
         key={location.pathname}
-        className="fixed inset-0 z-[70] bg-green/25 backdrop-blur-sm pointer-events-none"
+        className="fixed inset-0 z-70 bg-green/25 backdrop-blur-sm pointer-events-none"
         initial={{ y: '-101%' }}
         animate={{ y: ['-101%', '0%', '0%', '101%'] }}
         transition={{ duration: 0.75, times: [0, 0.4, 0.6, 1], ease: [0.76, 0, 0.24, 1] }}
@@ -44,6 +46,8 @@ function AnimatedRoutes() {
             <Route path="/commercial" element={<CommercialPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/works/:slug" element={<WorkPage />} />
+            <Route path="/blog/:slug" element={<PostPage />} />
           </Routes>
         </Suspense>
       </m.div>
