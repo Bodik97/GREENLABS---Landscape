@@ -15,7 +15,7 @@ export function Footer() {
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
           <div>
             <div className="inline-flex items-center bg-cream rounded-xl p-2 mb-5">
-              <img src="/logo-v2.webp" alt="GREENLABS" className="h-10 md:h-14 w-auto object-contain" />
+              <img src={`${import.meta.env.BASE_URL}logo-v2.webp`} alt="GREENLABS" className="h-10 md:h-14 w-auto object-contain" />
             </div>
             <p className="text-cream/55 text-[12px] font-sans leading-[1.72] mb-6">
               Студія ландшафтного дизайну у Львові. Від першого ескізу до вічнозеленого результату.

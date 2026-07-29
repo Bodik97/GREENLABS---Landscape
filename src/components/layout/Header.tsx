@@ -21,7 +21,7 @@ export function Header() {
     <header className={`fixed top-0 inset-x-0 z-50 transition-all duration-300 ${scrolled ? 'bg-gray-100/80 backdrop-blur-md shadow-[0_1px_0_rgba(0,0,0,0.07)]' : 'bg-black/15 backdrop-blur-sm'}`}>
       <div className="max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <img src="/logo-v2.webp" alt="GREENLABS" className="h-10 md:h-14 w-auto object-contain" />
+          <img src={`${import.meta.env.BASE_URL}logo-v2.webp`} alt="GREENLABS" className="h-10 md:h-14 w-auto object-contain" />
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
