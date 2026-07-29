@@ -1,0 +1,58 @@
+import { useEffect } from 'react'
+import { useLocation } from 'react-router-dom'
+
+function setMeta(selector: string, tagName: 'meta' | 'link', attrs: Record<string, string>) {
+  let el = document.head.querySelector<HTMLElement>(selector)
+  if (!el) {
+    el = document.createElement(tagName)
+    document.head.appendChild(el)
+  }
+  for (const [key, value] of Object.entries(attrs)) el.setAttribute(key, value)
+}
+
+export function Seo({
+  title,
+  description,
+  breadcrumbs,
+}: {
+  title: string
+  description: string
+  breadcrumbs?: { name: string; path: string }[]
+}) {
+  const { pathname } = useLocation()
+
+  useEffect(() => {
+    const url = `${window.location.origin}${pathname}`
+    document.title = title
+    setMeta('meta[name="description"]', 'meta', { name: 'description', content: description })
+    setMeta('link[rel="canonical"]', 'link', { rel: 'canonical', href: url })
+    setMeta('meta[property="og:title"]', 'meta', { property: 'og:title', content: title })
+    setMeta('meta[property="og:description"]', 'meta', { property: 'og:description', content: description })
+    setMeta('meta[property="og:url"]', 'meta', { property: 'og:url', content: url })
+
+    const breadcrumbId = 'breadcrumb-schema'
+    let script = document.getElementById(breadcrumbId) as HTMLScriptElement | null
+    if (breadcrumbs && breadcrumbs.length > 0) {
+      if (!script) {
+        script = document.createElement('script')
+        script.id = breadcrumbId
+        script.type = 'application/ld+json'
+        document.head.appendChild(script)
+      }
+      script.textContent = JSON.stringify({
+        '@context': 'https://schema.org',
+        '@type': 'BreadcrumbList',
+        itemListElement: breadcrumbs.map((b, i) => ({
+          '@type': 'ListItem',
+          position: i + 1,
+          name: b.name,
+          item: `${window.location.origin}${b.path}`,
+        })),
+      })
+    } else if (script) {
+      script.remove()
+    }
+  }, [title, description, pathname, breadcrumbs])
+
+  return null
+}
