@@ -1,22 +1,168 @@
+import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Reveal } from '../ui/Reveal'
 import { Eyebrow } from '../ui/Eyebrow'
-import { IcoArrow } from '../ui/Icons'
+import { IcoArrow, IcoEye } from '../ui/Icons'
 import { imageUrl, type WorkCard } from '../../lib/sanity'
 
-/** Сітка карток робіт — портфоліо на головній і «інші об'єкти» на сторінках. */
+function Card({ work }: { work: WorkCard }) {
+  return (
+    <Link to={`/works/${work.slug}`} className="group block">
+      <div className="relative rounded-2xl overflow-hidden bg-green aspect-4/3 mb-4">
+        <img
+          src={imageUrl(work.image, 800, 600)}
+          alt={work.image?.alt || work.title}
+          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        {/* Знак клікабельності — видимий завжди, бо на сенсорних екранах ховера немає.
+            Око, а не стрілка: стрілка тут читалась як «гортати далі», бо такі самі
+            кружечки гортають слайдер. */}
+        <span
+          aria-hidden="true"
+          className="absolute bottom-3 right-3 w-11 h-11 rounded-full bg-terra text-white flex items-center justify-center shadow-[0_4px_14px_rgba(0,0,0,0.28)] transition-all duration-200 group-hover:bg-[#b35c34] group-hover:scale-110"
+        >
+          <IcoEye className="w-5 h-5" />
+        </span>
+      </div>
+
+      <p className="text-ink text-[14px] font-display font-semibold leading-snug group-hover:text-green transition-colors">
+        {work.title}
+      </p>
+      <p className="text-stone text-[12px] font-sans mt-0.5 mb-2.5">
+        {[work.location, work.area].filter(Boolean).join(' · ')}
+      </p>
+
+      {work.tags && work.tags.length > 0 && (
+        <div className="flex flex-wrap gap-1.5">
+          {work.tags.map((t) => (
+            <span key={t} className="text-[11px] font-sans text-stone border border-[#d9d6d0] rounded-full px-3 py-1">
+              {t}
+            </span>
+          ))}
+        </div>
+      )}
+
+      <span className="inline-flex items-center gap-1.5 text-terra text-[12px] font-display font-semibold mt-3 group-hover:gap-2.5 transition-all">
+        Переглянути проєкт
+        <IcoArrow className="w-3.5 h-3.5" />
+      </span>
+    </Link>
+  )
+}
+
+function NavButton({ dir, onClick, disabled }: { dir: 'prev' | 'next'; onClick: () => void; disabled: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      aria-label={dir === 'prev' ? 'Попередні роботи' : 'Наступні роботи'}
+      className={`absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-terra text-white shadow-[0_4px_16px_rgba(0,0,0,0.28)] hidden md:flex items-center justify-center transition-all duration-200 enabled:hover:bg-[#b35c34] enabled:hover:scale-105 enabled:active:scale-95 disabled:bg-terra/35 disabled:shadow-none ${
+        dir === 'prev' ? 'left-4' : 'right-4'
+      }`}
+    >
+      <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+        <path
+          d={dir === 'prev' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'}
+          stroke="currentColor"
+          strokeWidth="2.25"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    </button>
+  )
+}
+
+/** Один ряд карток, що гортається стрілками, колесом або пальцем. */
+function CardsTrack({ items }: { items: WorkCard[] }) {
+  const trackRef = useRef<HTMLDivElement>(null)
+  const [edges, setEdges] = useState({ start: true, end: false })
+
+  const sync = () => {
+    const el = trackRef.current
+    if (!el) return
+    setEdges({
+      start: el.scrollLeft < 8,
+      end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 8,
+    })
+  }
+
+  // Кількість карток у кадрі залежить від ширини екрана, тож межі
+  // перераховуємо і після ресайзу, і після приходу даних
+  useEffect(sync, [items.length])
+  useEffect(() => {
+    window.addEventListener('resize', sync)
+    return () => window.removeEventListener('resize', sync)
+  }, [])
+
+  // scroll-snap-type: mandatory глушить `behavior: 'smooth'` — миттєва
+  // зміна scrollLeft працює, тож анімуємо її самі
+  const step = (dir: 1 | -1) => {
+    const el = trackRef.current
+    const card = el?.firstElementChild as HTMLElement | null
+    if (!el || !card) return
+
+    const from = el.scrollLeft
+    const to = Math.max(0, Math.min(from + dir * (card.clientWidth + 24), el.scrollWidth - el.clientWidth))
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      el.scrollLeft = to
+      return
+    }
+
+    const start = performance.now()
+    const tick = (now: number) => {
+      const p = Math.min(1, (now - start) / 380)
+      el.scrollLeft = from + (to - from) * (1 - Math.pow(1 - p, 3))
+      if (p < 1) requestAnimationFrame(tick)
+    }
+    requestAnimationFrame(tick)
+  }
+
+  return (
+    <div className="relative">
+      <div
+        ref={trackRef}
+        onScroll={sync}
+        tabIndex={0}
+        role="group"
+        aria-label="Список робіт, гортається вбік"
+        className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-6 px-6 md:mx-0 md:px-0"
+      >
+        {items.map((work) => (
+          <div key={work._id} className="shrink-0 snap-start w-70 sm:w-80 md:w-[calc((100%-1.5rem)/2)]">
+            <Card work={work} />
+          </div>
+        ))}
+      </div>
+
+      {items.length > 2 && (
+        <>
+          <NavButton dir="prev" onClick={() => step(-1)} disabled={edges.start} />
+          <NavButton dir="next" onClick={() => step(1)} disabled={edges.end} />
+        </>
+      )}
+    </div>
+  )
+}
+
+/** Картки робіт: сіткою або одним рядом-слайдером, якщо їх багато. */
 export function WorkCards({
   eyebrow,
   title,
   items,
   bg = 'bg-cream',
   id,
+  slider = false,
 }: {
   eyebrow: string
   title: string
   items: WorkCard[]
   bg?: string
   id?: string
+  slider?: boolean
 }) {
   if (!items.length) return null
 
@@ -28,42 +174,17 @@ export function WorkCards({
           <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08]">{title}</h2>
         </Reveal>
 
-        <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
-          {items.map((p, i) => (
-            <Reveal key={p._id} delay={(i % 3) * 90}>
-              <Link to={`/works/${p.slug}`} className="group block">
-                <div className="rounded-2xl overflow-hidden bg-green aspect-4/3 mb-4">
-                  <img
-                    src={imageUrl(p.image, 800, 600)}
-                    alt={p.image?.alt || p.title}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                </div>
-                <div className="flex items-start justify-between gap-2 mb-2.5">
-                  <div>
-                    <p className="text-ink text-[14px] font-display font-semibold leading-snug group-hover:text-green transition-colors">
-                      {p.title}
-                    </p>
-                    <p className="text-stone text-[12px] font-sans mt-0.5">
-                      {[p.location, p.area].filter(Boolean).join(' · ')}
-                    </p>
-                  </div>
-                  <IcoArrow className="w-4 h-4 text-stone mt-0.5 shrink-0 group-hover:text-green transition-colors" />
-                </div>
-                {p.tags && p.tags.length > 0 && (
-                  <div className="flex flex-wrap gap-1.5">
-                    {p.tags.map((t) => (
-                      <span key={t} className="text-[11px] font-sans text-stone border border-[#d9d6d0] rounded-full px-3 py-1">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                )}
-              </Link>
-            </Reveal>
-          ))}
-        </div>
+        {slider ? (
+          <CardsTrack items={items} />
+        ) : (
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {items.map((work, i) => (
+              <Reveal key={work._id} delay={(i % 3) * 90}>
+                <Card work={work} />
+              </Reveal>
+            ))}
+          </div>
+        )}
       </div>
     </section>
   )

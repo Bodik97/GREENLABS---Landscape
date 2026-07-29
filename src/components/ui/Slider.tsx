@@ -7,7 +7,7 @@ function Arrow({ dir }: { dir: 'prev' | 'next' }) {
       <path
         d={dir === 'prev' ? 'M10 3L5 8l5 5' : 'M6 3l5 5-5 5'}
         stroke="currentColor"
-        strokeWidth="1.6"
+        strokeWidth="2.25"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
@@ -62,7 +62,7 @@ export function Slider({ images, alt }: { images: SanityImage[]; alt: string }) 
             onClick={() => goTo(active - 1)}
             disabled={active === 0}
             aria-label="Попереднє фото"
-            className="absolute left-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 text-ink shadow-md flex items-center justify-center transition-opacity disabled:opacity-0 hover:bg-white"
+            className="absolute left-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-terra text-white shadow-[0_4px_16px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-200 disabled:opacity-0 enabled:hover:bg-[#b35c34] enabled:hover:scale-105 enabled:active:scale-95"
           >
             <Arrow dir="prev" />
           </button>
@@ -71,7 +71,7 @@ export function Slider({ images, alt }: { images: SanityImage[]; alt: string }) 
             onClick={() => goTo(active + 1)}
             disabled={active === images.length - 1}
             aria-label="Наступне фото"
-            className="absolute right-3 top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white/90 text-ink shadow-md flex items-center justify-center transition-opacity disabled:opacity-0 hover:bg-white"
+            className="absolute right-3 top-1/2 -translate-y-1/2 w-11 h-11 rounded-full bg-terra text-white shadow-[0_4px_16px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-200 disabled:opacity-0 enabled:hover:bg-[#b35c34] enabled:hover:scale-105 enabled:active:scale-95"
           >
             <Arrow dir="next" />
           </button>
@@ -84,7 +84,7 @@ export function Slider({ images, alt }: { images: SanityImage[]; alt: string }) 
                 onClick={() => goTo(i)}
                 aria-label={`Фото ${i + 1} з ${images.length}`}
                 aria-current={i === active}
-                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-green' : 'w-1.5 bg-[#d9d6d0] hover:bg-stone'}`}
+                className={`h-1.5 rounded-full transition-all ${i === active ? 'w-6 bg-terra' : 'w-1.5 bg-[#d9d6d0] hover:bg-stone'}`}
               />
             ))}
           </div>
