@@ -51,15 +51,26 @@ function Card({ work }: { work: WorkCard }) {
   )
 }
 
-function NavButton({ dir, onClick, disabled }: { dir: 'prev' | 'next'; onClick: () => void; disabled: boolean }) {
+function NavButton({
+  dir,
+  onClick,
+  disabled,
+  top,
+}: {
+  dir: 'prev' | 'next'
+  onClick: () => void
+  disabled: boolean
+  top: number | null
+}) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
       aria-label={dir === 'prev' ? 'Попередні роботи' : 'Наступні роботи'}
-      className={`absolute top-1/2 -translate-y-1/2 z-10 w-12 h-12 lg:w-14 lg:h-14 rounded-full bg-terra text-white shadow-[0_4px_16px_rgba(0,0,0,0.28)] hidden md:flex items-center justify-center transition-all duration-200 enabled:hover:bg-[#b35c34] enabled:hover:scale-105 enabled:active:scale-95 disabled:bg-terra/35 disabled:shadow-none ${
-        dir === 'prev' ? 'left-4' : 'right-4'
+      style={top === null ? undefined : { top }}
+      className={`absolute top-1/2 -translate-y-1/2 z-10 w-11 h-11 md:w-12 md:h-12 lg:w-14 lg:h-14 rounded-full bg-terra text-white shadow-[0_4px_16px_rgba(0,0,0,0.28)] flex items-center justify-center transition-all duration-200 enabled:hover:bg-[#b35c34] enabled:hover:scale-105 enabled:active:scale-95 disabled:bg-terra/35 disabled:shadow-none ${
+        dir === 'prev' ? 'left-3 md:left-4' : 'right-3 md:right-4'
       }`}
     >
       <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
@@ -78,14 +89,22 @@ function NavButton({ dir, onClick, disabled }: { dir: 'prev' | 'next'; onClick: 
 /** Один ряд карток, що гортається стрілками, колесом або пальцем. */
 function CardsTrack({ items }: { items: WorkCard[] }) {
   const trackRef = useRef<HTMLDivElement>(null)
-  const [edges, setEdges] = useState({ start: true, end: false })
+  const [edges, setEdges] = useState({ start: true, end: false, scrollable: false })
+  // Стрілки центруємо по фото, а не по всій картці: інакше на телефоні, де картка
+  // одна на весь екран, стрілка «далі» лягає рівно на кружечок-око під фото
+  const [arrowTop, setArrowTop] = useState<number | null>(null)
 
   const sync = () => {
     const el = trackRef.current
     if (!el) return
+    const img = el.querySelector('img')
+    setArrowTop(img ? img.clientHeight / 2 : null)
     setEdges({
       start: el.scrollLeft < 8,
       end: el.scrollLeft + el.clientWidth >= el.scrollWidth - 8,
+      // Скільки карток у кадрі — залежить від брейкпоінта, тож наявність
+      // стрілок рахуємо з фактичного переповнення, а не з кількості робіт
+      scrollable: el.scrollWidth > el.clientWidth + 8,
     })
   }
 
@@ -129,19 +148,19 @@ function CardsTrack({ items }: { items: WorkCard[] }) {
         tabIndex={0}
         role="group"
         aria-label="Список робіт, гортається вбік"
-        className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2 -mx-6 px-6 md:mx-0 md:px-0"
+        className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2"
       >
         {items.map((work) => (
-          <div key={work._id} className="shrink-0 snap-start w-70 sm:w-80 md:w-[calc((100%-1.5rem)/2)]">
+          <div key={work._id} className="shrink-0 snap-start w-full md:w-[calc((100%-1.5rem)/2)]">
             <Card work={work} />
           </div>
         ))}
       </div>
 
-      {items.length > 2 && (
+      {edges.scrollable && (
         <>
-          <NavButton dir="prev" onClick={() => step(-1)} disabled={edges.start} />
-          <NavButton dir="next" onClick={() => step(1)} disabled={edges.end} />
+          <NavButton dir="prev" onClick={() => step(-1)} disabled={edges.start} top={arrowTop} />
+          <NavButton dir="next" onClick={() => step(1)} disabled={edges.end} top={arrowTop} />
         </>
       )}
     </div>
