@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SectionWave } from '../ui/SectionWave'
 import { SectionGlow } from '../ui/SectionGlow'
 import {
   Reveal,
@@ -20,7 +21,8 @@ const SERVICE_ICONS = [SvcDesign, SvcPlant, SvcLawn, SvcWater, SvcLight, SvcPond
 
 export function Services() {
   return (
-    <section id="services" className="section-curve overflow-hidden py-24 bg-green">
+    <section id="services" className="relative py-24 bg-green">
+      <SectionWave shape="crest" className="text-green" />
       <SectionGlow tone="dark" />
 
       <div className="relative max-w-7xl mx-auto px-6">

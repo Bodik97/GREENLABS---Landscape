@@ -1,13 +1,17 @@
 import { Reveal } from '../ui/Reveal'
+import { SectionWave } from '../ui/SectionWave'
 import { ConsultationForm } from './ConsultationForm'
 
 export function LeadForm() {
   return (
     <section
       id="contact"
-      className="section-curve overflow-hidden py-28 md:py-36 bg-green"
+      className="relative py-28 md:py-36 bg-green"
       style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/lead-form.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
+      {/* Хвиля суцільно-зелена, а не з фото: вона лежить над попередньою
+          секцією, куди фон цієї секції не сягає */}
+      <SectionWave shape="mirror" className="text-green" />
       <div className="absolute inset-0 bg-linear-to-b from-green/80 via-green/55 to-green/80" />
       <Reveal className="relative z-10 max-w-125 mx-auto px-6 w-full">
         <ConsultationForm dark />

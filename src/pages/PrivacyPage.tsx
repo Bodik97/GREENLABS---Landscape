@@ -85,7 +85,7 @@ export default function PrivacyPage() {
         </div>
       </section>
 
-      <section className="section-curve py-20 md:py-24 bg-cream">
+      <section className="relative py-20 md:py-24 bg-cream">
         <div className="max-w-7xl mx-auto px-6">
           <Reveal className="max-w-170 flex flex-col gap-12">
             {SECTIONS.map((s) => (

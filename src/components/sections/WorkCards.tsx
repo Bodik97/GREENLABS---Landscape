@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { SectionWave } from '../ui/SectionWave'
 import { SectionGlow } from '../ui/SectionGlow'
 import { Link } from 'react-router-dom'
 import { Reveal } from '../ui/Reveal'
@@ -192,7 +193,8 @@ export function WorkCards({
   if (!items.length) return null
 
   return (
-    <section id={id} className={`section-curve overflow-hidden py-24 ${bg}`}>
+    <section id={id} className={`relative py-24 ${bg}`}>
+      <SectionWave shape="mirror" className={bg.replace('bg-', 'text-')} />
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

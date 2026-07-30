@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SectionWave } from '../ui/SectionWave'
 import { NAV, SERVICES } from '../../data/data'
 import { IcoPin, IcoPhone, IcoMail, IcoClock, IcoFacebook, IcoInstagram } from '../ui/Icons'
 
@@ -10,7 +11,8 @@ export function Footer() {
   ]
 
   return (
-    <footer className="section-curve overflow-hidden bg-green pt-16 pb-8">
+    <footer className="relative bg-green pt-16 pb-8">
+      <SectionWave shape="double" className="text-green" />
       <div className="max-w-7xl mx-auto px-6">
         <div className="grid sm:grid-cols-2 md:grid-cols-4 gap-10 pb-12 border-b border-white/10">
           <div>

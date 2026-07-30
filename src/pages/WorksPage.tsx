@@ -40,7 +40,7 @@ export default function WorksPage() {
         breadcrumbs={CRUMBS}
       />
 
-      <section className="section-curve py-16 md:py-20 bg-cream">
+      <section className="relative py-16 md:py-20 bg-cream">
         <div className="max-w-7xl mx-auto px-6">
           {loading && <p className="text-stone text-[14px] font-sans">Завантажуємо роботи…</p>}
 
