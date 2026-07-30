@@ -13,10 +13,13 @@ function setMeta(selector: string, tagName: 'meta' | 'link', attrs: Record<strin
 export function Seo({
   title,
   description,
+  image,
   breadcrumbs,
 }: {
   title: string
   description: string
+  /** Абсолютна адреса картинки для превʼю в соцмережах. Без неї лишається загальносайтова. */
+  image?: string
   breadcrumbs?: { name: string; path: string }[]
 }) {
   const { pathname } = useLocation()
@@ -29,6 +32,10 @@ export function Seo({
     setMeta('meta[property="og:title"]', 'meta', { property: 'og:title', content: title })
     setMeta('meta[property="og:description"]', 'meta', { property: 'og:description', content: description })
     setMeta('meta[property="og:url"]', 'meta', { property: 'og:url', content: url })
+    if (image) {
+      setMeta('meta[property="og:image"]', 'meta', { property: 'og:image', content: image })
+      setMeta('meta[name="twitter:image"]', 'meta', { name: 'twitter:image', content: image })
+    }
 
     const breadcrumbId = 'breadcrumb-schema'
     let script = document.getElementById(breadcrumbId) as HTMLScriptElement | null

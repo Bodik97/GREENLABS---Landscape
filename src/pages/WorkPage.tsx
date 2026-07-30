@@ -176,6 +176,7 @@ export default function WorkPage() {
       <Seo
         title={`${work.seo?.title || work.title} — наша робота | GREENLABS`}
         description={desc}
+        image={imageUrl(work.seo?.image || work.image, 1200, 630)}
         breadcrumbs={[
           { name: 'Головна', path: '/' },
           { name: work.title, path: `/works/${work.slug}` },

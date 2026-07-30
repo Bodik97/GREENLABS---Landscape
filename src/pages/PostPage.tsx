@@ -102,6 +102,7 @@ export default function PostPage() {
       <Seo
         title={`${post.seo?.title || post.title} | GREENLABS`}
         description={desc}
+        image={imageUrl(post.seo?.image || post.image, 1200, 630)}
         breadcrumbs={[
           { name: 'Головна', path: '/' },
           { name: post.title, path: `/blog/${post.slug}` },
