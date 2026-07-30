@@ -6,7 +6,7 @@ const ORIGIN = 'https://bodik97.github.io'
 const BASE = (process.env.FIGMA_PUBLIC_URL ?? '').replace(/\/$/, '')
 const SITE = ORIGIN + BASE
 
-const STATIC = ['/', '/services', '/private', '/commercial', '/about']
+const STATIC = ['/', '/services', '/private', '/commercial', '/about', '/privacy']
 
 const QUERY = `{
   "works": *[_type == "project" && hidden != true && defined(slug.current)].slug.current,

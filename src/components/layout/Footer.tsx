@@ -86,7 +86,7 @@ export function Footer() {
         <div className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <p className="text-cream/55 text-[11px] font-sans">© 2026 GREENLABS Ландшафт. Всі права захищено.</p>
           <div className="flex gap-5">
-            <a href="#" className="text-cream/55 text-[11px] font-sans hover:text-cream/60 transition-colors">Політика конфіденційності</a>
+            <Link to="/privacy" className="text-cream/55 text-[11px] font-sans hover:text-cream/60 transition-colors">Політика конфіденційності</Link>
             <a href="#" className="text-cream/55 text-[11px] font-sans hover:text-cream/60 transition-colors">Публічна оферта</a>
           </div>
         </div>

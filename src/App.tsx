@@ -11,6 +11,7 @@ const ServicesPage = lazy(() => import('./pages/ServicesPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const WorkPage = lazy(() => import('./pages/WorkPage'))
 const PostPage = lazy(() => import('./pages/PostPage'))
+const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
 
 function PageCurtain() {
   const location = useLocation()
@@ -48,6 +49,7 @@ function AnimatedRoutes() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/works/:slug" element={<WorkPage />} />
             <Route path="/blog/:slug" element={<PostPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
           </Routes>
         </Suspense>
       </m.div>

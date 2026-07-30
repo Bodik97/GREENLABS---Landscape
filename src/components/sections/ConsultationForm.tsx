@@ -1,10 +1,13 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import { Eyebrow } from '../ui/Eyebrow'
+import { useConsultationModal } from '../ui/ConsultationModalContext'
 
 export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [done, setDone] = useState(false)
+  const { close } = useConsultationModal()
 
   const submit = (e: React.FormEvent) => { e.preventDefault(); if (name && phone) setDone(true) }
 
@@ -49,7 +52,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
         </button>
         <p className={`text-[11px] font-sans ${dark ? 'text-cream/70' : 'text-stone'}`}>
           Натискаючи кнопку, ви погоджуєтесь із нашою{' '}
-          <a href="#" className={`underline transition-colors ${dark ? 'hover:text-cream' : 'hover:text-ink'}`}>політикою конфіденційності</a>
+          <Link to="/privacy" onClick={close} className={`underline transition-colors ${dark ? 'hover:text-cream' : 'hover:text-ink'}`}>політикою конфіденційності</Link>
         </p>
       </form>
     </>
