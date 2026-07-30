@@ -1,5 +1,7 @@
 import { PageBanner, Characteristics, ExamplesSection, Process, LeadForm, Seo } from '../shared'
 
+const BASE = import.meta.env.BASE_URL
+
 const CHARACTERISTICS = [
   "Готелі, ресторани, офіси, ЖК-комплекси",
   'Проєктування з урахуванням прохідності та експлуатаційних навантажень',
@@ -10,9 +12,9 @@ const CHARACTERISTICS = [
 ]
 
 const EXAMPLES = [
-  { img: 'https://images.unsplash.com/photo-1758450399245-0e1c5d4c2536?w=800&h=600&fit=crop&auto=format', label: 'Територія бізнес-центру' },
-  { img: 'https://images.unsplash.com/photo-1758526116322-52919e89b3c3?w=800&h=600&fit=crop&auto=format', label: 'Прибудинкова територія ЖК' },
-  { img: 'https://images.unsplash.com/photo-1596481768453-8befafc2d7ae?w=800&h=600&fit=crop&auto=format', label: 'Озеленення входу' },
+  { img: `${BASE}img/commercial-grounds.webp`, label: 'Територія бізнес-центру' },
+  { img: `${BASE}img/commercial-complex.webp`, label: 'Прибудинкова територія ЖК' },
+  { img: `${BASE}img/commercial-entrance.webp`, label: 'Озеленення входу' },
 ]
 
 export default function CommercialPage() {
@@ -30,7 +32,7 @@ export default function CommercialPage() {
         eyebrow="Комерційний об'єкт"
         title="Представницька зелень для бізнесу"
         desc="Готелі, ресторани, офіси та ЖК-комплекси. Проєктуємо й обслуговуємо озеленення, що витримує навантаження комерційного простору і працює на імідж вашого бізнесу."
-        img="https://images.unsplash.com/photo-1758526116322-52919e89b3c3?w=1600&h=1000&fit=crop&auto=format"
+        img={`${BASE}img/banner-commercial.webp`}
       />
       <Characteristics title="Що включає робота над комерційним об'єктом" items={CHARACTERISTICS} />
       <Process />

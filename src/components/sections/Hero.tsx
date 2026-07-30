@@ -9,7 +9,7 @@ export function Hero() {
         className="absolute inset-0 bg-green"
         style={{
           backgroundImage:
-            "url('https://images.unsplash.com/photo-1762811054950-b74e0a055c80?w=1920&h=1080&fit=crop&auto=format')",
+            `url('${import.meta.env.BASE_URL}img/hero.webp')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}

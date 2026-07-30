@@ -39,7 +39,7 @@ export default function AboutPage() {
         eyebrow="Про нас"
         title="Команда, що перетворює ділянки на живий простір"
         desc="GREENLABS — студія ландшафтного дизайну у Львові. Ми поєднуємо продуманий план і живу природу, щоб простір навколо вашого дому чи бізнесу працював на вас роками."
-        img="https://images.unsplash.com/photo-1772040942277-b194d9d0b648?w=1600&h=1000&fit=crop&auto=format"
+        img={`${import.meta.env.BASE_URL}img/banner-about.webp`}
       />
 
       <section className="py-24 bg-cream">

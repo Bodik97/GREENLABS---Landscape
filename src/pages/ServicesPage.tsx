@@ -32,7 +32,7 @@ export default function ServicesPage() {
         eyebrow="Послуги"
         title="Карта послуг: що саме входить у роботу"
         desc="Пропонуємо всі етапи створення та підтримки саду в одній команді: проєктування, реалізацію та регулярний догляд."
-        img="https://images.unsplash.com/photo-1765129049887-bae454eecc92?w=1600&h=1000&fit=crop&auto=format"
+        img={`${import.meta.env.BASE_URL}img/banner-services.webp`}
       />
 
       {SERVICE_CATEGORIES.map((cat, i) => {

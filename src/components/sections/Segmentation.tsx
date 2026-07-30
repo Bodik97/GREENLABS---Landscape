@@ -5,13 +5,13 @@ export function Segmentation() {
   const cards = [
     {
       to: '/private',
-      img: 'https://images.unsplash.com/photo-1656646549757-17739c7a7e3b?ixlib=rb-4.1.0&q=85&fm=jpg&crop=entropy&cs=srgb&dl=point3d-commercial-imaging-ltd-QelV3RY8UVY-unsplash.jpg',
+      img: `${import.meta.env.BASE_URL}img/segment-private.webp`,
       title: 'Приватна ділянка',
       desc: 'Сад вашої мрії біля заміського будинку або міської садиби. Від 3 до 100 соток.',
     },
     {
       to: '/commercial',
-      img: 'https://images.unsplash.com/photo-1758526116322-52919e89b3c3?w=900&h=600&fit=crop&auto=format',
+      img: `${import.meta.env.BASE_URL}img/segment-commercial.webp`,
       title: "Комерційний об'єкт",
       desc: 'Готелі, ресторани, офіси, ЖК-комплекси. Представницька зелень для вашого бізнесу.',
     },
