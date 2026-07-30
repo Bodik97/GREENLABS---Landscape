@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal, IcoArrow } from '../../shared'
 
 export function Segmentation() {
@@ -18,8 +19,10 @@ export function Segmentation() {
   ]
 
   return (
-    <section className="py-24 bg-cream">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="relative overflow-hidden py-24 bg-cream">
+      <SectionGlow />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-6">
           {cards.map((c, i) => (
             <Reveal key={c.title} delay={i * 100}>

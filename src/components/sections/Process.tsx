@@ -1,4 +1,5 @@
 import { Reveal } from '../ui/Reveal'
+import { SectionGlow } from '../ui/SectionGlow'
 import { Eyebrow } from '../ui/Eyebrow'
 import { IcoPhone, SvcDesign, IcoCheck, SvcPlant, IcoShield } from '../ui/Icons'
 import { PROCESS } from '../../data/data'
@@ -7,8 +8,10 @@ const PROCESS_ICONS = [IcoPhone, SvcDesign, IcoCheck, SvcPlant, IcoShield]
 
 export function Process() {
   return (
-    <section className="py-24 bg-parchment">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="relative overflow-hidden py-24 bg-parchment">
+      <SectionGlow />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-14">
           <Eyebrow className="mb-3">Процес</Eyebrow>
           <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08]">

@@ -1,13 +1,16 @@
 import { useState } from 'react'
+import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal, IcoChevron, Eyebrow, FAQ, FaqSchema } from '../../shared'
 
 export function FaqSection() {
   const [open, setOpen] = useState<number>(0)
 
   return (
-    <section className="py-24 bg-cream">
+    <section className="relative overflow-hidden py-24 bg-cream">
+      <SectionGlow />
+
       <FaqSchema items={FAQ} />
-      <div className="max-w-7xl mx-auto px-6">
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-14 mx-auto text-center">
           <Eyebrow center className="mb-3">FAQ</Eyebrow>
           <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08] max-w-105 mx-auto">

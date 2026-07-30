@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SectionGlow } from '../ui/SectionGlow'
 import {
   Reveal,
   IcoArrow,
@@ -19,8 +20,10 @@ const SERVICE_ICONS = [SvcDesign, SvcPlant, SvcLawn, SvcWater, SvcLight, SvcPond
 
 export function Services() {
   return (
-    <section id="services" className="py-24 bg-green">
-      <div className="max-w-7xl mx-auto px-6">
+    <section id="services" className="relative overflow-hidden py-24 bg-green">
+      <SectionGlow tone="dark" />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-14">
           <Eyebrow dark className="mb-3">Послуги</Eyebrow>
           <h2 className="font-display font-bold text-cream text-[32px] md:text-[48px] leading-[1.08] max-w-110">

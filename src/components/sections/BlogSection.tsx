@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal } from '../ui/Reveal'
 import { IcoArrow } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
@@ -16,8 +17,10 @@ export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more }: 
   if (!items.length) return null
 
   return (
-    <section id={id} className={`py-24 ${bg}`}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id={id} className={`relative overflow-hidden py-24 ${bg}`}>
+      <SectionGlow />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         {title && (
           <Reveal className="mb-14">
             {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}

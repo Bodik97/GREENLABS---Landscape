@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { SectionGlow } from '../ui/SectionGlow'
 import { Link } from 'react-router-dom'
 import { Reveal } from '../ui/Reveal'
 import { Eyebrow } from '../ui/Eyebrow'
@@ -148,7 +149,10 @@ function CardsTrack({ items }: { items: WorkCard[] }) {
         tabIndex={0}
         role="group"
         aria-label="Список робіт, гортається вбік"
-        className="flex gap-6 overflow-x-auto snap-x snap-mandatory scrollbar-hide pb-2"
+        // overflow-y-hidden обов'язковий: із самим overflow-x трек стає ще й
+        // вертикальним скрол-контейнером і з'їдає колесо — сторінка перестає
+        // гортатись, коли курсор над картками
+        className="flex gap-6 overflow-x-auto overflow-y-hidden snap-x snap-mandatory scrollbar-hide pb-2"
       >
         {items.map((work) => (
           <div key={work._id} className="shrink-0 snap-start w-full md:w-[calc((100%-1.5rem)/2)]">
@@ -188,8 +192,10 @@ export function WorkCards({
   if (!items.length) return null
 
   return (
-    <section id={id} className={`py-24 ${bg}`}>
-      <div className="max-w-7xl mx-auto px-6">
+    <section id={id} className={`relative overflow-hidden py-24 ${bg}`}>
+      <SectionGlow />
+
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-14">
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
           <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08]">{title}</h2>
