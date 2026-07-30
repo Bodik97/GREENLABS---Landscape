@@ -5,7 +5,7 @@ import { Eyebrow } from '../ui/Eyebrow'
 import { IcoArrow, IcoEye } from '../ui/Icons'
 import { imageUrl, type WorkCard } from '../../lib/sanity'
 
-function Card({ work }: { work: WorkCard }) {
+export function WorkTile({ work }: { work: WorkCard }) {
   return (
     <Link to={`/works/${work.slug}`} className="group block">
       <div className="relative rounded-2xl overflow-hidden bg-green aspect-4/3 mb-4">
@@ -152,7 +152,7 @@ function CardsTrack({ items }: { items: WorkCard[] }) {
       >
         {items.map((work) => (
           <div key={work._id} className="shrink-0 snap-start w-full md:w-[calc((100%-1.5rem)/2)]">
-            <Card work={work} />
+            <WorkTile work={work} />
           </div>
         ))}
       </div>
@@ -175,6 +175,7 @@ export function WorkCards({
   bg = 'bg-cream',
   id,
   slider = false,
+  more,
 }: {
   eyebrow: string
   title: string
@@ -182,6 +183,7 @@ export function WorkCards({
   bg?: string
   id?: string
   slider?: boolean
+  more?: { to: string; label: string }
 }) {
   if (!items.length) return null
 
@@ -199,10 +201,22 @@ export function WorkCards({
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
             {items.map((work, i) => (
               <Reveal key={work._id} delay={(i % 3) * 90}>
-                <Card work={work} />
+                <WorkTile work={work} />
               </Reveal>
             ))}
           </div>
+        )}
+
+        {more && (
+          <Reveal className="mt-12 text-center">
+            <Link
+              to={more.to}
+              className="inline-flex items-center gap-2 border border-[#d9d6d0] rounded-lg px-6 py-3 text-ink font-display font-semibold text-[14px] hover:border-green hover:text-green transition-colors"
+            >
+              {more.label}
+              <IcoArrow className="w-4 h-4" />
+            </Link>
+          </Reveal>
         )}
       </div>
     </section>

@@ -24,22 +24,25 @@ const WHY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   phone: IcoPhone,
 }
 
+const CRUMBS = [
+  { name: 'Головна', path: '/' },
+  { name: "Про нас", path: '/about' },
+]
+
 export default function AboutPage() {
   return (
     <>
       <Seo
         title="Про нас — команда GREENLABS | Ландшафтний дизайн Львів"
         description="GREENLABS — студія ландшафтного дизайну у Львові. Індивідуальний підхід, повний цикл робіт в одній команді та гарантія на всі роботи."
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: 'Про нас', path: '/about' },
-        ]}
+        breadcrumbs={CRUMBS}
       />
       <PageBanner
         eyebrow="Про нас"
         title="Команда, що перетворює ділянки на живий простір"
         desc="GREENLABS — студія ландшафтного дизайну у Львові. Ми поєднуємо продуманий план і живу природу, щоб простір навколо вашого дому чи бізнесу працював на вас роками."
         img={`${import.meta.env.BASE_URL}img/banner-about.webp`}
+        breadcrumbs={CRUMBS}
       />
 
       <section className="py-24 bg-cream">

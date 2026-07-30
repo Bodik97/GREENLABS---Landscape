@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, NavLink } from 'react-router-dom'
 import { NAV } from '../../data/data'
 import { IcoClose, IcoMenu } from '../ui/Icons'
 import { useConsultationModal } from '../ui/ConsultationModalContext'
@@ -25,13 +25,20 @@ export function Header() {
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
-          {NAV.map((n) =>
-            n.href.includes('#') ? (
-              <a key={n.label} href={n.href} className={`text-[13px] font-medium font-sans tracking-wide transition-colors hover:opacity-60 ${textCls}`}>{n.label}</a>
-            ) : (
-              <Link key={n.label} to={n.href} className={`text-[13px] font-medium font-sans tracking-wide transition-colors hover:opacity-60 ${textCls}`}>{n.label}</Link>
-            )
-          )}
+          {NAV.map((n) => (
+            <NavLink
+              key={n.label}
+              to={n.href}
+              end={n.href === '/'}
+              className={({ isActive }) =>
+                `relative text-[13px] font-medium font-sans tracking-wide transition-colors hover:opacity-60 ${textCls} ${
+                  isActive ? 'after:absolute after:-bottom-1.5 after:inset-x-0 after:h-0.5 after:rounded-full after:bg-terra' : ''
+                }`
+              }
+            >
+              {n.label}
+            </NavLink>
+          ))}
         </nav>
 
         <div className="hidden md:flex items-center gap-5 shrink-0 ml-auto">
@@ -50,13 +57,19 @@ export function Header() {
 
       {open && (
         <div className="md:hidden bg-cream/85 backdrop-blur-md border-t border-[#e6e2db] px-6 py-6 flex flex-col gap-5 animate-drawer-in">
-          {NAV.map((n) =>
-            n.href.includes('#') ? (
-              <a key={n.label} href={n.href} onClick={() => setOpen(false)} className="text-ink text-[16px] font-sans font-medium">{n.label}</a>
-            ) : (
-              <Link key={n.label} to={n.href} onClick={() => setOpen(false)} className="text-ink text-[16px] font-sans font-medium">{n.label}</Link>
-            )
-          )}
+          {NAV.map((n) => (
+            <NavLink
+              key={n.label}
+              to={n.href}
+              end={n.href === '/'}
+              onClick={() => setOpen(false)}
+              className={({ isActive }) =>
+                `text-[16px] font-sans font-medium ${isActive ? 'text-terra' : 'text-ink'}`
+              }
+            >
+              {n.label}
+            </NavLink>
+          ))}
           <div className="pt-4 border-t border-[#e6e2db] flex flex-col gap-3">
             <a href="tel:+380976952473" className="text-ink text-[15px] font-sans">+38 (097) 695-24-73</a>
             <button

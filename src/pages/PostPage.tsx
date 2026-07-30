@@ -93,7 +93,13 @@ export default function PostPage() {
   if (!data) return <Placeholder note="Завантажуємо статтю…" />
 
   const post = data.post
-  if (!post) return <Placeholder note="Такої статті не знайшлося. Можливо, посилання застаріло — подивіться блог на головній." />
+  if (!post) return <Placeholder note="Такої статті не знайшлося. Можливо, посилання застаріло — подивіться всі матеріали в блозі." />
+
+  const crumbs = [
+    { name: 'Головна', path: '/' },
+    { name: 'Блог', path: '/blog' },
+    { name: post.title, path: `/blog/${post.slug}` },
+  ]
 
   const desc = post.seo?.description || post.excerpt || post.subtitle || post.title
 
@@ -103,16 +109,14 @@ export default function PostPage() {
         title={`${post.seo?.title || post.title} | GREENLABS`}
         description={desc}
         image={imageUrl(post.seo?.image || post.image, 1200, 630)}
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: post.title, path: `/blog/${post.slug}` },
-        ]}
+        breadcrumbs={crumbs}
       />
       <PageBanner
         eyebrow={(post.category && CATEGORY_TITLES[post.category]) || 'Блог'}
         title={post.title}
         desc={post.subtitle || post.excerpt || ''}
         img={imageUrl(post.image, 1600, 1000)}
+        breadcrumbs={crumbs}
       />
       <Meta post={post} />
       <Blocks blocks={post.blocks} fallbackAlt={post.title} />

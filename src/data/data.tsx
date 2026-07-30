@@ -3,9 +3,9 @@ const BASE = import.meta.env.BASE_URL
 export const NAV = [
   { label: 'Головна', href: '/' },
   { label: 'Послуги', href: '/services' },
-  { label: 'Портфоліо', href: `${BASE}#portfolio` },
+  { label: 'Портфоліо', href: '/works' },
   { label: 'Про нас', href: '/about' },
-  { label: 'Блог', href: `${BASE}#blog` },
+  { label: 'Блог', href: '/blog' },
 ]
 
 export const SERVICES = [

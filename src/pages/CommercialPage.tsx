@@ -17,22 +17,25 @@ const EXAMPLES = [
   { img: `${BASE}img/commercial-entrance.webp`, label: 'Озеленення входу' },
 ]
 
+const CRUMBS = [
+  { name: 'Головна', path: '/' },
+  { name: "Комерційний об'єкт", path: '/commercial' },
+]
+
 export default function CommercialPage() {
   return (
     <>
       <Seo
         title="Комерційне озеленення — готелі, офіси, ЖК | GREENLABS"
         description="Озеленення та ландшафтний дизайн комерційних об'єктів у Львові — готелі, офіси, ЖК-комплекси. Проєктування та сезонне обслуговування території бізнесу."
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: "Комерційний об'єкт", path: '/commercial' },
-        ]}
+        breadcrumbs={CRUMBS}
       />
       <PageBanner
         eyebrow="Комерційний об'єкт"
         title="Представницька зелень для бізнесу"
         desc="Готелі, ресторани, офіси та ЖК-комплекси. Проєктуємо й обслуговуємо озеленення, що витримує навантаження комерційного простору і працює на імідж вашого бізнесу."
         img={`${BASE}img/banner-commercial.webp`}
+        breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над комерційним об'єктом" items={CHARACTERISTICS} />
       <Process />

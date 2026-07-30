@@ -7,5 +7,15 @@ export function Portfolio({ bg = 'bg-cream' }: { bg?: string }) {
   // Поки дані вантажаться — тримаємо висоту, щоб сторінка не стрибала
   if (loading) return <section id="portfolio" className={`py-24 min-h-125 ${bg}`} aria-hidden="true" />
 
-  return <WorkCards id="portfolio" eyebrow="Портфоліо" title="Наші роботи" items={works ?? []} bg={bg} slider />
+  return (
+    <WorkCards
+      id="portfolio"
+      eyebrow="Портфоліо"
+      title="Наші роботи"
+      items={works ?? []}
+      bg={bg}
+      slider
+      more={{ to: '/works', label: 'Усі роботи' }}
+    />
+  )
 }

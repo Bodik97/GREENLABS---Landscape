@@ -17,22 +17,25 @@ const EXAMPLES = [
   { img: `${BASE}img/private-entrance.webp`, label: 'Вхідна група' },
 ]
 
+const CRUMBS = [
+  { name: 'Головна', path: '/' },
+  { name: "Приватна ділянка", path: '/private' },
+]
+
 export default function PrivatePage() {
   return (
     <>
       <Seo
         title="Приватна ділянка — ландшафтний дизайн саду | GREENLABS"
         description="Ландшафтний дизайн приватних ділянок у Львові — проєкт, озеленення, полив і догляд за садом заміського будинку чи міської садиби. Консультація безкоштовно."
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: 'Приватна ділянка', path: '/private' },
-        ]}
+        breadcrumbs={CRUMBS}
       />
       <PageBanner
         eyebrow="Приватна ділянка"
         title="Сад вашої мрії біля дому"
         desc="Створюємо приватні сади для заміських будинків і міських садиб — від першого ескізу до бездоганної реалізації. Враховуємо стиль життя родини, клімат Львівщини та ваші побажання."
         img={`${BASE}img/banner-private.webp`}
+        breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над приватною ділянкою" items={CHARACTERISTICS} />
       <Process />

@@ -1,7 +1,7 @@
 import { Suspense, lazy } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { MotionConfig, LazyMotion, domAnimation, AnimatePresence, m } from 'framer-motion'
-import { Header, Footer, MobileCTA, Fab, ConsultationModal, ConsultationModalProvider } from './shared'
+import { Header, Footer, MobileCTA, Fab, ConsultationModal, ConsultationModalProvider, ScrollProgress, BackToTop } from './shared'
 import { ScrollToTop } from './components/ScrollToTop'
 import HomePage from './pages/HomePage'
 
@@ -12,6 +12,8 @@ const AboutPage = lazy(() => import('./pages/AboutPage'))
 const WorkPage = lazy(() => import('./pages/WorkPage'))
 const PostPage = lazy(() => import('./pages/PostPage'))
 const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
+const WorksPage = lazy(() => import('./pages/WorksPage'))
+const BlogPage = lazy(() => import('./pages/BlogPage'))
 
 function PageCurtain() {
   const location = useLocation()
@@ -47,7 +49,9 @@ function AnimatedRoutes() {
             <Route path="/commercial" element={<CommercialPage />} />
             <Route path="/services" element={<ServicesPage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/works" element={<WorksPage />} />
             <Route path="/works/:slug" element={<WorkPage />} />
+            <Route path="/blog" element={<BlogPage />} />
             <Route path="/blog/:slug" element={<PostPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
           </Routes>
@@ -63,7 +67,8 @@ export default function App() {
       <LazyMotion features={domAnimation} strict>
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <ConsultationModalProvider>
-            <ScrollToTop /> {/* <- Вставили сюди! */}
+            <ScrollToTop />
+            <ScrollProgress />
             <PageCurtain />
             <div className="bg-cream text-ink font-sans min-h-screen flex flex-col">
               <Header />
@@ -72,6 +77,7 @@ export default function App() {
               </main>
               <Footer />
               <MobileCTA />
+              <BackToTop />
               <Fab />
             </div>
             <ConsultationModal />

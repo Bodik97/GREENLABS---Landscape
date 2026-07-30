@@ -34,11 +34,7 @@ export function Footer() {
             <ul className="flex flex-col gap-3">
               {NAV.map((n) => (
                 <li key={n.label}>
-                  {n.href.includes('#') ? (
-                    <a href={n.href} className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">{n.label}</a>
-                  ) : (
-                    <Link to={n.href} className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">{n.label}</Link>
-                  )}
+                  <Link to={n.href} className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">{n.label}</Link>
                 </li>
               ))}
               <li><Link to="/private" className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">Приватна ділянка</Link></li>

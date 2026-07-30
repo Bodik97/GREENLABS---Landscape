@@ -1,24 +1,29 @@
 import { Link } from 'react-router-dom'
 import { Reveal } from '../ui/Reveal'
+import { IcoArrow } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
 import { useSanity, imageUrl, formatDate, POSTS_QUERY, type PostCard } from '../../lib/sanity'
 
-export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title }: {
+/** Без `title` шапка не малюється — на сторінці блогу її роль виконує `PageHeader`. */
+export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more }: {
   items: PostCard[]
   bg?: string
   id?: string
-  eyebrow: string
-  title: string
+  eyebrow?: string
+  title?: string
+  more?: { to: string; label: string }
 }) {
   if (!items.length) return null
 
   return (
     <section id={id} className={`py-24 ${bg}`}>
       <div className="max-w-7xl mx-auto px-6">
-        <Reveal className="mb-14">
-          <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
-          <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08]">{title}</h2>
-        </Reveal>
+        {title && (
+          <Reveal className="mb-14">
+            {eyebrow && <Eyebrow className="mb-3">{eyebrow}</Eyebrow>}
+            <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08]">{title}</h2>
+          </Reveal>
+        )}
 
         <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6">
           {items.map((b, i) => (
@@ -47,6 +52,18 @@ export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title }: {
             </Reveal>
           ))}
         </div>
+
+        {more && (
+          <Reveal className="mt-12 text-center">
+            <Link
+              to={more.to}
+              className="inline-flex items-center gap-2 border border-[#d9d6d0] rounded-lg px-6 py-3 text-ink font-display font-semibold text-[14px] hover:border-green hover:text-green transition-colors"
+            >
+              {more.label}
+              <IcoArrow className="w-4 h-4" />
+            </Link>
+          </Reveal>
+        )}
       </div>
     </section>
   )
@@ -57,5 +74,14 @@ export function BlogSection() {
 
   if (loading) return <section id="blog" className="py-24 min-h-150 bg-cream" aria-hidden="true" />
 
-  return <PostCards id="blog" eyebrow="Блог" title="Корисні матеріали" items={posts ?? []} bg="bg-cream" />
+  return (
+    <PostCards
+      id="blog"
+      eyebrow="Блог"
+      title="Корисні матеріали"
+      items={posts ?? []}
+      bg="bg-cream"
+      more={{ to: '/blog', label: 'Усі статті' }}
+    />
+  )
 }

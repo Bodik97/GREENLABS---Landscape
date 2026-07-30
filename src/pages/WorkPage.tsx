@@ -164,7 +164,13 @@ export default function WorkPage() {
   if (!data) return <Placeholder note="Завантажуємо роботу…" />
 
   const work = data.work
-  if (!work) return <Placeholder note="Такої роботи не знайшлося. Можливо, посилання застаріло — подивіться портфоліо на головній." />
+  if (!work) return <Placeholder note="Такої роботи не знайшлося. Можливо, посилання застаріло — подивіться всі роботи в портфоліо." />
+
+  const crumbs = [
+    { name: 'Головна', path: '/' },
+    { name: 'Портфоліо', path: '/works' },
+    { name: work.title, path: `/works/${work.slug}` },
+  ]
 
   const desc =
     work.seo?.description ||
@@ -177,16 +183,14 @@ export default function WorkPage() {
         title={`${work.seo?.title || work.title} — наша робота | GREENLABS`}
         description={desc}
         image={imageUrl(work.seo?.image || work.image, 1200, 630)}
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: work.title, path: `/works/${work.slug}` },
-        ]}
+        breadcrumbs={crumbs}
       />
       <PageBanner
         eyebrow={work.location || 'Наша робота'}
         title={work.title}
         desc={work.subtitle || work.summary || ''}
         img={imageUrl(work.image, 1600, 1000)}
+        breadcrumbs={crumbs}
       />
       <Facts work={work} />
       <Blocks blocks={work.blocks} fallbackAlt={work.title} />

@@ -9,6 +9,8 @@ export * from './components/ui/BeforeAfterSlider'
 export * from './components/ui/Seo'
 export * from './components/ui/FaqSchema'
 export * from './components/ui/Placeholder'
+export * from './components/ui/Breadcrumbs'
+export * from './components/ui/ScrollAids'
 export * from './components/ui/Slider'
 
 // Layout
@@ -18,6 +20,7 @@ export * from './components/layout/MobileCTA'
 
 // Sections
 export * from './components/sections/PageBanner'
+export * from './components/sections/PageHeader'
 export * from './components/sections/ExamplesSection'
 export * from './components/sections/Process'
 export * from './components/sections/LeadForm'

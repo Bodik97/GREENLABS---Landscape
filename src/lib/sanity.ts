@@ -133,7 +133,10 @@ export const WORK_QUERY = `{
   "others": *[_type == "project" && ${LIVE} && defined(slug.current) && slug.current != $slug] | order(order asc)[0...3]{ ${WORK_CARD} }
 }`
 
+/** Головна показує три останні статті, сторінка блогу — всі. */
 export const POSTS_QUERY = `*[_type == "post" && ${LIVE} && defined(slug.current)] | order(publishedAt desc)[0...3]{ ${POST_CARD} }`
+
+export const ALL_POSTS_QUERY = `*[_type == "post" && ${LIVE} && defined(slug.current)] | order(publishedAt desc){ ${POST_CARD} }`
 
 export const POST_QUERY = `{
   "post": *[_type == "post" && ${LIVE} && slug.current == $slug][0]{

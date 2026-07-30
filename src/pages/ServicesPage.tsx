@@ -17,22 +17,25 @@ import {
 
 const CATEGORY_ICONS = [SvcDesign, SvcPlant, SvcLawn, SvcWater, SvcLight, SvcPond, SvcCare, SvcPave]
 
+const CRUMBS = [
+  { name: 'Головна', path: '/' },
+  { name: "Послуги", path: '/services' },
+]
+
 export default function ServicesPage() {
   return (
     <>
       <Seo
         title="Послуги — ландшафтний дизайн, озеленення, догляд | GREENLABS"
         description="Повний цикл ландшафтних робіт у Львові: проєктування, озеленення та благоустрій, регулярний догляд за ділянкою. Все в одній команді."
-        breadcrumbs={[
-          { name: 'Головна', path: '/' },
-          { name: 'Послуги', path: '/services' },
-        ]}
+        breadcrumbs={CRUMBS}
       />
       <PageBanner
         eyebrow="Послуги"
         title="Карта послуг: що саме входить у роботу"
         desc="Пропонуємо всі етапи створення та підтримки саду в одній команді: проєктування, реалізацію та регулярний догляд."
         img={`${import.meta.env.BASE_URL}img/banner-services.webp`}
+        breadcrumbs={CRUMBS}
       />
 
       {SERVICE_CATEGORIES.map((cat, i) => {

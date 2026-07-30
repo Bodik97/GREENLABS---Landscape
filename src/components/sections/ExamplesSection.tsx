@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom'
 import { Reveal } from '../ui/Reveal'
 import { BeforeAfterSlider } from '../ui/BeforeAfterSlider'
 import { IcoArrow } from '../ui/Icons'
@@ -24,9 +25,9 @@ export function ExamplesSection({ eyebrow, title, note, items }: { eyebrow: stri
         </div>
 
         <Reveal className="mt-10 text-center">
-          <a href={`${import.meta.env.BASE_URL}#portfolio`} className="inline-flex items-center gap-2 text-terra font-display font-semibold text-[14px] hover:text-[#b35c34] transition-colors">
+          <Link to="/works" className="inline-flex items-center gap-2 text-terra font-display font-semibold text-[14px] hover:text-[#b35c34] transition-colors">
             Переглянути реальне портфоліо <IcoArrow className="w-4 h-4" />
-          </a>
+          </Link>
         </Reveal>
       </div>
     </section>
