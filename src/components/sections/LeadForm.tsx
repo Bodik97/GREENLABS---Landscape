@@ -5,7 +5,7 @@ export function LeadForm() {
   return (
     <section
       id="contact"
-      className="relative py-28 md:py-36 bg-green"
+      className="section-curve overflow-hidden py-28 md:py-36 bg-green"
       style={{ backgroundImage: `url('${import.meta.env.BASE_URL}img/lead-form.webp')`, backgroundSize: 'cover', backgroundPosition: 'center' }}
     >
       <div className="absolute inset-0 bg-linear-to-b from-green/80 via-green/55 to-green/80" />

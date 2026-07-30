@@ -244,7 +244,7 @@ export function Blocks({ blocks, fallbackAlt }: { blocks?: Block[]; fallbackAlt:
       {blocks.map((block, i) => {
         const onCream = i % 2 === 0
         return (
-          <section key={block._key ?? i} className={`py-20 ${onCream ? 'bg-cream' : 'bg-parchment'}`}>
+          <section key={block._key ?? i} className={`section-curve py-20 ${onCream ? 'bg-cream' : 'bg-parchment'}`}>
             <div className="max-w-7xl mx-auto px-6">
               <BlockBody block={block} fallbackAlt={fallbackAlt} onCream={onCream} />
             </div>

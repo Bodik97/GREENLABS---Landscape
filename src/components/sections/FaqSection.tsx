@@ -6,7 +6,7 @@ export function FaqSection() {
   const [open, setOpen] = useState<number>(0)
 
   return (
-    <section className="relative overflow-hidden py-24 bg-cream">
+    <section className="section-curve overflow-hidden py-24 bg-cream">
       <SectionGlow />
 
       <FaqSchema items={FAQ} />

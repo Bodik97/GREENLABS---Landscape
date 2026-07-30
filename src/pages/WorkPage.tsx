@@ -35,7 +35,7 @@ function Facts({ work }: { work: Work }) {
   if (!facts.length && !hasChips) return null
 
   return (
-    <section className="py-14 bg-parchment">
+    <section className="section-curve py-14 bg-parchment">
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-x-14 gap-y-8 items-start">
         {facts.map((f) => (
           <Reveal key={f.label}>
@@ -108,7 +108,7 @@ function Details({ work }: { work: Work }) {
   if (!tools.length && !materials.length && !hasTeam) return null
 
   return (
-    <section className="py-20 bg-parchment">
+    <section className="section-curve py-20 bg-parchment">
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="mb-12">
           <Eyebrow className="mb-3">Деталі</Eyebrow>

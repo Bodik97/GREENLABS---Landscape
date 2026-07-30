@@ -8,7 +8,7 @@ const PROCESS_ICONS = [IcoPhone, SvcDesign, IcoCheck, SvcPlant, IcoShield]
 
 export function Process() {
   return (
-    <section className="relative overflow-hidden py-24 bg-parchment">
+    <section className="section-curve overflow-hidden py-24 bg-parchment">
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

@@ -25,7 +25,7 @@ export default function BlogPage() {
       />
 
       {(loading || error) && (
-        <section className="py-20 bg-cream">
+        <section className="section-curve py-20 bg-cream">
           <div className="max-w-7xl mx-auto px-6">
             <p className="text-stone text-[14px] font-sans">
               {loading

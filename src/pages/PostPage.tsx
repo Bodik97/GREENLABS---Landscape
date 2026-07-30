@@ -20,7 +20,7 @@ function Meta({ post }: { post: Post }) {
     .join(' · ')
 
   return (
-    <section className="py-12 bg-parchment">
+    <section className="section-curve py-12 bg-parchment">
       <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center gap-x-10 gap-y-6">
         {post.author && (
           <Reveal className="flex items-center gap-3.5">
@@ -61,7 +61,7 @@ function AuthorBio({ post }: { post: Post }) {
   if (!post.author?.bio) return null
 
   return (
-    <section className="py-16 bg-parchment">
+    <section className="section-curve py-16 bg-parchment">
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="flex items-start gap-5 max-w-175">
           <div className="w-16 h-16 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">

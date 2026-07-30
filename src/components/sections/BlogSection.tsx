@@ -17,7 +17,7 @@ export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more }: 
   if (!items.length) return null
 
   return (
-    <section id={id} className={`relative overflow-hidden py-24 ${bg}`}>
+    <section id={id} className={`section-curve overflow-hidden py-24 ${bg}`}>
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

@@ -19,7 +19,7 @@ export function Segmentation() {
   ]
 
   return (
-    <section className="relative overflow-hidden py-24 bg-cream">
+    <section className="section-curve overflow-hidden py-24 bg-cream">
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

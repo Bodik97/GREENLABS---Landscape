@@ -6,7 +6,7 @@ import { Eyebrow } from '../ui/Eyebrow'
 
 export function ExamplesSection({ eyebrow, title, note, items }: { eyebrow: string; title: string; note: string; items: { img: string; label: string }[] }) {
   return (
-    <section className="py-24 bg-parchment">
+    <section className="section-curve py-24 bg-parchment">
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="mb-4">
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>
