@@ -19,10 +19,10 @@ import {
 
 const SERVICE_ICONS = [SvcDesign, SvcPlant, SvcLawn, SvcWater, SvcLight, SvcPond, SvcCare, SvcPave]
 
-export function Services() {
+export function Services({ above }: { above?: string } = {}) {
   return (
     <section id="services" className="relative py-24 bg-green">
-      <SectionWave shape="crest" className="text-green" />
+      <SectionWave shape="crest" className="text-green" above={above} />
       <SectionGlow tone="dark" />
 
       <div className="relative max-w-7xl mx-auto px-6">

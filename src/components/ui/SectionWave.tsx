@@ -1,13 +1,16 @@
 /**
- * Хвиляста лінія стику: замість прямої межі край секції піднімається і
- * опускається. Малюється кольором самої секції і виступає вгору за її межі,
- * накриваючи низ попереднього блока — тому знати колір сусіда не потрібно.
+ * Хвиляста лінія стику: край секції піднімається і опускається.
+ *
+ * Два режими, бо зона над самою хвилею мусить чимось бути залита:
+ *
+ * - `above` заданий (колір блока зверху) — хвиля лежить у межах своєї секції
+ *   і нічого не перекриває. Це основний режим.
+ * - `above` не заданий — хвиля виступає вгору за межі секції і прозорою
+ *   частиною показує те, що під нею. Потрібно там, де блок зверху не має
+ *   рівного кольору: фото героя, фонове фото форми заявки.
  *
  * `preserveAspectRatio="none"` розтягує контур на будь-яку ширину, тож висота
  * хвилі лишається сталою і на телефоні, і на широкому екрані.
- *
- * Секція-господар має бути `relative` і БЕЗ `overflow-hidden`, інакше виступ
- * обріжеться.
  */
 
 const H = 90
@@ -26,15 +29,37 @@ const SHAPES = {
 
 export type WaveShape = keyof typeof SHAPES
 
-export function SectionWave({ shape = 'calm', className = '' }: { shape?: WaveShape; className?: string }) {
-  return (
+const SIZE = 'h-[46px] md:h-[69px]'
+
+export function SectionWave({
+  shape = 'calm',
+  className = '',
+  above,
+}: {
+  shape?: WaveShape
+  /** Колір самої секції — `text-*`, бо контур заливається currentColor. */
+  className?: string
+  /** Колір блока зверху — `bg-*`. Без нього хвиля виступає за межі секції. */
+  above?: string
+}) {
+  const path = (
     <svg
       aria-hidden="true"
       viewBox={`0 0 1440 ${H}`}
       preserveAspectRatio="none"
-      className={`pointer-events-none absolute inset-x-0 -top-[45px] md:-top-[68px] w-full h-[46px] md:h-[69px] ${className}`}
+      className={`absolute inset-0 w-full h-full ${className}`}
     >
       <path d={SHAPES[shape]} fill="currentColor" />
     </svg>
+  )
+
+  if (!above) {
+    return (
+      <div className={`pointer-events-none absolute inset-x-0 -top-[45px] md:-top-[68px] ${SIZE}`}>{path}</div>
+    )
+  }
+
+  return (
+    <div className={`pointer-events-none absolute inset-x-0 top-0 ${SIZE} ${above}`}>{path}</div>
   )
 }

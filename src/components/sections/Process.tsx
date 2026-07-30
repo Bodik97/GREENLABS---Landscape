@@ -7,10 +7,10 @@ import { PROCESS } from '../../data/data'
 
 const PROCESS_ICONS = [IcoPhone, SvcDesign, IcoCheck, SvcPlant, IcoShield]
 
-export function Process() {
+export function Process({ above }: { above?: string } = {}) {
   return (
     <section className="relative py-24 bg-parchment">
-      <SectionWave shape="double" className="text-parchment" />
+      <SectionWave shape="double" className="text-parchment" above={above} />
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

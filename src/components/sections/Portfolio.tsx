@@ -1,7 +1,7 @@
 import { WorkCards } from './WorkCards'
 import { useSanity, WORKS_QUERY, type WorkCard } from '../../lib/sanity'
 
-export function Portfolio({ bg = 'bg-cream' }: { bg?: string }) {
+export function Portfolio({ bg = 'bg-cream', above }: { bg?: string; above?: string }) {
   const { data: works, loading } = useSanity<WorkCard[]>(WORKS_QUERY)
 
   // Поки дані вантажаться — тримаємо висоту, щоб сторінка не стрибала
@@ -16,6 +16,7 @@ export function Portfolio({ bg = 'bg-cream' }: { bg?: string }) {
       bg={bg}
       slider
       more={{ to: '/works', label: 'Усі роботи' }}
+      above={above}
     />
   )
 }

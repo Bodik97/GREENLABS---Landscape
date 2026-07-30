@@ -3,12 +3,12 @@ import { SectionWave } from '../ui/SectionWave'
 import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal, IcoChevron, Eyebrow, FAQ, FaqSchema } from '../../shared'
 
-export function FaqSection() {
+export function FaqSection({ above }: { above?: string } = {}) {
   const [open, setOpen] = useState<number>(0)
 
   return (
     <section className="relative py-24 bg-cream">
-      <SectionWave shape="calm" className="text-cream" />
+      <SectionWave shape="calm" className="text-cream" above={above} />
       <SectionGlow />
 
       <FaqSchema items={FAQ} />

@@ -7,19 +7,20 @@ import { Eyebrow } from '../ui/Eyebrow'
 import { useSanity, imageUrl, formatDate, POSTS_QUERY, type PostCard } from '../../lib/sanity'
 
 /** Без `title` шапка не малюється — на сторінці блогу її роль виконує `PageHeader`. */
-export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more }: {
+export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more, above }: {
   items: PostCard[]
   bg?: string
   id?: string
   eyebrow?: string
   title?: string
   more?: { to: string; label: string }
+  above?: string
 }) {
   if (!items.length) return null
 
   return (
     <section id={id} className={`relative py-24 ${bg}`}>
-      <SectionWave shape="crest" className={bg.replace('bg-', 'text-')} />
+      <SectionWave shape="crest" className={bg.replace('bg-', 'text-')} above={above} />
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">

@@ -15,11 +15,11 @@ export default function HomePage() {
       <Seo title={siteConfig.title} description={siteConfig.description} />
       <Hero />
       <Segmentation />
-      <Portfolio bg="bg-parchment" />
-      <Services />
-      <Process />
-      <FaqSection />
-      <LeadForm />
+      <Portfolio bg="bg-parchment" above="bg-cream" />
+      <Services above="bg-parchment" />
+      <Process above="bg-green" />
+      <FaqSection above="bg-parchment" />
+      <LeadForm above="bg-cream" />
       <BlogSection />
     </>
   )

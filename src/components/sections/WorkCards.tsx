@@ -181,6 +181,7 @@ export function WorkCards({
   id,
   slider = false,
   more,
+  above,
 }: {
   eyebrow: string
   title: string
@@ -189,12 +190,13 @@ export function WorkCards({
   id?: string
   slider?: boolean
   more?: { to: string; label: string }
+  above?: string
 }) {
   if (!items.length) return null
 
   return (
     <section id={id} className={`relative py-24 ${bg}`}>
-      <SectionWave shape="mirror" className={bg.replace('bg-', 'text-')} />
+      <SectionWave shape="mirror" className={bg.replace('bg-', 'text-')} above={above} />
       <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">
