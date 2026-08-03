@@ -20,14 +20,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
-
+      # Node ставимо першим: setup-node з cache: pnpm запускав pnpm ще до того,
+      # як версія Node перемкнеться, і крок падав. Кеш прибрано — він економив
+      # секунди, а коштував усього викочування.
       - uses: actions/setup-node@v4
         with:
           node-version: 20
-          cache: pnpm
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 11.1.2
 
       - run: pnpm install --frozen-lockfile
 
