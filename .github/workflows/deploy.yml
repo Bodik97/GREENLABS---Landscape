@@ -25,7 +25,8 @@ jobs:
       # секунди, а коштував усього викочування.
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # pnpm 11 вимагає Node >= 22.13 — на Node 20 install падав одразу.
+          node-version: 22
 
       - uses: pnpm/action-setup@v4
         with:
