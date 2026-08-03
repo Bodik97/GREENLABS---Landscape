@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { useLocation } from 'react-router-dom'
+import { siteUrl } from './JsonLd'
 
 function setMeta(selector: string, tagName: 'meta' | 'link', attrs: Record<string, string>) {
   let el = document.head.querySelector<HTMLElement>(selector)
@@ -25,7 +26,7 @@ export function Seo({
   const { pathname } = useLocation()
 
   useEffect(() => {
-    const url = `${window.location.origin}${pathname}`
+    const url = siteUrl(pathname)
     document.title = title
     setMeta('meta[name="description"]', 'meta', { name: 'description', content: description })
     setMeta('link[rel="canonical"]', 'link', { rel: 'canonical', href: url })
@@ -53,7 +54,7 @@ export function Seo({
           '@type': 'ListItem',
           position: i + 1,
           name: b.name,
-          item: `${window.location.origin}${b.path}`,
+          item: siteUrl(b.path),
         })),
       })
     } else if (script) {

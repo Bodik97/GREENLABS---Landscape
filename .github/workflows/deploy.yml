@@ -22,7 +22,7 @@ jobs:
 
       - uses: pnpm/action-setup@v4
         with:
-          version: 9
+          version: 11
 
       - uses: actions/setup-node@v4
         with:
@@ -31,13 +31,13 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Install Chrome for prerender
+        run: pnpm exec puppeteer browsers install chrome
+
       - name: Build
         run: pnpm build
         env:
           FIGMA_PUBLIC_URL: /${{ github.event.repository.name }}
-
-      - name: SPA fallback for client-side routing
-        run: cp dist/index.html dist/404.html
 
       - uses: actions/upload-pages-artifact@v3
         with:

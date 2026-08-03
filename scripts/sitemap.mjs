@@ -10,17 +10,25 @@ const STATIC = ['/', '/services', '/works', '/blog', '/private', '/commercial', 
 
 const QUERY = `{
   "works": *[_type == "project" && hidden != true && defined(slug.current)].slug.current,
-  "posts": *[_type == "post" && hidden != true && defined(slug.current)].slug.current
+  "posts": *[_type == "post" && hidden != true && defined(slug.current)].slug.current,
+  "services": *[_type == "service" && hidden != true && defined(slug.current)].slug.current,
+  "serviceItems": *[_type == "serviceItem" && hidden != true && ownPage == true && defined(slug.current)]{
+    "path": parent->slug.current + "/" + slug.current
+  }.path
 }`
 
 async function fetchSlugs() {
-  const url = `https://v6s9ym4d.apicdn.sanity.io/v2026-07-29/data/query/production?query=${encodeURIComponent(QUERY)}`
+  // api, а не apicdn: CDN віддає кеш, і сторінки, додані щойно перед білдом,
+  // не потрапляли б ні в sitemap, ні в пререндер.
+  const url = `https://v6s9ym4d.api.sanity.io/v2026-07-29/data/query/production?query=${encodeURIComponent(QUERY)}`
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Sanity відповіла ${res.status}`)
   const { result } = await res.json()
   return [
     ...result.works.map((s) => `/works/${s}`),
     ...result.posts.map((s) => `/blog/${s}`),
+    ...result.services.map((s) => `/services/${s}`),
+    ...result.serviceItems.map((s) => `/services/${s}`),
   ]
 }
 
