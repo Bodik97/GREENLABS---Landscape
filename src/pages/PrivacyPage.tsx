@@ -1,4 +1,5 @@
 import { Eyebrow, Reveal, Seo } from '../shared'
+import { SectionWave } from '../components/ui/SectionWave'
 
 const UPDATED = '30 липня 2026 року'
 
@@ -86,7 +87,8 @@ export default function PrivacyPage() {
       </section>
 
       <section className="relative py-20 md:py-24 bg-cream">
-        <div className="max-w-7xl mx-auto px-6">
+        <SectionWave shape="mirror" className="text-cream" above="text-green" />
+        <div className="relative max-w-7xl mx-auto px-6">
           <Reveal className="max-w-170 flex flex-col gap-12">
             {SECTIONS.map((s) => (
               <div key={s.title} className="flex flex-col gap-4">

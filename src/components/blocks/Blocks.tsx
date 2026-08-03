@@ -4,6 +4,8 @@ import { Eyebrow } from '../ui/Eyebrow'
 import { IcoCheck } from '../ui/Icons'
 import { BeforeAfterSlider } from '../ui/BeforeAfterSlider'
 import { Slider } from '../ui/Slider'
+import { SectionWave } from '../ui/SectionWave'
+import { CountUp } from '../ui/CountUp'
 import { imageUrl, type Block, type VideoItem } from '../../lib/sanity'
 
 /** Звичайне посилання на YouTube/Vimeo → адреса плеєра для iframe. */
@@ -104,7 +106,7 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
       return (
         <>
           <SectionHeading title={block.heading} />
-          <Reveal className="max-w-200">
+          <Reveal className="max-w-200 mx-auto">
             <Slider images={images} alt={fallbackAlt} />
           </Reveal>
         </>
@@ -117,7 +119,7 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
       return (
         <>
           <SectionHeading title={block.heading} />
-          <Reveal className="max-w-175">
+          <Reveal className="max-w-175 mx-auto">
             <BeforeAfterSlider
               img={imageUrl(block.after, 1200, 900)}
               imgBefore={imageUrl(block.before, 1200, 900)}
@@ -154,21 +156,30 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
 
     case 'checklistBlock': {
       if (!block.items?.length) return null
+      // «Як ми це робимо» — це послідовність, а не перелік: там важливий порядок,
+      // тому нумеруємо кроки замість галочок.
+      const ordered = (block.heading ?? '').startsWith('Як ми це робимо')
       return (
         <>
           <SectionHeading title={block.heading} />
-          <div className="grid sm:grid-cols-2 gap-5">
+          <ol className="grid sm:grid-cols-2 gap-5">
             {block.items.map((item, i) => (
               <Reveal key={item} delay={(i % 6) * 60}>
-                <div className={`flex items-start gap-3.5 rounded-2xl p-5 ${onCream ? 'bg-parchment' : 'bg-cream'}`}>
-                  <span className="text-green mt-0.5 shrink-0">
-                    <IcoCheck className="w-5 h-5" />
+                <li className={`flex items-start gap-3.5 rounded-2xl p-5 h-full ${onCream ? 'bg-parchment' : 'bg-cream'}`}>
+                  <span
+                    className={
+                      ordered
+                        ? 'shrink-0 w-6 h-6 rounded-full bg-green text-cream font-display font-semibold text-[12px] flex items-center justify-center mt-px'
+                        : 'text-green mt-0.5 shrink-0'
+                    }
+                  >
+                    {ordered ? i + 1 : <IcoCheck className="w-5 h-5" />}
                   </span>
                   <span className="text-ink text-[14px] font-sans leading-[1.55]">{item}</span>
-                </div>
+                </li>
               </Reveal>
             ))}
-          </div>
+          </ol>
         </>
       )
     }
@@ -198,8 +209,13 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {block.items.map((stat, i) => (
               <Reveal key={stat._key ?? i} delay={(i % 4) * 70}>
-                <p className="font-display font-bold text-green text-[30px] md:text-[40px] leading-none mb-2">
-                  {stat.value}
+                {/* paintOrder кладе обводку під заливку — інакше вона зʼїдає
+                    тіло літери і цифра виглядає тоншою, ніж сусідній текст. */}
+                <p
+                  className="font-display font-bold text-terra text-[30px] md:text-[40px] leading-none mb-2"
+                  style={{ WebkitTextStroke: '1.5px #1A1A1A', paintOrder: 'stroke fill' }}
+                >
+                  <CountUp value={stat.value ?? ''} />
                 </p>
                 <p className="text-stone text-[13px] font-sans leading-snug">{stat.label}</p>
               </Reveal>
@@ -235,8 +251,25 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
   }
 }
 
-/** Малює блоки в тому порядку, в якому їх склали в адмінці, чергуючи тло секцій. */
-export function Blocks({ blocks, fallbackAlt }: { blocks?: Block[]; fallbackAlt: string }) {
+/** Кольори тла блоків чергуються, тож колір сусіда зверху рахується з індексу. */
+export const blocksTrailingColor = (count: number, above = 'text-parchment') =>
+  count ? (count % 2 === 1 ? 'text-cream' : 'text-parchment') : above
+
+/**
+ * Малює блоки в тому порядку, в якому їх склали в адмінці, чергуючи тло секцій.
+ *
+ * `above` — колір блока над першою хвилею: у роботах і статтях зверху стоїть
+ * смуга фактів на `bg-parchment`, на сторінці виду робіт — вступ на `bg-cream`.
+ */
+export function Blocks({
+  blocks,
+  fallbackAlt,
+  above = 'text-parchment',
+}: {
+  blocks?: Block[]
+  fallbackAlt: string
+  above?: string
+}) {
   if (!blocks?.length) return null
 
   return (
@@ -245,7 +278,12 @@ export function Blocks({ blocks, fallbackAlt }: { blocks?: Block[]; fallbackAlt:
         const onCream = i % 2 === 0
         return (
           <section key={block._key ?? i} className={`relative py-20 ${onCream ? 'bg-cream' : 'bg-parchment'}`}>
-            <div className="max-w-7xl mx-auto px-6">
+            <SectionWave
+              shape={onCream ? 'calm' : 'mirror'}
+              className={onCream ? 'text-cream' : 'text-parchment'}
+              above={i === 0 ? above : onCream ? 'text-parchment' : 'text-cream'}
+            />
+            <div className="relative max-w-7xl mx-auto px-6">
               <BlockBody block={block} fallbackAlt={fallbackAlt} onCream={onCream} />
             </div>
           </section>

@@ -1,9 +1,12 @@
 import { Link } from 'react-router-dom'
 import { SectionWave } from '../ui/SectionWave'
-import { NAV, SERVICES } from '../../data/data'
+import { NAV } from '../../data/data'
+import { useSanity, SERVICES_QUERY, type ServiceCard } from '../../lib/sanity'
 import { IcoPin, IcoPhone, IcoMail, IcoClock, IcoFacebook, IcoInstagram } from '../ui/Icons'
 
 export function Footer() {
+  const { data: services } = useSanity<ServiceCard[]>(SERVICES_QUERY)
+
   const socials = [
     { label: 'Facebook', href: '#', Icon: IcoFacebook },
     { label: 'Instagram', href: 'https://www.instagram.com/landspace_design10', Icon: IcoInstagram },
@@ -47,8 +50,12 @@ export function Footer() {
           <div>
             <h4 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Послуги</h4>
             <ul className="flex flex-col gap-3">
-              {SERVICES.slice(0, 6).map((s) => (
-                <li key={s.title}><Link to="/services" className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">{s.title}</Link></li>
+              {services?.slice(0, 6).map((s) => (
+                <li key={s._id}>
+                  <Link to={`/services/${s.slug}`} className="text-cream/55 text-[12px] font-sans hover:text-cream transition-colors">
+                    {s.title}
+                  </Link>
+                </li>
               ))}
             </ul>
           </div>

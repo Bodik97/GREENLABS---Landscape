@@ -3,10 +3,10 @@ import { SectionWave } from '../ui/SectionWave'
 import { IcoCheck } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
 
-export function Characteristics({ eyebrow = 'Характеристики', title, items }: { eyebrow?: string; title: string; items: string[] }) {
+export function Characteristics({ eyebrow = 'Характеристики', title, items, above }: { eyebrow?: string; title: string; items: string[]; above?: string }) {
   return (
     <section className="relative py-24 bg-cream">
-      <SectionWave shape="crest" className="text-cream" />
+      <SectionWave shape="crest" className="text-cream" above={above} />
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="mb-14">
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>

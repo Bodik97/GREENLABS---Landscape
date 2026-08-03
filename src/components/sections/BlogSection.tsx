@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { SectionWave } from '../ui/SectionWave'
-import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal } from '../ui/Reveal'
 import { IcoArrow } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
@@ -21,7 +20,6 @@ export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more, ab
   return (
     <section id={id} className={`relative py-24 ${bg}`}>
       <SectionWave shape="crest" className={bg.replace('bg-', 'text-')} above={above} />
-      <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">
         {title && (

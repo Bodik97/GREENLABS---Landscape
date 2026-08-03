@@ -1,6 +1,7 @@
 import { useParams } from 'react-router-dom'
 import { PageBanner, LeadForm, Seo, Reveal } from '../shared'
-import { Blocks } from '../components/blocks/Blocks'
+import { Blocks, blocksTrailingColor } from '../components/blocks/Blocks'
+import { SectionWave } from '../components/ui/SectionWave'
 import { PostCards } from '../components/sections/BlogSection'
 import { WorkCards } from '../components/sections/WorkCards'
 import { Placeholder } from '../components/ui/Placeholder'
@@ -21,7 +22,8 @@ function Meta({ post }: { post: Post }) {
 
   return (
     <section className="relative py-12 bg-parchment">
-      <div className="max-w-7xl mx-auto px-6 flex flex-wrap items-center gap-x-10 gap-y-6">
+      <SectionWave shape="calm" className="text-parchment" />
+      <div className="relative max-w-7xl mx-auto px-6 flex flex-wrap items-center gap-x-10 gap-y-6">
         {post.author && (
           <Reveal className="flex items-center gap-3.5">
             <div className="w-12 h-12 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">
@@ -62,7 +64,8 @@ function AuthorBio({ post }: { post: Post }) {
 
   return (
     <section className="relative py-16 bg-parchment">
-      <div className="max-w-7xl mx-auto px-6">
+      <SectionWave shape="mirror" className="text-parchment" />
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="flex items-start gap-5 max-w-175">
           <div className="w-16 h-16 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">
             {post.author.photo?.asset && (
@@ -125,7 +128,18 @@ export default function PostPage() {
         <WorkCards eyebrow="Згадані роботи" title="Про це ми писали на прикладі" items={post.relatedProjects} bg="bg-cream" />
       )}
       <PostCards eyebrow="Ще почитати" title="Інші матеріали" items={data.others ?? []} bg="bg-parchment" />
-      <LeadForm />
+      {/* Форма на фото, тож колір сусіда їй потрібен точний — а секції вище умовні */}
+      <LeadForm
+        above={
+          data.others?.length
+            ? 'text-parchment'
+            : post.relatedProjects?.length
+              ? 'text-cream'
+              : post.author
+                ? 'text-parchment'
+                : blocksTrailingColor(post.blocks?.length ?? 0)
+        }
+      />
     </>
   )
 }

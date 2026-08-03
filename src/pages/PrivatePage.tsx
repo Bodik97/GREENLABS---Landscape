@@ -38,14 +38,15 @@ export default function PrivatePage() {
         breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над приватною ділянкою" items={CHARACTERISTICS} />
-      <Process />
+      <Process above="text-cream" />
       <ExamplesSection
+        above="text-parchment"
         eyebrow="Приклади оформлення"
         title="Як може виглядати ваша ділянка"
         note="Це демонстрація механіки «до/після» на ілюстративних фото — потягніть повзунок. Реальні кейси приватних ділянок додамо, щойно погодимо фото з клієнтами."
         items={EXAMPLES}
       />
-      <LeadForm />
+      <LeadForm above="text-cream" />
     </>
   )
 }

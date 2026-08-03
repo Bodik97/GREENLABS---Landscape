@@ -38,14 +38,15 @@ export default function CommercialPage() {
         breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над комерційним об'єктом" items={CHARACTERISTICS} />
-      <Process />
+      <Process above="text-cream" />
       <ExamplesSection
+        above="text-parchment"
         eyebrow="Приклади оформлення"
         title="Як може виглядати ваш об'єкт"
         note="Це демонстрація механіки «до/після» на ілюстративних фото — потягніть повзунок. Реальні кейси комерційних об'єктів додамо, щойно погодимо фото з клієнтами."
         items={EXAMPLES}
       />
-      <LeadForm />
+      <LeadForm above="text-cream" />
     </>
   )
 }

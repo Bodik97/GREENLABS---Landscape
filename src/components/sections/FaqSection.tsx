@@ -1,27 +1,31 @@
 import { useState } from 'react'
 import { SectionWave } from '../ui/SectionWave'
-import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal, IcoChevron, Eyebrow, FAQ, FaqSchema } from '../../shared'
 
-export function FaqSection({ above }: { above?: string } = {}) {
+export function FaqSection({
+  above,
+  items = FAQ,
+  title = 'Часті запитання',
+}: { above?: string; items?: { q: string; a: string }[]; title?: string } = {}) {
   const [open, setOpen] = useState<number>(0)
+
+  if (!items.length) return null
 
   return (
     <section className="relative py-24 bg-cream">
       <SectionWave shape="calm" className="text-cream" above={above} />
-      <SectionGlow />
 
-      <FaqSchema items={FAQ} />
+      <FaqSchema items={items} />
       <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-14 mx-auto text-center">
           <Eyebrow center className="mb-3">FAQ</Eyebrow>
           <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08] max-w-105 mx-auto">
-            Часті запитання
+            {title}
           </h2>
         </Reveal>
 
         <Reveal className="max-w-200 mx-auto">
-          {FAQ.map((item, i) => (
+          {items.map((item, i) => (
             <div key={i} className={`border-b border-[#d9d6d0] ${i === 0 ? 'border-t' : ''}`}>
               <button
                 onClick={() => setOpen(open === i ? -1 : i)}

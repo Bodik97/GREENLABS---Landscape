@@ -1,6 +1,7 @@
 import { Link, useParams } from 'react-router-dom'
 import { PageBanner, LeadForm, Seo, Reveal, Eyebrow } from '../shared'
-import { Blocks } from '../components/blocks/Blocks'
+import { Blocks, blocksTrailingColor } from '../components/blocks/Blocks'
+import { SectionWave } from '../components/ui/SectionWave'
 import { WorkCards } from '../components/sections/WorkCards'
 import { Placeholder } from '../components/ui/Placeholder'
 import {
@@ -36,7 +37,8 @@ function Facts({ work }: { work: Work }) {
 
   return (
     <section className="relative py-14 bg-parchment">
-      <div className="max-w-7xl mx-auto px-6 flex flex-wrap gap-x-14 gap-y-8 items-start">
+      <SectionWave shape="calm" className="text-parchment" />
+      <div className="relative max-w-7xl mx-auto px-6 flex flex-wrap gap-x-14 gap-y-8 items-start">
         {facts.map((f) => (
           <Reveal key={f.label}>
             <p className="text-stone text-[11px] font-display font-semibold uppercase tracking-wider mb-1.5">{f.label}</p>
@@ -48,17 +50,23 @@ function Facts({ work }: { work: Work }) {
           <Reveal className="w-full lg:w-auto">
             <p className="text-stone text-[11px] font-display font-semibold uppercase tracking-wider mb-2">Види робіт</p>
             <div className="flex flex-wrap gap-1.5">
+              {/* Послуги — це справжні види робіт: насичений колір і повна обводка.
+                  Теги лише уточнюють обʼєкт, тому лишаються приглушеними, але
+                  темніший stone тримає їх читабельними. */}
               {work.services?.map((s) => (
                 <Link
                   key={s}
-                  to={`/services#${s}`}
-                  className="text-[11px] font-sans text-ink bg-cream border border-[#d9d6d0] rounded-full px-3 py-1 hover:border-green hover:text-green transition-colors"
+                  to={`/services/${s}`}
+                  className="text-[12px] font-sans font-medium text-[#b35c34] border border-terra rounded-full px-3.5 py-1 hover:text-[#8f4526] hover:border-[#8f4526] transition-colors"
                 >
                   {SERVICE_TITLES[s] ?? s}
                 </Link>
               ))}
               {work.tags?.map((t) => (
-                <span key={t} className="text-[11px] font-sans text-stone border border-[#d9d6d0] rounded-full px-3 py-1">
+                <span
+                  key={t}
+                  className="text-[12px] font-sans text-stone border border-terra/30 rounded-full px-3.5 py-1"
+                >
                   {t}
                 </span>
               ))}
@@ -109,7 +117,8 @@ function Details({ work }: { work: Work }) {
 
   return (
     <section className="relative py-20 bg-parchment">
-      <div className="max-w-7xl mx-auto px-6">
+      <SectionWave shape="mirror" className="text-parchment" />
+      <div className="relative max-w-7xl mx-auto px-6">
         <Reveal className="mb-12">
           <Eyebrow className="mb-3">Деталі</Eyebrow>
           <h2 className="font-display font-bold text-ink text-[28px] md:text-[40px] leading-[1.1]">Як це було зроблено</h2>
@@ -196,7 +205,16 @@ export default function WorkPage() {
       <Blocks blocks={work.blocks} fallbackAlt={work.title} />
       <Details work={work} />
       <WorkCards eyebrow="Ще роботи" title="Інші наші об'єкти" items={data.others ?? []} bg="bg-cream" />
-      <LeadForm />
+      {/* Форма на фото, тож колір сусіда їй потрібен точний — а секції вище умовні */}
+      <LeadForm
+        above={
+          data.others?.length
+            ? 'text-cream'
+            : work.tools?.length || work.materials?.length || work.team?.length
+              ? 'text-parchment'
+              : blocksTrailingColor(work.blocks?.length ?? 0)
+        }
+      />
     </>
   )
 }

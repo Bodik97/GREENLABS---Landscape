@@ -1,4 +1,5 @@
 import { PageHeader, Seo } from '../shared'
+import { SectionWave } from '../components/ui/SectionWave'
 import { PostCards } from '../components/sections/BlogSection'
 import { useSanity, ALL_POSTS_QUERY, type PostCard } from '../lib/sanity'
 
@@ -26,7 +27,8 @@ export default function BlogPage() {
 
       {(loading || error) && (
         <section className="relative py-20 bg-cream">
-          <div className="max-w-7xl mx-auto px-6">
+          <SectionWave shape="calm" className="text-cream" above="text-green" />
+          <div className="relative max-w-7xl mx-auto px-6">
             <p className="text-stone text-[14px] font-sans">
               {loading
                 ? 'Завантажуємо статті…'
@@ -37,7 +39,7 @@ export default function BlogPage() {
       )}
 
       {!loading && !error && (
-        <PostCards items={posts ?? []} bg="bg-cream" />
+        <PostCards items={posts ?? []} bg="bg-cream" above="text-green" />
       )}
     </>
   )

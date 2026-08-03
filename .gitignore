@@ -5,3 +5,6 @@ dist
 .env
 .env.*
 photo-source
+
+# Генерується scripts/seed-services.mjs
+services.ndjson

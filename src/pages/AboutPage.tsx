@@ -13,6 +13,7 @@ import {
   IcoShield,
   IcoPhone,
 } from '../shared'
+import { SectionWave } from '../components/ui/SectionWave'
 import { SvcPlant } from '../components/ui/Icons'
 
 const WHY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
@@ -45,8 +46,9 @@ export default function AboutPage() {
         breadcrumbs={CRUMBS}
       />
 
-      <section className="py-24 bg-cream">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="relative py-24 bg-cream">
+        <SectionWave shape="calm" className="text-cream" />
+        <div className="relative max-w-7xl mx-auto px-6">
           <Reveal className="max-w-170 flex flex-col gap-5">
             <p className="text-ink text-[16px] font-sans leading-[1.72]">
               Ми вважаємо, що ділянка — це не просто територія навколо будівлі, а частина того, як ви живете.
@@ -61,10 +63,11 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <Team />
+      <Team above="text-cream" />
 
-      <section className="py-24 bg-cream">
-        <div className="max-w-7xl mx-auto px-6">
+      <section className="relative py-24 bg-cream">
+        <SectionWave shape="crest" className="text-cream" above="text-parchment" />
+        <div className="relative max-w-7xl mx-auto px-6">
           <Reveal className="mb-14">
             <Eyebrow className="mb-3">Чому обирають нас</Eyebrow>
             <h2 className="font-display font-bold text-ink text-[32px] md:text-[48px] leading-[1.08] max-w-125">
@@ -91,7 +94,7 @@ export default function AboutPage() {
         </div>
       </section>
 
-      <LeadForm />
+      <LeadForm above="text-cream" />
     </>
   )
 }

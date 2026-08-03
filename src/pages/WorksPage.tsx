@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { PageHeader, Reveal, Seo } from '../shared'
+import { SectionWave } from '../components/ui/SectionWave'
 import { WorkTile } from '../components/sections/WorkCards'
 import { useSanity, WORKS_QUERY, type WorkCard } from '../lib/sanity'
 
@@ -41,7 +42,8 @@ export default function WorksPage() {
       />
 
       <section className="relative py-16 md:py-20 bg-cream">
-        <div className="max-w-7xl mx-auto px-6">
+        <SectionWave shape="calm" className="text-cream" above="text-green" />
+        <div className="relative max-w-7xl mx-auto px-6">
           {loading && <p className="text-stone text-[14px] font-sans">Завантажуємо роботи…</p>}
 
           {error && (

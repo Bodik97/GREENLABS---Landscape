@@ -8,6 +8,8 @@ import HomePage from './pages/HomePage'
 const PrivatePage = lazy(() => import('./pages/PrivatePage'))
 const CommercialPage = lazy(() => import('./pages/CommercialPage'))
 const ServicesPage = lazy(() => import('./pages/ServicesPage'))
+const ServicePage = lazy(() => import('./pages/ServicePage'))
+const ServiceItemPage = lazy(() => import('./pages/ServiceItemPage'))
 const AboutPage = lazy(() => import('./pages/AboutPage'))
 const WorkPage = lazy(() => import('./pages/WorkPage'))
 const PostPage = lazy(() => import('./pages/PostPage'))
@@ -48,6 +50,8 @@ function AnimatedRoutes() {
             <Route path="/private" element={<PrivatePage />} />
             <Route path="/commercial" element={<CommercialPage />} />
             <Route path="/services" element={<ServicesPage />} />
+            <Route path="/services/:slug" element={<ServicePage />} />
+            <Route path="/services/:slug/:item" element={<ServiceItemPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/works" element={<WorksPage />} />
             <Route path="/works/:slug" element={<WorkPage />} />

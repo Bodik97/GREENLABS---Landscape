@@ -3,12 +3,12 @@ import { SectionWave } from '../ui/SectionWave'
 import { Eyebrow } from '../ui/Eyebrow'
 import { useSanity, imageUrl, TEAM_QUERY, type Member } from '../../lib/sanity'
 
-export function Team() {
+export function Team({ above }: { above?: string } = {}) {
   const { data: team } = useSanity<Member[]>(TEAM_QUERY)
 
   return (
     <section className="relative py-24 bg-parchment">
-      <SectionWave shape="calm" className="text-parchment" />
+      <SectionWave shape="calm" className="text-parchment" above={above} />
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="mb-14">
           <Eyebrow className="mb-3">Команда</Eyebrow>

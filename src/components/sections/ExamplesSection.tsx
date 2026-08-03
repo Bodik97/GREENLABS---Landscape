@@ -5,10 +5,10 @@ import { BeforeAfterSlider } from '../ui/BeforeAfterSlider'
 import { IcoArrow } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
 
-export function ExamplesSection({ eyebrow, title, note, items }: { eyebrow: string; title: string; note: string; items: { img: string; label: string }[] }) {
+export function ExamplesSection({ eyebrow, title, note, items, above }: { eyebrow: string; title: string; note: string; items: { img: string; label: string }[]; above?: string }) {
   return (
-    <section className="relative py-24 bg-parchment">
-      <SectionWave shape="double" className="text-parchment" />
+    <section className="relative py-24 bg-cream">
+      <SectionWave shape="double" className="text-cream" above={above} />
       <div className="max-w-7xl mx-auto px-6">
         <Reveal className="mb-4">
           <Eyebrow className="mb-3">{eyebrow}</Eyebrow>

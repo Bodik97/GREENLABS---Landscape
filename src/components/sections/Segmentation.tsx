@@ -1,6 +1,5 @@
 import { Link } from 'react-router-dom'
 import { SectionWave } from '../ui/SectionWave'
-import { SectionGlow } from '../ui/SectionGlow'
 import { Reveal, IcoArrow } from '../../shared'
 
 export function Segmentation() {
@@ -22,7 +21,6 @@ export function Segmentation() {
   return (
     <section className="relative py-24 bg-cream">
       <SectionWave shape="calm" className="text-cream" />
-      <SectionGlow />
 
       <div className="relative max-w-7xl mx-auto px-6">
         <div className="grid md:grid-cols-2 gap-6">
