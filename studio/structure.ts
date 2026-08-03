@@ -3,6 +3,8 @@ import { CaseIcon } from '@sanity/icons/Case'
 import { DocumentTextIcon } from '@sanity/icons/DocumentText'
 import { UserIcon } from '@sanity/icons/User'
 import { EyeClosedIcon } from '@sanity/icons/EyeClosed'
+import { TagIcon } from '@sanity/icons/Tag'
+import { ComponentIcon } from '@sanity/icons/Component'
 
 // id обов'язково задаємо явно: з кириличних назв Sanity його не виводить
 export const structure: StructureResolver = (S) =>
@@ -69,6 +71,48 @@ export const structure: StructureResolver = (S) =>
                     .id('posts-hidden-list')
                     .title('Сховані статті')
                     .filter('_type == "post" && hidden == true'),
+                ),
+            ]),
+        ),
+      S.listItem()
+        .id('services')
+        .title('Послуги')
+        .icon(TagIcon)
+        .child(
+          S.list()
+            .id('services-list')
+            .title('Послуги')
+            .items([
+              S.listItem()
+                .id('services-all')
+                .title('Розділи послуг')
+                .icon(TagIcon)
+                .child(
+                  S.documentTypeList('service')
+                    .id('services-all-list')
+                    .title('Розділи послуг')
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                ),
+              S.listItem()
+                .id('service-items-all')
+                .title('Види робіт')
+                .icon(ComponentIcon)
+                .child(
+                  S.documentTypeList('serviceItem')
+                    .id('service-items-all-list')
+                    .title('Види робіт')
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                ),
+              S.listItem()
+                .id('service-items-pages')
+                .title('Види робіт із власною сторінкою')
+                .icon(ComponentIcon)
+                .child(
+                  S.documentTypeList('serviceItem')
+                    .id('service-items-pages-list')
+                    .title('Види робіт із власною сторінкою')
+                    .filter('_type == "serviceItem" && ownPage == true')
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
                 ),
             ]),
         ),

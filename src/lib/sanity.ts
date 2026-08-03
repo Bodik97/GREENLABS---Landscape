@@ -88,6 +88,76 @@ export type Work = WorkCard & {
   seo?: Seo
 }
 
+// ── Послуги ──
+
+/** Порожня вилка нічого не малює — блок ціни показуємо лише коли є `from` і `unit`. */
+export type Price = {
+  from?: number
+  to?: number
+  unit?: string
+  note?: string
+  /** Чим множити в калькуляторі. `none` — послуги в калькуляторі не буде. */
+  basis?: 'none' | 'm2' | 'sotka' | 'fixed'
+}
+
+export type Qa = { _key: string; q: string; a: string }
+
+export type ServiceItemCard = {
+  _id: string
+  title: string
+  /** Є лише коли `ownPage` — тоді вид робіт має власну сторінку. */
+  slug?: string
+  ownPage?: boolean
+  short?: string
+  image?: SanityImage
+  price?: Price
+  duration?: string
+}
+
+export type ServiceCard = {
+  _id: string
+  title: string
+  slug: string
+  short?: string
+  image: SanityImage
+  price?: Price
+  /** Назви видів робіт — щоб на картці показати, що входить. */
+  items?: string[]
+}
+
+export type Service = Omit<ServiceCard, 'items'> & {
+  intro?: string
+  duration?: string
+  guarantee?: string
+  season?: string
+  benefits?: { _key: string; title: string; desc?: string }[]
+  faq?: Qa[]
+  items?: ServiceItemCard[]
+  works?: WorkCard[]
+  seo?: Seo
+}
+
+export type ServiceItem = ServiceItemCard & {
+  parent?: { title: string; slug: string }
+  what?: string
+  why?: string
+  when?: string
+  blocks?: Block[]
+  faq?: Qa[]
+  works?: WorkCard[]
+  related?: RelatedItem[]
+  seo?: Seo
+}
+
+/** Суміжна робота з іншого розділу — тільки те, що треба для картки-посилання. */
+export type RelatedItem = {
+  _id: string
+  title: string
+  short?: string
+  slug: string
+  parentSlug: string
+}
+
 // ── Статті ──
 
 export type PostCard = {
@@ -150,6 +220,36 @@ export const POST_QUERY = `{
 }`
 
 export const TEAM_QUERY = `*[_type == "teamMember"] | order(order asc){ _id, name, role, photo }`
+
+// ── Послуги ──
+
+const PRICE = 'price{ from, to, unit, note, basis }'
+const SERVICE_ITEM_CARD = `_id, title, "slug": slug.current, ownPage, short, image, duration, ${PRICE}`
+
+/** Список послуг: картка + назви видів робіт, щоб одразу показати, що входить. */
+export const SERVICES_QUERY = `*[_type == "service" && ${LIVE} && defined(slug.current)] | order(order asc){
+  _id, title, "slug": slug.current, short, image, ${PRICE},
+  "items": *[_type == "serviceItem" && ${LIVE} && parent._ref == ^._id] | order(order asc).title
+}`
+
+/** Роботи прив'язані до послуги через список `services` у проєкті. */
+const SERVICE_WORKS = `"works": *[_type == "project" && ${LIVE} && defined(slug.current) && $slug in services] | order(order asc)[0...3]{ ${WORK_CARD} }`
+
+export const SERVICE_QUERY = `*[_type == "service" && ${LIVE} && slug.current == $slug][0]{
+  ...,
+  "slug": slug.current,
+  "items": *[_type == "serviceItem" && ${LIVE} && parent._ref == ^._id] | order(order asc){ ${SERVICE_ITEM_CARD} },
+  ${SERVICE_WORKS}
+}`
+
+export const SERVICE_ITEM_QUERY = `*[_type == "serviceItem" && ${LIVE} && ownPage == true && slug.current == $item && parent->slug.current == $slug][0]{
+  ...,
+  "slug": slug.current,
+  parent->{ title, "slug": slug.current },
+  ${BLOCKS},
+  ${SERVICE_WORKS},
+  related[]->{ _id, title, short, "slug": slug.current, "parentSlug": parent->slug.current }
+}`
 
 /** Дані вантажаться в браузері — тому в стані завжди є `loading` і можлива помилка мережі. */
 export function useSanity<T>(query: string, params?: Record<string, string>) {
