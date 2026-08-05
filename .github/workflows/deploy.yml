@@ -41,6 +41,11 @@ jobs:
         run: pnpm build
         env:
           FIGMA_PUBLIC_URL: /${{ github.event.repository.name }}
+          # Адреса Worker, який пересилає заявки в Telegram. Задається у
+          # Settings → Secrets and variables → Actions → Variables.
+          # Порожня змінна означає, що форма чесно покаже помилку з телефоном,
+          # а не вдаватиме, ніби заявку прийнято.
+          VITE_LEAD_ENDPOINT: ${{ vars.VITE_LEAD_ENDPOINT }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

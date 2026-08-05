@@ -6,16 +6,41 @@ import { useConsultationModal } from '../ui/ConsultationModalContext'
 export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [done, setDone] = useState(false)
+  const [website, setWebsite] = useState('') // пастка для ботів, людина її не бачить
+  const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const { close } = useConsultationModal()
 
-  const submit = (e: React.FormEvent) => { e.preventDefault(); if (name && phone) setDone(true) }
+  const endpoint = import.meta.env.VITE_LEAD_ENDPOINT
+
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!name || !phone || state === 'sending') return
+
+    // Без налаштованого приймача заявку нікуди слати. Показуємо помилку з
+    // телефоном, а не «дякуємо»: хибне підтвердження коштує втраченого клієнта.
+    if (!endpoint) {
+      setState('error')
+      return
+    }
+
+    setState('sending')
+    try {
+      const res = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, phone, website, page: window.location.pathname }),
+      })
+      setState(res.ok ? 'done' : 'error')
+    } catch {
+      setState('error')
+    }
+  }
 
   const heading = dark ? 'text-cream' : 'text-ink'
   const desc = dark ? 'text-cream/75' : 'text-stone'
   const label = dark ? 'text-cream/70' : 'text-stone'
 
-  if (done) {
+  if (state === 'done') {
     return (
       <div className="flex flex-col gap-4 items-center text-center animate-fade-up">
         <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl animate-pop-in ${dark ? 'bg-white/15 text-cream' : 'bg-green/10 text-green'}`}>✓</div>
@@ -33,7 +58,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
       </h3>
       <p className={`text-[13px] font-sans mb-8 text-center ${desc}`}>Менеджер зв'яжеться з вами протягом 30 хвилин у робочий час.</p>
 
-      <form onSubmit={submit} className="flex flex-col gap-6 w-full">
+      <form onSubmit={submit} className="relative flex flex-col gap-6 w-full">
         <div className="flex flex-col gap-4">
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Ваше ім'я</label>
@@ -47,8 +72,31 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           </div>
         </div>
 
-        <button type="submit" className="bg-terra text-white font-display font-semibold text-[14px] px-8 py-4 rounded-lg hover:bg-[#b35c34] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200">
-          Надіслати заявку
+        {/* Поле-пастка: приховане від людини, боти заповнюють майже завжди */}
+        <input
+          type="text"
+          name="website"
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+          value={website}
+          onChange={(e) => setWebsite(e.target.value)}
+          className="absolute left-[-9999px] w-px h-px opacity-0"
+        />
+
+        {state === 'error' && (
+          <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>
+            Не вдалося надіслати заявку. Зателефонуйте, будь ласка:{' '}
+            <a href="tel:+380976952473" className="underline font-semibold">+38 (097) 695-24-73</a>
+          </p>
+        )}
+
+        <button
+          type="submit"
+          disabled={state === 'sending'}
+          className="bg-terra text-white font-display font-semibold text-[14px] px-8 py-4 rounded-lg hover:bg-[#b35c34] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 disabled:opacity-60 disabled:hover:translate-y-0 disabled:cursor-not-allowed transition-all duration-200"
+        >
+          {state === 'sending' ? 'Надсилаємо…' : 'Надіслати заявку'}
         </button>
         <p className={`text-[11px] font-sans ${dark ? 'text-cream/70' : 'text-stone'}`}>
           Натискаючи кнопку, ви погоджуєтесь із нашою{' '}
