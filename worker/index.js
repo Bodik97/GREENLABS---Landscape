@@ -34,6 +34,44 @@ function corsHeaders(request, env) {
 const escapeHtml = (value) =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
+/** @returns чи дійшло. Помилку не кидає — рішення приймає виклик вище. */
+async function sendToTelegram(env, text) {
+  try {
+    const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        chat_id: env.CHAT_ID,
+        text,
+        parse_mode: 'HTML',
+        link_preview_options: { is_disabled: true },
+      }),
+    })
+    if (!response.ok) console.error('telegram', response.status, await response.text())
+    return response.ok
+  } catch (error) {
+    console.error('telegram', error)
+    return false
+  }
+}
+
+/** Те саме для таблиці. Без SHEET_URL просто нічого не робить. */
+async function sendToSheet(env, lead) {
+  if (!env.SHEET_URL) return false
+  try {
+    const response = await fetch(env.SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(lead),
+    })
+    if (!response.ok) console.error('sheet', response.status, await response.text())
+    return response.ok
+  } catch (error) {
+    console.error('sheet', error)
+    return false
+  }
+}
+
 export default {
   async fetch(request, env) {
     const cors = corsHeaders(request, env)
@@ -97,21 +135,16 @@ export default {
       (page ? `<b>Сторінка:</b> ${escapeHtml(page)}\n` : '') +
       `<b>Час:</b> ${time}`
 
-    const response = await fetch(`https://api.telegram.org/bot${env.BOT_TOKEN}/sendMessage`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        chat_id: env.CHAT_ID,
-        text,
-        parse_mode: 'HTML',
-        link_preview_options: { is_disabled: true },
-      }),
-    })
+    // Обидва канали смикаємо одночасно й незалежно: заявка не має губитись
+    // через те, що один із них саме зараз недоступний.
+    const [telegram, sheet] = await Promise.all([
+      sendToTelegram(env, text),
+      sendToSheet(env, { name, phone, page }),
+    ])
 
-    if (!response.ok) {
-      // Не показуємо клієнту «дякуємо», якщо повідомлення не пішло: краще
-      // чесна помилка з телефоном, ніж втрачена заявка.
-      console.error('telegram', response.status, await response.text())
+    // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще
+    // чесна помилка з телефоном, ніж втрачений клієнт.
+    if (!telegram && !sheet) {
       return new Response(JSON.stringify({ error: 'delivery_failed' }), {
         status: 502,
         headers: { ...cors, 'Content-Type': 'application/json' },

@@ -14,6 +14,7 @@ ALLOWED_ORIGINS = "https://bodik97.github.io"
 # binding = "LEADS_KV"
 # id = "сюди-id-з-попередньої-команди"
 
-# BOT_TOKEN і CHAT_ID сюди НЕ пишемо — вони задаються як секрети:
+# BOT_TOKEN, CHAT_ID і SHEET_URL сюди НЕ пишемо — вони задаються як секрети:
 #   npx wrangler secret put BOT_TOKEN
 #   npx wrangler secret put CHAT_ID
+#   npx wrangler secret put SHEET_URL
