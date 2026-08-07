@@ -2,7 +2,7 @@
 // якщо CMS недоступна, лишаються тільки статичні сторінки, білд не падає.
 import { writeFile } from 'node:fs/promises'
 
-const ORIGIN = 'https://bodik97.github.io'
+const ORIGIN = 'https://greenlabs-one.vercel.app'
 const BASE = (process.env.FIGMA_PUBLIC_URL ?? '').replace(/\/$/, '')
 const SITE = ORIGIN + BASE
 

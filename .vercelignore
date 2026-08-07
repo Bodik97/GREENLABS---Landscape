@@ -1,0 +1,10 @@
+# Що не потрібне збірці сайту. Студія Sanity, вихідні фото й воркер живуть
+# у цьому ж репозиторії, але важать сотні мегабайт і на білд не впливають.
+node_modules
+dist
+.git
+photo-source
+studio
+worker
+docs
+services.ndjson

@@ -1,0 +1,6 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "framework": "vite",
+  "outputDirectory": "dist",
+  "buildCommand": "dnf install -y nss nspr atk at-spi2-atk at-spi2-core cups-libs libdrm libXcomposite libXdamage libXrandr libxkbcommon mesa-libgbm alsa-lib pango && pnpm exec puppeteer browsers install chrome && pnpm build"
+}

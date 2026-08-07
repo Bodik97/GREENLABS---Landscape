@@ -25,7 +25,7 @@ export function JsonLd({ data }: { data: object | null }) {
   return null
 }
 
-const ORIGIN = 'https://bodik97.github.io'
+const ORIGIN = 'https://greenlabs-one.vercel.app'
 
 /**
  * Абсолютна адреса сторінки.
