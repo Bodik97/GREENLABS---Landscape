@@ -1,5 +1,5 @@
 // Збирає dist/sitemap.xml після білду. Адреси робіт і статей тягне з Sanity —
-// якщо CMS недоступна, лишаються тільки статичні сторінки, білд не падає.
+// якщо CMS недоступна, збірка падає.
 import { writeFile } from 'node:fs/promises'
 
 const ORIGIN = 'https://greenlabs-one.vercel.app'
@@ -32,11 +32,15 @@ async function fetchSlugs() {
   ]
 }
 
-let dynamic = []
+let dynamic
 try {
   dynamic = await fetchSlugs()
 } catch (err) {
-  console.warn(`sitemap: не вдалось отримати адреси з Sanity (${err.message}) — лишаю статичні сторінки`)
+  // Раніше тут лишались самі статичні сторінки, і збірка йшла далі зеленою:
+  // sitemap на 8 адрес замість 57, а решта — ще й без пререндеру, бо він бере
+  // адреси звідси. Тобто сайт мовчки втрачав для пошуку майже все, що має.
+  console.error(`sitemap: не вдалось отримати адреси з Sanity — ${err.message}`)
+  process.exit(1)
 }
 
 const today = new Date().toISOString().slice(0, 10)
