@@ -75,37 +75,29 @@ npx wrangler deploy
 
 Таблиця необовʼязкова: без `SHEET_URL` Worker працює як раніше, тільки Telegram.
 
-Команда `deploy` виведе адресу вигляду
-`https://greenlabs-leads.<ваш-акаунт>.workers.dev`.
+Worker уже розгорнутий за адресою
+`https://greenlabs-leads.myshop-api.workers.dev`. Сховище для обмеження частоти
+теж створене й підключене в `wrangler.toml`, окремих дій не потребує.
 
-### 5. Обмеження частоти (необовʼязково, але варто)
+Лишається тільки покласти три секрети командами вище і повторити `deploy` —
+без них Worker відповідає `502 delivery_failed`, бо заявку нікуди подіти.
 
-```bash
-npx wrangler kv namespace create LEADS_KV
-```
+### 5. Підключення сайту
 
-Отриманий `id` вписати в `wrangler.toml` і зняти коментар із блока
-`[[kv_namespaces]]`, потім `npx wrangler deploy` ще раз.
-
-Без цього кроку Worker працює, просто без захисту від напливу заявок з однієї
-адреси.
-
-### 6. Підключення сайту
-
-У репозиторії на GitHub: **Settings → Secrets and variables → Actions →
-Variables → New repository variable**
+У Vercel: проєкт `greenlabs` → **Settings → Environment Variables**
 
 ```
 Name:  VITE_LEAD_ENDPOINT
-Value: https://greenlabs-leads.<ваш-акаунт>.workers.dev
+Value: https://greenlabs-leads.myshop-api.workers.dev
 ```
 
-Далі будь-який пуш у `main` пересоберe сайт уже з підключеною формою.
+Далі будь-який пуш у `main` пересоберe сайт уже з підключеною формою. Змінну
+читає збірка, а не браузер, тож без нового викочування вона не застосується.
 
 Поки змінна порожня, форма не вдає, ніби заявку прийнято, — вона показує
 помилку з номером телефону.
 
-### 7. Після переїзду на власний домен
+### 6. При зміні домену сайту
 
 Дописати новий домен першим у `ALLOWED_ORIGINS` у `wrangler.toml` і виконати
 `npx wrangler deploy`. Інакше браузер заблокує надсилання з нового домену.
@@ -113,9 +105,9 @@ Value: https://greenlabs-leads.<ваш-акаунт>.workers.dev
 ## Перевірка
 
 ```bash
-curl -X POST https://greenlabs-leads.<акаунт>.workers.dev \
+curl -X POST https://greenlabs-leads.myshop-api.workers.dev \
   -H "Content-Type: application/json" \
-  -H "Origin: https://bodik97.github.io" \
+  -H "Origin: https://greenlabs-one.vercel.app" \
   -d '{"name":"Тест","phone":"+380671234567"}'
 ```
 

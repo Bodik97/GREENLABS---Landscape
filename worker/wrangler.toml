@@ -5,14 +5,12 @@ compatibility_date = "2026-08-01"
 # Домени, з яких приймаємо форму. Запит із будь-якого іншого джерела браузер
 # заблокує сам. Після переїзду на власний домен допишіть його сюди першим.
 [vars]
-ALLOWED_ORIGINS = "https://bodik97.github.io"
+ALLOWED_ORIGINS = "https://greenlabs-one.vercel.app"
 
 # Сховище для обмеження частоти заявок з однієї адреси.
-# Створити: npx wrangler kv namespace create LEADS_KV
-# Отриманий id підставити нижче і зняти коментар.
-# [[kv_namespaces]]
-# binding = "LEADS_KV"
-# id = "сюди-id-з-попередньої-команди"
+[[kv_namespaces]]
+binding = "LEADS_KV"
+id = "f7e21be8b1784725864440a2e9d0d329"
 
 # BOT_TOKEN, CHAT_ID і SHEET_URL сюди НЕ пишемо — вони задаються як секрети:
 #   npx wrangler secret put BOT_TOKEN
