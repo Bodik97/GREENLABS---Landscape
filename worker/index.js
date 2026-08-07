@@ -34,6 +34,19 @@ function corsHeaders(request, env) {
 const escapeHtml = (value) =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
 
+/**
+ * Людська назва сторінки, з якої прийшла заявка.
+ *
+ * Заголовок написаний під пошук — «Газони — ціна та терміни у Львові |
+ * GREENLABS». Менеджеру потрібен тільки початок, решта то хвіст для Google.
+ * Якщо заголовка нема (старий бандл у когось у кеші), лишається шлях: гірше
+ * читається, але краще, ніж порожньо.
+ */
+function pageLabel(page, title) {
+  if (page === '/') return 'Головна'
+  return title.split(/[—|]/)[0].trim() || page || '—'
+}
+
 /** @returns чи дійшло. Помилку не кидає — рішення приймає виклик вище. */
 async function sendToTelegram(env, text) {
   try {
@@ -128,18 +141,21 @@ export default {
     }
 
     const time = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' })
+    // Жирним саме значення, а не підпис: менеджер вихоплює очима ім'я й номер,
+    // а не слово «Телефон», яке в кожному повідомленні те саме.
+    const label = pageLabel(page, String(data.title ?? '').trim())
     const text =
-      `<b>Нова заявка з сайту</b>\n\n` +
-      `<b>Ім'я:</b> ${escapeHtml(name)}\n` +
-      `<b>Телефон:</b> ${escapeHtml(phone)}\n` +
-      (page ? `<b>Сторінка:</b> ${escapeHtml(page)}\n` : '') +
-      `<b>Час:</b> ${time}`
+      `🌿 <b>Нова заявка з сайту</b>\n\n` +
+      `Ім'я: <b>${escapeHtml(name)}</b>\n` +
+      `Телефон: <b>${escapeHtml(phone)}</b>\n` +
+      `Сторінка: <b>${escapeHtml(label)}</b>\n\n` +
+      `Час: ${time}`
 
     // Обидва канали смикаємо одночасно й незалежно: заявка не має губитись
     // через те, що один із них саме зараз недоступний.
     const [telegram, sheet] = await Promise.all([
       sendToTelegram(env, text),
-      sendToSheet(env, { name, phone, page }),
+      sendToSheet(env, { name, phone, page: label }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще

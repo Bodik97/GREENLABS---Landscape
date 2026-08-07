@@ -28,7 +28,9 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
       const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, phone, website, page: window.location.pathname }),
+        // title — щоб у заявці стояла назва сторінки, а не шлях: менеджер читає
+        // «Газони», а не «/services/ozelenennia/gazon».
+        body: JSON.stringify({ name, phone, website, page: window.location.pathname, title: document.title }),
       })
       setState(res.ok ? 'done' : 'error')
     } catch {
