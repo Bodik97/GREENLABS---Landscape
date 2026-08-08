@@ -42,6 +42,27 @@ html {
   animation: pop-in 400ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
 }
 
+/* Галочка на екрані «Дякуємо»: спершу обводиться коло, потім у ньому
+   промальовується сама галочка. Довжини ліній зашиті числами під viewBox
+   52×52 — коло r=24 має 151, галочка 36. */
+@keyframes ring-draw {
+  from { stroke-dashoffset: 151; }
+  to { stroke-dashoffset: 0; }
+}
+.animate-ring-draw {
+  stroke-dasharray: 151;
+  animation: ring-draw 600ms ease-out both;
+}
+
+@keyframes check-draw {
+  from { stroke-dashoffset: 36; }
+  to { stroke-dashoffset: 0; }
+}
+.animate-check-draw {
+  stroke-dasharray: 36;
+  animation: check-draw 350ms 450ms ease-out both;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

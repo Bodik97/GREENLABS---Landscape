@@ -1,9 +1,12 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eyebrow } from '../ui/Eyebrow'
+import { IcoClock } from '../ui/Icons'
 import { useConsultationModal } from '../ui/ConsultationModalContext'
 
-const NAME_MAX = 60
+const NAME_MAX = 25
+/** Довжина повністю набраного «+38 (0XX) XXX-XX-XX». */
+const PHONE_MAX = 19
 /** Скільки цифр іде після коду країни: 0XX XXX XX XX. */
 const PHONE_DIGITS = 10
 
@@ -87,10 +90,42 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
   if (state === 'done') {
     return (
-      <div className="flex flex-col gap-4 items-center text-center animate-fade-up">
-        <div className={`w-14 h-14 rounded-full flex items-center justify-center text-2xl animate-pop-in ${dark ? 'bg-white/15 text-cream' : 'bg-green/10 text-green'}`}>✓</div>
-        <h3 className={`font-display font-bold text-[24px] ${heading}`}>Дякуємо!</h3>
-        <p className={`text-[14px] font-sans leading-[1.65] max-w-105 ${desc}`}>Вашу заявку прийнято. Менеджер зв'яжеться з вами протягом 30 хвилин у робочий час.</p>
+      <div className="flex flex-col items-center text-center animate-fade-up">
+        {/* Галочка промальовується, а не зʼявляється: це та мить, коли людина
+            щойно віддала свій номер і чекає підтвердження, що її почули. */}
+        <svg viewBox="0 0 52 52" className={`w-16 h-16 mb-5 ${dark ? 'text-cream' : 'text-green'}`} aria-hidden="true">
+          <circle
+            cx="26" cy="26" r="24" fill="none" stroke="currentColor" strokeWidth="2"
+            opacity="0.3" className="animate-ring-draw"
+          />
+          <path
+            d="M15 26.5 L22.5 34 L37 18.5" fill="none" stroke="currentColor"
+            strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-check-draw"
+          />
+        </svg>
+
+        <h3 className={`font-display font-bold text-[26px] md:text-[30px] mb-2 ${heading}`}>Дякуємо!</h3>
+
+        {/* Показуємо номер, який людина ввела: якщо в ньому одруківка, це
+            єдина мить, коли її ще можна помітити й надіслати заново. */}
+        <p className={`text-[15px] font-sans leading-[1.6] mb-6 ${desc}`}>
+          Заявку прийнято. Зателефонуємо на{' '}
+          <span className={`font-semibold whitespace-nowrap ${heading}`}>{phone}</span>
+        </p>
+
+        <div className={`flex items-start gap-2.5 rounded-lg px-4 py-3 mb-6 w-full max-w-100 ${dark ? 'bg-white/10' : 'bg-parchment'}`}>
+          <IcoClock className={`w-4 h-4 shrink-0 mt-0.5 ${dark ? 'text-cream/70' : 'text-stone'}`} />
+          <p className={`text-[13px] font-sans leading-[1.55] text-left ${desc}`}>
+            Менеджер зв'яжеться протягом 30 хвилин у робочий час: Пн–Пт 9:00–18:00, Сб 10:00–15:00
+          </p>
+        </div>
+
+        <p className={`text-[13px] font-sans ${desc}`}>
+          Не хочете чекати?{' '}
+          <a href="tel:+380976952473" className={`font-semibold underline whitespace-nowrap ${heading}`}>
+            +38 (097) 695-24-73
+          </a>
+        </p>
       </div>
     )
   }
@@ -112,7 +147,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           </div>
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric"
+            <input type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" maxLength={PHONE_MAX}
               className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
           </div>
         </div>
