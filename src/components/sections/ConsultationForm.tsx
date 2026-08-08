@@ -3,9 +3,47 @@ import { Link } from 'react-router-dom'
 import { Eyebrow } from '../ui/Eyebrow'
 import { useConsultationModal } from '../ui/ConsultationModalContext'
 
+const NAME_MAX = 60
+/** Скільки цифр іде після коду країни: 0XX XXX XX XX. */
+const PHONE_DIGITS = 10
+
+/**
+ * Лишає в імені літери, пробіл, апостроф і дефіс.
+ *
+ * Не «тільки літери»: половина справжніх імен тоді не введеться — «Олена
+ * Петрівна», «Анна-Марія», «Дмитро О'Коннор». Відсікаємо саме те, чого в імені
+ * не буває: цифри, розмітку, службові символи.
+ */
+const cleanName = (value: string) => value.replace(/[^\p{L}\s'’-]/gu, '').slice(0, NAME_MAX)
+
+/** Скільки цифр людина справді набрала, без коду країни. */
+const phoneDigits = (value: string) => value.replace(/^\+?38/, '').replace(/\D/g, '')
+
+/**
+ * Малює +38 (0XX) XXX-XX-XX з того, що ввели.
+ *
+ * Код країни дописується сам, тож лишається набрати десять цифр. Розділювачі
+ * теж наші, тому вставлений з месенджера «+38 (067) 123-45-67» і надрукований
+ * підряд «0671234567» дають однаковий результат.
+ */
+function formatPhone(value: string) {
+  // Код країни зрізаємо до пошуку цифр — інакше «38» із власного ж префікса
+  // потрапило б у номер, і затирання назад ламало б поле.
+  const digits = phoneDigits(value).slice(0, PHONE_DIGITS)
+  if (!digits) return ''
+
+  let out = `+38 (${digits.slice(0, 3)}`
+  if (digits.length >= 3) out += ')'
+  if (digits.length > 3) out += ` ${digits.slice(3, 6)}`
+  if (digits.length > 6) out += `-${digits.slice(6, 8)}`
+  if (digits.length > 8) out += `-${digits.slice(8, 10)}`
+  return out
+}
+
 export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
+  const [hint, setHint] = useState('')
   const [website, setWebsite] = useState('') // пастка для ботів, людина її не бачить
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const { close } = useConsultationModal()
@@ -14,7 +52,12 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!name || !phone || state === 'sending') return
+    if (state === 'sending') return
+
+    // Маска не дає ввести зайвого, але дозволяє зупинитись на пів номера.
+    if (name.trim().length < 2) return setHint("Напишіть, будь ласка, ім'я")
+    if (phoneDigits(phone).length < PHONE_DIGITS) return setHint('Номер неповний — потрібно 10 цифр після +38')
+    setHint('')
 
     // Без налаштованого приймача заявку нікуди слати. Показуємо помилку з
     // телефоном, а не «дякуємо»: хибне підтвердження коштує втраченого клієнта.
@@ -64,12 +107,12 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
         <div className="flex flex-col gap-4">
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Ваше ім'я</label>
-            <input type="text" value={name} onChange={(e) => setName(e.target.value)} placeholder="Олена Петрівна" required
+            <input type="text" value={name} onChange={(e) => setName(cleanName(e.target.value))} placeholder="Олена Петрівна" required maxLength={NAME_MAX}
               className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
           </div>
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+38 (0XX) XXX-XX-XX" required
+            <input type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric"
               className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
           </div>
         </div>
@@ -85,6 +128,12 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           onChange={(e) => setWebsite(e.target.value)}
           className="absolute left-[-9999px] w-px h-px opacity-0"
         />
+
+        {hint && state !== 'error' && (
+          <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>
+            {hint}
+          </p>
+        )}
 
         {state === 'error' && (
           <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>

@@ -9,7 +9,7 @@
     "icon": "/logo/logo-32.webp"
   },
   "openGraph": {
-    "image": "https://bodik97.github.io/GREENLABS---Landscape/img/og.jpg"
+    "image": "https://greenlabs-one.vercel.app/img/og.jpg"
   },
   "accessibility": {
     "addBypassLinks": true
