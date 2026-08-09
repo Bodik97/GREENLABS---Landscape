@@ -19,6 +19,11 @@ const PHONE_DIGITS = 10
  */
 const cleanName = (value: string) => value.replace(/[^\p{L}\s'’-]/gu, '').slice(0, NAME_MAX)
 
+/** Символи, яких в імені не буває, — по них вирішуємо, чи скаржитись. */
+const NAME_FORBIDDEN = /[^\p{L}\s'’-]/u
+/** Те саме для телефону: цифри й розділювачі маски пропускаємо, решту ні. */
+const PHONE_FORBIDDEN = /[^\d\s+()-]/
+
 /** Скільки цифр людина справді набрала, без коду країни. */
 const phoneDigits = (value: string) => value.replace(/^\+?38/, '').replace(/\D/g, '')
 
@@ -63,10 +68,22 @@ function caretAfterDigits(formatted: string, count: number) {
   return formatted.length
 }
 
+/** Червоний рядок під полем. На темному тлі terra не читається — беремо світлий. */
+function FieldHint({ id, dark, children }: { id: string; dark: boolean; children: React.ReactNode }) {
+  return (
+    <p id={id} role="alert" className={`text-[12px] font-sans leading-[1.5] mt-1.5 ${dark ? 'text-[#F0A882]' : 'text-terra'}`}>
+      {children}
+    </p>
+  )
+}
+
 export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
-  const [hint, setHint] = useState('')
+  // Підказка окремо під кожним полем: спільна не показує, котре з двох
+  // виправляти, а людина в цю мить дивиться саме на поле, а не на форму.
+  const [nameHint, setNameHint] = useState('')
+  const [phoneHint, setPhoneHint] = useState('')
   const phoneRef = useRef<HTMLInputElement>(null)
   /** Куди повернути курсор після того, як маска перемалює поле. */
   const caret = useRef<number | null>(null)
@@ -84,8 +101,21 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     caret.current = null
   }, [phone])
 
+  const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    // Скаржимось на те, що прибрали, а не на те, що лишилось: інакше людина
+    // бачить, як символ зникає, і не розуміє, чи поле взагалі працює.
+    if (NAME_FORBIDDEN.test(raw)) setNameHint("Ім'я пишеться літерами — без цифр і символів")
+    else if (raw.length > NAME_MAX) setNameHint(`Не більше ${NAME_MAX} символів`)
+    else setNameHint('')
+    setName(cleanName(raw))
+  }
+
   const changePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value
+    if (PHONE_FORBIDDEN.test(raw)) setPhoneHint('Телефон — це лише цифри')
+    else setPhoneHint('')
+
     const before = phoneDigits(raw.slice(0, e.target.selectionStart ?? raw.length)).length
     const next = formatPhone(raw)
     caret.current = caretAfterDigits(next, before)
@@ -97,9 +127,14 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     if (state === 'sending') return
 
     // Маска не дає ввести зайвого, але дозволяє зупинитись на пів номера.
-    if (name.trim().length < 2) return setHint("Напишіть, будь ласка, ім'я")
-    if (phoneDigits(phone).length < PHONE_DIGITS) return setHint('Номер неповний — потрібно 10 цифр після +38')
-    setHint('')
+    const badName = name.trim().length < 2 ? "Напишіть, будь ласка, ім'я" : ''
+    const badPhone =
+      phoneDigits(phone).length < PHONE_DIGITS ? 'Номер неповний — потрібно 10 цифр після +38' : ''
+    setNameHint(badName)
+    setPhoneHint(badPhone)
+    // Обидва поля перевіряємо разом: інакше людина виправляє ім'я, тисне
+    // «надіслати» — і аж тоді дізнається, що з номером теж негаразд.
+    if (badName || badPhone) return
 
     // Без налаштованого приймача заявку нікуди слати. Показуємо помилку з
     // телефоном, а не «дякуємо»: хибне підтвердження коштує втраченого клієнта.
@@ -177,17 +212,23 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
       </h3>
       <p className={`text-[13px] font-sans mb-8 text-center ${desc}`}>Менеджер зв'яжеться з вами протягом 30 хвилин у робочий час.</p>
 
-      <form onSubmit={submit} className="relative flex flex-col gap-6 w-full">
+      {/* noValidate: інакше на порожньому полі браузер показує власну підказку
+          своєю мовою і поверх усього, а наша — під полем і українською. */}
+      <form onSubmit={submit} noValidate className="relative flex flex-col gap-6 w-full">
         <div className="flex flex-col gap-4">
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Ваше ім'я</label>
-            <input type="text" value={name} onChange={(e) => setName(cleanName(e.target.value))} placeholder="Олена Петрівна" required maxLength={NAME_MAX}
-              className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
+            <input type="text" value={name} onChange={changeName} placeholder="Олена Петрівна" required maxLength={NAME_MAX}
+              aria-invalid={!!nameHint} aria-describedby={nameHint ? 'name-hint' : undefined}
+              className={`w-full bg-parchment border rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 transition-colors ${nameHint ? 'border-terra focus:border-terra focus:ring-terra/30' : 'border-[#d9d6d0] focus:border-green focus:ring-green/30'}`} />
+            {nameHint && <FieldHint id="name-hint" dark={dark}>{nameHint}</FieldHint>}
           </div>
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
             <input ref={phoneRef} type="tel" value={phone} onChange={changePhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" maxLength={PHONE_MAX}
-              className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
+              aria-invalid={!!phoneHint} aria-describedby={phoneHint ? 'phone-hint' : undefined}
+              className={`w-full bg-parchment border rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 transition-colors ${phoneHint ? 'border-terra focus:border-terra focus:ring-terra/30' : 'border-[#d9d6d0] focus:border-green focus:ring-green/30'}`} />
+            {phoneHint && <FieldHint id="phone-hint" dark={dark}>{phoneHint}</FieldHint>}
           </div>
         </div>
 
@@ -202,12 +243,6 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           onChange={(e) => setWebsite(e.target.value)}
           className="absolute left-[-9999px] w-px h-px opacity-0"
         />
-
-        {hint && state !== 'error' && (
-          <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>
-            {hint}
-          </p>
-        )}
 
         {state === 'error' && (
           <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>
