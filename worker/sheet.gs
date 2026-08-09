@@ -5,24 +5,79 @@
  * усередині самої таблиці. Як саме — див. worker/README.md, розділ «Таблиця».
  */
 
+/** Кольори сайту, щоб таблиця не виглядала чужою. */
+var GREEN = '#1F3D2B'
+var CREAM = '#F7F5F0'
+var PARCHMENT = '#F4F1EB'
+
+var HEADERS = ['Час', "Ім'я", 'Телефон', 'Сторінка']
+/** Ширини колонок у пікселях, у тому ж порядку. */
+var WIDTHS = [150, 200, 180, 300]
+
 function doPost(e) {
   var data = JSON.parse(e.postData.contents)
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
 
-  // Перший запис у порожню таблицю сам створює шапку.
-  if (sheet.getLastRow() === 0) {
-    sheet.appendRow(['Час', "Ім'я", 'Телефон', 'Сторінка'])
-    sheet.getRange(1, 1, 1, 4).setFontWeight('bold')
-    sheet.setFrozenRows(1)
-  }
+  if (sheet.getLastRow() === 0) formatSheet()
 
   sheet.appendRow([
-    Utilities.formatDate(new Date(), 'Europe/Kyiv', 'dd.MM.yyyy HH:mm'),
+    // Саме Date, а не готовий рядок: інакше таблиця сортує час як текст і
+    // «10.08» стає раніше за «09.08». Вигляд задає формат колонки.
+    new Date(),
     data.name || '',
-    // Апостроф не дає таблиці зробити з номера формулу чи число.
-    "'" + (data.phone || ''),
+    data.phone || '',
     data.page || '',
   ])
 
   return ContentService.createTextOutput('ok')
+}
+
+/**
+ * Наводить лад у таблиці: шапка, ширини, формати, смужки.
+ *
+ * Викликається сама при першому записі, але її можна запустити й руками з
+ * редактора Apps Script — саме так оформлюють таблицю, яка вже має рядки.
+ * Виконується скільки завгодно разів поспіль без шкоди.
+ */
+function formatSheet() {
+  var book = SpreadsheetApp.getActiveSpreadsheet()
+  var sheet = book.getSheets()[0]
+
+  // Щоб час у таблиці збігався з часом у телеграмі.
+  book.setSpreadsheetTimeZone('Europe/Kyiv')
+
+  sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS])
+  sheet.setFrozenRows(1)
+  sheet.setRowHeight(1, 34)
+
+  for (var i = 0; i < WIDTHS.length; i++) {
+    sheet.setColumnWidth(i + 1, WIDTHS[i])
+  }
+
+  // Формати колонок. Телефон — текстом, інакше таблиця бачить у ньому число
+  // або формулу і псує «+38 (097)…».
+  sheet.getRange('A2:A').setNumberFormat('dd.MM.yyyy  HH:mm')
+  sheet.getRange('C2:C').setNumberFormat('@')
+
+  // Смужки через рядок: очима легше вести по довгому рядку до потрібної колонки.
+  // Стару розмітку прибираємо, бо друге накладання на ті самі клітинки падає.
+  var bandings = sheet.getBandings()
+  for (var b = 0; b < bandings.length; b++) bandings[b].remove()
+
+  sheet
+    .getRange(1, 1, sheet.getMaxRows(), HEADERS.length)
+    .applyRowBanding(SpreadsheetApp.BandingTheme.LIGHT_GREY, true, false)
+    .setHeaderRowColor(GREEN)
+    .setFirstRowColor('#FFFFFF')
+    .setSecondRowColor(PARCHMENT)
+
+  sheet
+    .getRange(1, 1, 1, HEADERS.length)
+    .setFontColor(CREAM)
+    .setFontWeight('bold')
+    .setVerticalAlignment('middle')
+
+  // Дані вирівнюємо по верху: довга назва сторінки переноситься на другий
+  // рядок, і без цього сусідні клітинки «пливли» б посередині висоти.
+  sheet.getRange('A2:D').setVerticalAlignment('top').setWrap(true)
 }

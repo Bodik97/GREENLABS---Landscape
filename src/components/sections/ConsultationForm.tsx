@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eyebrow } from '../ui/Eyebrow'
 import { IcoClock } from '../ui/Icons'
@@ -43,15 +43,54 @@ function formatPhone(value: string) {
   return out
 }
 
+/**
+ * Куди поставити курсор, щоб ліворуч від нього лишилось `count` цифр номера.
+ *
+ * Потрібно, бо маска перемальовує поле цілком, а браузер після заміни значення
+ * кидає курсор у кінець — і виправити цифру посеред номера ставало неможливо.
+ * Рахуємо не позицію в рядку, а саме цифри: розділювачі ж наші, вони зсуваються.
+ */
+function caretAfterDigits(formatted: string, count: number) {
+  if (count <= 0) return formatted.length
+  let seen = 0
+  // Перші три символи — «+38», його цифри до номера не належать.
+  for (let i = 3; i < formatted.length; i++) {
+    if (/\d/.test(formatted[i])) {
+      seen++
+      if (seen === count) return i + 1
+    }
+  }
+  return formatted.length
+}
+
 export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   const [hint, setHint] = useState('')
+  const phoneRef = useRef<HTMLInputElement>(null)
+  /** Куди повернути курсор після того, як маска перемалює поле. */
+  const caret = useRef<number | null>(null)
   const [website, setWebsite] = useState('') // пастка для ботів, людина її не бачить
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
   const { close } = useConsultationModal()
 
   const endpoint = import.meta.env.VITE_LEAD_ENDPOINT
+
+  // Повертаємо курсор після перемальовування — саме тут, а не в обробнику:
+  // на момент обробника поле ще показує старе значення.
+  useLayoutEffect(() => {
+    if (caret.current === null || !phoneRef.current) return
+    phoneRef.current.setSelectionRange(caret.current, caret.current)
+    caret.current = null
+  }, [phone])
+
+  const changePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const raw = e.target.value
+    const before = phoneDigits(raw.slice(0, e.target.selectionStart ?? raw.length)).length
+    const next = formatPhone(raw)
+    caret.current = caretAfterDigits(next, before)
+    setPhone(next)
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -147,7 +186,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           </div>
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
-            <input type="tel" value={phone} onChange={(e) => setPhone(formatPhone(e.target.value))} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" maxLength={PHONE_MAX}
+            <input ref={phoneRef} type="tel" value={phone} onChange={changePhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" maxLength={PHONE_MAX}
               className="w-full bg-parchment border border-[#d9d6d0] rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:border-green focus:ring-2 focus:ring-green/30 transition-colors" />
           </div>
         </div>
