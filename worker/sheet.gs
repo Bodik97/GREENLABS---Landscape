@@ -18,13 +18,8 @@ var HEADERS = ['Час', "Ім'я", 'Телефон', 'Сторінка']
 /** Ширини для них, у пікселях. */
 var WIDTHS = [150, 190, 170, 260]
 
-/**
- * Куди писати вид звернення — заявка це чи клік по номеру.
- *
- * Восьма колонка (H) — перша вільна після «Коментар». Ліворуч ставити не
- * можна: усе, що між D і G, зсунулось би, а на ті колонки зав'язані формули.
- */
-var EVENT_COL = 8
+/** Заголовок колонки, у яку пишемо вид звернення: заявка, дзвінок чи консультація. */
+var EVENT_HEADER = 'Подія'
 
 function doPost(e) {
   // Запуск із редактора приходить без даних: людина натиснула «Виконати», не
@@ -47,9 +42,28 @@ function doPost(e) {
     data.page || '',
   ]])
   // Назву події вирішує Worker — він єдиний знає про всі канали.
-  sheet.getRange(row, EVENT_COL).setValue(data.event || 'Заявка')
+  var col = eventColumn(sheet)
+  if (col) sheet.getRange(row, col).setValue(data.event || 'Заявка')
 
   return ContentService.createTextOutput('ok')
+}
+
+/**
+ * Шукає колонку «Подія» за назвою в шапці.
+ *
+ * Саме за назвою, а не за номером: таблицю веде власник, він додає й пересуває
+ * свої колонки, і зашитий номер рано чи пізно вкаже не туди. Так уже сталось —
+ * колонка переїхала на G, а скрипт мовчки писав у H, поверх «Коментаря».
+ *
+ * Не знайшли — нічого не пишемо. Заявка важливіша за позначку, і краще лишити
+ * її без виду звернення, ніж затерти чужу колонку навмання.
+ */
+function eventColumn(sheet) {
+  var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
+  for (var i = 0; i < head.length; i++) {
+    if (String(head[i]).trim() === EVENT_HEADER) return i + 1
+  }
+  return 0
 }
 
 /**
@@ -79,13 +93,20 @@ function formatSheet() {
   book.setSpreadsheetTimeZone('Europe/Kyiv')
 
   sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS])
-  sheet.getRange(1, EVENT_COL).setValue('Подія')
   sheet.setFrozenRows(1)
 
   for (var i = 0; i < WIDTHS.length; i++) {
     sheet.setColumnWidth(i + 1, WIDTHS[i])
   }
-  sheet.setColumnWidth(EVENT_COL, 90)
+
+  // Колонку «Подія» не двигаємо, якщо вона вже десь є: власник міг поставити
+  // її там, де йому зручно, і формули можуть на неї посилатись.
+  var col = eventColumn(sheet)
+  if (!col) {
+    col = sheet.getLastColumn() + 1
+    sheet.getRange(1, col).setValue(EVENT_HEADER)
+  }
+  sheet.setColumnWidth(col, 100)
 
   // Телефон — текстом, інакше таблиця бачить у ньому число або формулу і псує
   // «+38 (097)…».
@@ -97,7 +118,7 @@ function formatSheet() {
     .setFontColor(CREAM)
     .setFontWeight('bold')
     .setBackground(GREEN)
-  sheet.getRange(1, EVENT_COL)
+  sheet.getRange(1, col)
     .setFontColor(CREAM)
     .setFontWeight('bold')
     .setBackground(GREEN)
