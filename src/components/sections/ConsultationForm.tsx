@@ -5,8 +5,6 @@ import { IcoClock } from '../ui/Icons'
 import { useConsultationModal } from '../ui/ConsultationModalContext'
 
 const NAME_MAX = 25
-/** Довжина повністю набраного «+38 (0XX) XXX-XX-XX». */
-const PHONE_MAX = 19
 /** Скільки цифр іде після коду країни: 0XX XXX XX XX. */
 const PHONE_DIGITS = 10
 
@@ -56,7 +54,11 @@ function formatPhone(value: string) {
  * Рахуємо не позицію в рядку, а саме цифри: розділювачі ж наші, вони зсуваються.
  */
 function caretAfterDigits(formatted: string, count: number) {
-  if (count <= 0) return formatted.length
+  if (!formatted) return 0
+  // Жодної цифри ліворуч — курсор стоїть перед першою, тобто одразу за «+38 (».
+  // Кидати його в кінець тут не можна: саме так ламалось редагування коду
+  // оператора, коли зі стертих трьох цифр не лишалось жодної.
+  if (count <= 0) return Math.min(5, formatted.length)
   let seen = 0
   // Перші три символи — «+38», його цифри до номера не належать.
   for (let i = 3; i < formatted.length; i++) {
@@ -109,6 +111,32 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     else if (raw.length > NAME_MAX) setNameHint(`Не більше ${NAME_MAX} символів`)
     else setNameHint('')
     setName(cleanName(raw))
+  }
+
+  /**
+   * Backspace, коли перед курсором роздільник маски.
+   *
+   * Інакше стирався б сам роздільник, цифри лишались би ті самі, маска малювала
+   * б той самий рядок — і клавіша просто нічого не робила. Тому перестрибуємо
+   * дужки й дефіси і прибираємо найближчу цифру ліворуч.
+   */
+  const keyDownPhone = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const el = e.currentTarget
+    // Виділення браузер обробить сам, і він має рацію.
+    if (e.key !== 'Backspace' || el.selectionStart !== el.selectionEnd) return
+
+    const start = el.selectionStart ?? 0
+    let i = start - 1
+    while (i >= 0 && !/\d/.test(el.value[i])) i--
+    // Перші три символи — «+38»: код країни дописуємо ми, стирати його нічого.
+    if (i < 3) return
+    if (i === start - 1) return // перед курсором і так цифра — хай працює як завжди
+
+    e.preventDefault()
+    const digitsBefore = phoneDigits(el.value.slice(0, i)).length
+    const next = formatPhone(el.value.slice(0, i) + el.value.slice(i + 1))
+    caret.current = caretAfterDigits(next, digitsBefore)
+    setPhone(next)
   }
 
   const changePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -164,39 +192,67 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
   if (state === 'done') {
     return (
-      <div className="flex flex-col items-center text-center animate-fade-up">
+      <div className="flex flex-col items-center text-center">
         {/* Галочка промальовується, а не зʼявляється: це та мить, коли людина
-            щойно віддала свій номер і чекає підтвердження, що її почули. */}
-        <svg viewBox="0 0 52 52" className={`w-16 h-16 mb-5 ${dark ? 'text-cream' : 'text-green'}`} aria-hidden="true">
-          <circle
-            cx="26" cy="26" r="24" fill="none" stroke="currentColor" strokeWidth="2"
-            opacity="0.3" className="animate-ring-draw"
+            щойно віддала свій номер і чекає підтвердження, що її почули.
+            Далі решта збирається по черзі — звідси затримки. */}
+        <div className="relative mb-6">
+          <div
+            className={`absolute inset-[-14px] rounded-full blur-xl animate-done-glow ${dark ? 'bg-cream/20' : 'bg-green/15'}`}
+            aria-hidden="true"
           />
-          <path
-            d="M15 26.5 L22.5 34 L37 18.5" fill="none" stroke="currentColor"
-            strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" className="animate-check-draw"
-          />
-        </svg>
+          <div className={`relative w-20 h-20 rounded-full flex items-center justify-center animate-done-glow ${dark ? 'bg-cream/15' : 'bg-green/10'}`}>
+            <svg viewBox="0 0 52 52" className={`w-14 h-14 ${dark ? 'text-cream' : 'text-green'}`} aria-hidden="true">
+              <circle
+                cx="26" cy="26" r="24" fill="none" stroke="currentColor" strokeWidth="2"
+                opacity="0.35" className="animate-ring-draw"
+              />
+              <path
+                d="M15 26.5 L22.5 34 L37 18.5" fill="none" stroke="currentColor"
+                strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" className="animate-check-draw"
+              />
+            </svg>
+          </div>
+        </div>
 
-        <h3 className={`font-display font-bold text-[26px] md:text-[30px] mb-2 ${heading}`}>Дякуємо!</h3>
+        <h3
+          className={`font-display font-bold text-[28px] md:text-[34px] leading-tight mb-2 animate-done-in ${heading}`}
+          style={{ animationDelay: '550ms' }}
+        >
+          Дякуємо, {name.split(' ')[0]}!
+        </h3>
 
         {/* Показуємо номер, який людина ввела: якщо в ньому одруківка, це
             єдина мить, коли її ще можна помітити й надіслати заново. */}
-        <p className={`text-[15px] font-sans leading-[1.6] mb-6 ${desc}`}>
+        <p
+          className={`text-[15px] font-sans leading-[1.6] mb-6 animate-done-in ${desc}`}
+          style={{ animationDelay: '650ms' }}
+        >
           Заявку прийнято. Зателефонуємо на{' '}
           <span className={`font-semibold whitespace-nowrap ${heading}`}>{phone}</span>
         </p>
 
-        <div className={`flex items-start gap-2.5 rounded-lg px-4 py-3 mb-6 w-full max-w-100 ${dark ? 'bg-white/10' : 'bg-parchment'}`}>
-          <IcoClock className={`w-4 h-4 shrink-0 mt-0.5 ${dark ? 'text-cream/70' : 'text-stone'}`} />
+        <div
+          className={`flex items-start gap-3 rounded-xl px-4 py-3.5 mb-5 w-full max-w-100 animate-done-in ${dark ? 'bg-white/10' : 'bg-parchment border border-[#e3ded4]'}`}
+          style={{ animationDelay: '750ms' }}
+        >
+          <IcoClock className={`w-4 h-4 shrink-0 mt-0.5 ${dark ? 'text-cream/70' : 'text-green'}`} />
           <p className={`text-[13px] font-sans leading-[1.55] text-left ${desc}`}>
-            Менеджер зв'яжеться протягом 30 хвилин у робочий час: Пн–Пт 9:00–18:00, Сб 10:00–15:00
+            Менеджер зв'яжеться <span className={`font-semibold ${heading}`}>протягом 30 хвилин</span> у робочий час
+            <br />
+            Пн–Пт 9:00–18:00 · Сб 10:00–15:00
           </p>
         </div>
 
-        <p className={`text-[13px] font-sans ${desc}`}>
+        <p
+          className={`text-[13px] font-sans animate-done-in ${desc}`}
+          style={{ animationDelay: '850ms' }}
+        >
           Не хочете чекати?{' '}
-          <a href="tel:+380976952473" className={`font-semibold underline whitespace-nowrap ${heading}`}>
+          <a
+            href="tel:+380976952473"
+            className={`font-semibold underline underline-offset-2 whitespace-nowrap transition-colors ${dark ? 'text-cream hover:text-white' : 'text-terra hover:text-[#b35c34]'}`}
+          >
             +38 (097) 695-24-73
           </a>
         </p>
@@ -225,7 +281,10 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
           </div>
           <div>
             <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
-            <input ref={phoneRef} type="tel" value={phone} onChange={changePhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" maxLength={PHONE_MAX}
+            {/* Без maxLength: повний номер має рівно стільки символів, скільки
+                дозволяв би ліміт, і браузер переставав пускати ввід усередину
+                готового номера. Довжину й так тримає маска — десять цифр. */}
+            <input ref={phoneRef} type="tel" value={phone} onChange={changePhone} onKeyDown={keyDownPhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric"
               aria-invalid={!!phoneHint} aria-describedby={phoneHint ? 'phone-hint' : undefined}
               className={`w-full bg-parchment border rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 transition-colors ${phoneHint ? 'border-terra focus:border-terra focus:ring-terra/30' : 'border-[#d9d6d0] focus:border-green focus:ring-green/30'}`} />
             {phoneHint && <FieldHint id="phone-hint" dark={dark}>{phoneHint}</FieldHint>}
