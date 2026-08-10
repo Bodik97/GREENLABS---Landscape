@@ -10,9 +10,9 @@ var GREEN = '#1F3D2B'
 var CREAM = '#F7F5F0'
 var PARCHMENT = '#F4F1EB'
 
-var HEADERS = ['Час', "Ім'я", 'Телефон', 'Сторінка']
+var HEADERS = ['Час', 'Подія', "Ім'я", 'Телефон', 'Сторінка', 'Адреса']
 /** Ширини колонок у пікселях, у тому ж порядку. */
-var WIDTHS = [150, 200, 180, 300]
+var WIDTHS = [140, 90, 180, 160, 260, 200]
 
 function doPost(e) {
   var data = JSON.parse(e.postData.contents)
@@ -24,9 +24,11 @@ function doPost(e) {
     // Саме Date, а не готовий рядок: інакше таблиця сортує час як текст і
     // «10.08» стає раніше за «09.08». Вигляд задає формат колонки.
     new Date(),
+    data.event === 'call' ? 'Дзвінок' : 'Заявка',
     data.name || '',
     data.phone || '',
     data.page || '',
+    data.path || '',
   ])
 
   return ContentService.createTextOutput('ok')
@@ -57,7 +59,17 @@ function formatSheet() {
   // Формати колонок. Телефон — текстом, інакше таблиця бачить у ньому число
   // або формулу і псує «+38 (097)…».
   sheet.getRange('A2:A').setNumberFormat('dd.MM.yyyy  HH:mm')
-  sheet.getRange('C2:C').setNumberFormat('@')
+  sheet.getRange('D2:D').setNumberFormat('@')
+
+  // Дзвінки притлумлені, заявки — ні: у таблиці їх буде більше, і вони не мають
+  // перетягувати на себе увагу з того, що потребує відповіді.
+  var calls = SpreadsheetApp.newConditionalFormatRule()
+    .whenTextEqualTo('Дзвінок')
+    .setBackground('#EFEDE7')
+    .setFontColor('#6B6B65')
+    .setRanges([sheet.getRange('B2:B')])
+    .build()
+  sheet.setConditionalFormatRules([calls])
 
   // Смужки через рядок: очима легше вести по довгому рядку до потрібної колонки.
   // Стару розмітку прибираємо, бо друге накладання на ті самі клітинки падає.
@@ -79,5 +91,5 @@ function formatSheet() {
 
   // Дані вирівнюємо по верху: довга назва сторінки переноситься на другий
   // рядок, і без цього сусідні клітинки «пливли» б посередині висоти.
-  sheet.getRange('A2:D').setVerticalAlignment('top').setWrap(true)
+  sheet.getRange('A2:F').setVerticalAlignment('top').setWrap(true)
 }

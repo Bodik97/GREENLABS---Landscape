@@ -22,8 +22,36 @@ const NAME_FORBIDDEN = /[^\p{L}\s'’-]/u
 /** Те саме для телефону: цифри й розділювачі маски пропускаємо, решту ні. */
 const PHONE_FORBIDDEN = /[^\d\s+()-]/
 
+/**
+ * Коди мобільних операторів України.
+ *
+ * Номер поза цим списком — не номер: до нього ніхто не додзвониться, а заявка
+ * виглядає справжньою. Саме так у заявки потрапляло «+38 (000) 000-00-00».
+ */
+const OPERATOR_CODES = [
+  '050', '066', '095', '099', // Vodafone
+  '067', '068', '096', '097', '098', // Київстар
+  '063', '073', '093', // lifecell
+  '089', '091', '092', '094', // менші оператори
+]
+
+/** Чи може цей набір цифр іще стати справжнім кодом оператора. */
+function isOperatorPrefix(digits: string) {
+  if (!digits) return true
+  const head = digits.slice(0, 3)
+  return digits.length >= 3
+    ? OPERATOR_CODES.includes(head)
+    : OPERATOR_CODES.some((code) => code.startsWith(head))
+}
+
 /** Скільки цифр людина справді набрала, без коду країни. */
-const phoneDigits = (value: string) => value.replace(/^\+?38/, '').replace(/\D/g, '')
+function phoneDigits(value: string) {
+  const digits = value.replace(/^\+?38/, '').replace(/\D/g, '')
+  // Набрали «67…» замість «067…» — дописуємо нуль. Інакше перша ж цифра
+  // відхиляється як неправильний код, і людина втикається в глухий кут.
+  if (digits && digits[0] !== '0' && isOperatorPrefix('0' + digits.slice(0, 2))) return '0' + digits
+  return digits
+}
 
 /**
  * Малює +38 (0XX) XXX-XX-XX з того, що ввели.
@@ -141,7 +169,21 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
   const changePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
     const raw = e.target.value
+    const digits = phoneDigits(raw)
+
+    // Дописати неправильний код оператора не можна: відхиляємо саме натискання.
+    // Але коли номер коротшає — людина щось виправляє всередині, — пускаємо, бо
+    // інакше «067» посеред редагування стає «07…», і поле заклинює намертво.
+    const typedForward = digits.length > phoneDigits(phone).length
+    if (typedForward && !isOperatorPrefix(digits)) {
+      setPhoneHint('Такого коду оператора немає. Наприклад: 067, 095, 073')
+      caret.current = phone.length
+      setPhone(phone)
+      return
+    }
+
     if (PHONE_FORBIDDEN.test(raw)) setPhoneHint('Телефон — це лише цифри')
+    else if (!isOperatorPrefix(digits)) setPhoneHint('Такого коду оператора немає. Наприклад: 067, 095, 073')
     else setPhoneHint('')
 
     const before = phoneDigits(raw.slice(0, e.target.selectionStart ?? raw.length)).length
@@ -156,8 +198,12 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
     // Маска не дає ввести зайвого, але дозволяє зупинитись на пів номера.
     const badName = name.trim().length < 2 ? "Напишіть, будь ласка, ім'я" : ''
-    const badPhone =
-      phoneDigits(phone).length < PHONE_DIGITS ? 'Номер неповний — потрібно 10 цифр після +38' : ''
+    const digits = phoneDigits(phone)
+    const badPhone = !isOperatorPrefix(digits)
+      ? 'Такого коду оператора немає. Наприклад: 067, 095, 073'
+      : digits.length < PHONE_DIGITS
+        ? 'Номер неповний — потрібно 10 цифр після +38'
+        : ''
     setNameHint(badName)
     setPhoneHint(badPhone)
     // Обидва поля перевіряємо разом: інакше людина виправляє ім'я, тисне

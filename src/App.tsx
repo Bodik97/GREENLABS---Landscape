@@ -1,8 +1,9 @@
-import { Suspense, lazy } from 'react'
+import { Suspense, lazy, useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { MotionConfig, LazyMotion, domAnimation, AnimatePresence, m } from 'framer-motion'
 import { Header, Footer, MobileCTA, Fab, ConsultationModal, ConsultationModalProvider, ScrollProgress, BackToTop } from './shared'
 import { ScrollToTop } from './components/ScrollToTop'
+import { trackPhoneClicks } from './lib/track'
 import HomePage from './pages/HomePage'
 
 const PrivatePage = lazy(() => import('./pages/PrivatePage'))
@@ -66,6 +67,8 @@ function AnimatedRoutes() {
 }
 
 export default function App() {
+  useEffect(trackPhoneClicks, [])
+
   return (
     <MotionConfig reducedMotion="user">
       <LazyMotion features={domAnimation} strict>

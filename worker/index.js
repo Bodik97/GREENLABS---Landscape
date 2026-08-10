@@ -11,7 +11,22 @@
 
 /** Скільки заявок з однієї адреси пропускаємо за годину. */
 const RATE_LIMIT = 5
+/** Кліків по номеру з однієї адреси за годину — свій, вищий ліміт. */
+const CALL_LIMIT = 20
 const RATE_WINDOW_MS = 60 * 60 * 1000
+
+/**
+ * Коди мобільних операторів України.
+ *
+ * Дублює список із форми навмисно: перевірка в браузері зручна людині, але
+ * запит сюди можна надіслати й повз форму, і тоді єдиний захист — оцей.
+ */
+const OPERATOR_CODES = [
+  '050', '066', '095', '099', // Vodafone
+  '067', '068', '096', '097', '098', // Київстар
+  '063', '073', '093', // lifecell
+  '089', '091', '092', '094', // менші оператори
+]
 
 const json = (status, body) =>
   new Response(JSON.stringify(body), {
@@ -105,10 +120,31 @@ export default {
     const name = String(data.name ?? '').trim()
     const phone = String(data.phone ?? '').trim()
     const page = String(data.page ?? '').trim()
+    const label = pageLabel(page, String(data.title ?? '').trim())
 
     // Приховане поле: людина його не бачить і не заповнює, бот заповнює майже
     // завжди. Відповідаємо успіхом, щоб бот не шукав обхід.
     if (data.website) return new Response(JSON.stringify({ ok: true }), { headers: cors })
+
+    // Клік по номеру телефону. Ні імені, ні номера тут немає й бути не може —
+    // тому й перевіряти нічого. Кладемо лише в таблицю: у групу такі події
+    // сипались би десятками на день і топили б справжні заявки.
+    if (data.type === 'call') {
+      if (env.LEADS_KV) {
+        const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
+        const key = `call:${ip}`
+        const count = Number((await env.LEADS_KV.get(key)) ?? 0)
+        // Ліміт свій і вищий за заявочний: людина може натиснути номер
+        // кілька разів поспіль, і це не має з'їдати квоту на заявки.
+        if (count >= CALL_LIMIT) return new Response(JSON.stringify({ ok: true }), { headers: cors })
+        await env.LEADS_KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_MS / 1000 })
+      }
+
+      await sendToSheet(env, { event: 'call', page: label, path: page })
+      return new Response(JSON.stringify({ ok: true }), {
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
 
     if (name.length < 2 || name.length > 100) {
       return new Response(JSON.stringify({ error: 'bad_name' }), {
@@ -117,8 +153,9 @@ export default {
       })
     }
 
-    const digits = phone.replace(/\D/g, '')
-    if (digits.length < 9 || digits.length > 15) {
+    // Зводимо до десяти цифр після коду країни: 380XX…, 0XX…, XX… — усе те саме.
+    const digits = phone.replace(/\D/g, '').replace(/^380?/, '0')
+    if (digits.length !== 10 || !OPERATOR_CODES.includes(digits.slice(0, 3))) {
       return new Response(JSON.stringify({ error: 'bad_phone' }), {
         status: 400,
         headers: { ...cors, 'Content-Type': 'application/json' },
@@ -143,7 +180,6 @@ export default {
     const time = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' })
     // Жирним саме значення, а не підпис: менеджер вихоплює очима ім'я й номер,
     // а не слово «Телефон», яке в кожному повідомленні те саме.
-    const label = pageLabel(page, String(data.title ?? '').trim())
     const text =
       `🌿 <b>Нова заявка з сайту</b>\n\n` +
       `Ім'я: <b>${escapeHtml(name)}</b>\n` +
@@ -155,7 +191,7 @@ export default {
     // через те, що один із них саме зараз недоступний.
     const [telegram, sheet] = await Promise.all([
       sendToTelegram(env, text),
-      sendToSheet(env, { name, phone, page: label }),
+      sendToSheet(env, { event: 'lead', name, phone, page: label, path: page }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще
