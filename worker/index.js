@@ -140,7 +140,7 @@ export default {
         await env.LEADS_KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_MS / 1000 })
       }
 
-      await sendToSheet(env, { event: 'call', page: label, path: page })
+      await sendToSheet(env, { event: 'call', page: label })
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
@@ -191,7 +191,7 @@ export default {
     // через те, що один із них саме зараз недоступний.
     const [telegram, sheet] = await Promise.all([
       sendToTelegram(env, text),
-      sendToSheet(env, { event: 'lead', name, phone, page: label, path: page }),
+      sendToSheet(env, { event: 'lead', name, phone, page: label }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще
