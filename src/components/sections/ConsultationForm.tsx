@@ -23,6 +23,24 @@ const NAME_FORBIDDEN = /[^\p{L}\s'’-]/u
 const PHONE_FORBIDDEN = /[^\d\s+()-]/
 
 /**
+ * Тексти підказок.
+ *
+ * Кожна каже дві речі: що не так і як правильно. «Неправильний формат» змушує
+ * людину вгадувати, а вона в цю мить уже наполовину пішла.
+ */
+const MSG = {
+  nameEmpty: "Напишіть ім'я — менеджер звертатиметься на ім'я",
+  nameChars: "В імені лише літери. Наприклад: Олена Петрівна",
+  nameLong: `Задовге ім'я — не більше ${NAME_MAX} символів`,
+  phoneChars: 'У номері лише цифри. Наприклад: 067 123 45 67',
+  phoneOperator:
+    'Потрібен код українського оператора: 050, 063, 066, 067, 068, 073, 093, 095, 096, 097, 098, 099',
+  phoneShort: 'Номер неповний — після +38 має бути 10 цифр. Наприклад: 067 123 45 67',
+  rateLimited: 'З цієї адреси вже надійшло кілька заявок. Спробуйте за годину або зателефонуйте:',
+  failed: 'Не вдалося надіслати заявку. Зателефонуйте, будь ласка:',
+}
+
+/**
  * Коди мобільних операторів України.
  *
  * Номер поза цим списком — не номер: до нього ніхто не додзвониться, а заявка
@@ -119,6 +137,8 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   const caret = useRef<number | null>(null)
   const [website, setWebsite] = useState('') // пастка для ботів, людина її не бачить
   const [state, setState] = useState<'idle' | 'sending' | 'done' | 'error'>('idle')
+  /** Перше речення в помилці — далі йде телефон, він потрібен у будь-якому разі. */
+  const [errorLead, setErrorLead] = useState(MSG.failed)
   const { close } = useConsultationModal()
 
   const endpoint = import.meta.env.VITE_LEAD_ENDPOINT
@@ -131,12 +151,16 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     caret.current = null
   }, [phone])
 
+  /** Людина взялась виправляти — стара помилка про надсилання вже неправда. */
+  const clearSendError = () => state === 'error' && setState('idle')
+
   const changeName = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearSendError()
     const raw = e.target.value
     // Скаржимось на те, що прибрали, а не на те, що лишилось: інакше людина
     // бачить, як символ зникає, і не розуміє, чи поле взагалі працює.
-    if (NAME_FORBIDDEN.test(raw)) setNameHint("Ім'я пишеться літерами — без цифр і символів")
-    else if (raw.length > NAME_MAX) setNameHint(`Не більше ${NAME_MAX} символів`)
+    if (NAME_FORBIDDEN.test(raw)) setNameHint(MSG.nameChars)
+    else if (raw.length > NAME_MAX) setNameHint(MSG.nameLong)
     else setNameHint('')
     setName(cleanName(raw))
   }
@@ -168,6 +192,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
   }
 
   const changePhone = (e: React.ChangeEvent<HTMLInputElement>) => {
+    clearSendError()
     const raw = e.target.value
     const digits = phoneDigits(raw)
 
@@ -176,14 +201,14 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     // інакше «067» посеред редагування стає «07…», і поле заклинює намертво.
     const typedForward = digits.length > phoneDigits(phone).length
     if (typedForward && !isOperatorPrefix(digits)) {
-      setPhoneHint('Такого коду оператора немає. Наприклад: 067, 095, 073')
+      setPhoneHint(MSG.phoneOperator)
       caret.current = phone.length
       setPhone(phone)
       return
     }
 
-    if (PHONE_FORBIDDEN.test(raw)) setPhoneHint('Телефон — це лише цифри')
-    else if (!isOperatorPrefix(digits)) setPhoneHint('Такого коду оператора немає. Наприклад: 067, 095, 073')
+    if (PHONE_FORBIDDEN.test(raw)) setPhoneHint(MSG.phoneChars)
+    else if (!isOperatorPrefix(digits)) setPhoneHint(MSG.phoneOperator)
     else setPhoneHint('')
 
     const before = phoneDigits(raw.slice(0, e.target.selectionStart ?? raw.length)).length
@@ -197,12 +222,12 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     if (state === 'sending') return
 
     // Маска не дає ввести зайвого, але дозволяє зупинитись на пів номера.
-    const badName = name.trim().length < 2 ? "Напишіть, будь ласка, ім'я" : ''
+    const badName = name.trim().length < 2 ? MSG.nameEmpty : ''
     const digits = phoneDigits(phone)
     const badPhone = !isOperatorPrefix(digits)
-      ? 'Такого коду оператора немає. Наприклад: 067, 095, 073'
+      ? MSG.phoneOperator
       : digits.length < PHONE_DIGITS
-        ? 'Номер неповний — потрібно 10 цифр після +38'
+        ? MSG.phoneShort
         : ''
     setNameHint(badName)
     setPhoneHint(badPhone)
@@ -226,8 +251,28 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
         // «Газони», а не «/services/ozelenennia/gazon».
         body: JSON.stringify({ name, phone, website, page: window.location.pathname, title: document.title }),
       })
-      setState(res.ok ? 'done' : 'error')
+      if (res.ok) {
+        setState('done')
+        return
+      }
+
+      // Worker знає, що саме не так, — раніше ця відповідь викидалась, і людина
+      // бачила безадресне «не вдалося надіслати» замість причини.
+      const { error } = await res.json().catch(() => ({ error: '' }))
+      if (error === 'bad_phone') {
+        setPhoneHint(MSG.phoneOperator)
+        setState('idle')
+        return
+      }
+      if (error === 'bad_name') {
+        setNameHint(MSG.nameChars)
+        setState('idle')
+        return
+      }
+      setErrorLead(error === 'rate_limited' ? MSG.rateLimited : MSG.failed)
+      setState('error')
     } catch {
+      setErrorLead(MSG.failed)
       setState('error')
     }
   }
@@ -351,7 +396,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
 
         {state === 'error' && (
           <p role="alert" className={`text-[13px] font-sans leading-[1.6] ${dark ? 'text-cream' : 'text-terra'}`}>
-            Не вдалося надіслати заявку. Зателефонуйте, будь ласка:{' '}
+            {errorLead}{' '}
             <a href="tel:+380976952473" className="underline font-semibold">+38 (097) 695-24-73</a>
           </p>
         )}
