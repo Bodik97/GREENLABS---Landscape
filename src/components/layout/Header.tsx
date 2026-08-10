@@ -97,7 +97,7 @@ export function Header() {
           >
             +38 (097) 695-24-73
           </a>
-          <button type="button" onClick={openConsultation} className="bg-terra text-white text-[13px] font-display font-semibold px-5 py-2.5 rounded-lg hover:bg-[#b35c34] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200">
+          <button type="button" onClick={() => openConsultation('Шапка')} className="bg-terra text-white text-[13px] font-display font-semibold px-5 py-2.5 rounded-lg hover:bg-[#b35c34] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200">
             Консультація
           </button>
         </div>
@@ -163,7 +163,7 @@ export function Header() {
             </a>
             <button
               type="button"
-              onClick={() => { setOpen(false); openConsultation() }}
+              onClick={() => { setOpen(false); openConsultation('Меню на мобільному') }}
               className="bg-terra text-white text-center text-[16px] font-display font-semibold px-5 py-4 rounded-lg active:scale-95 transition-transform duration-150"
             >
               Отримати консультацію

@@ -163,7 +163,12 @@ export default {
         await env.LEADS_KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_MS / 1000 })
       }
 
-      await sendToSheet(env, { event: eventLabel, page: label })
+      await sendToSheet(env, {
+        kind: 'event',
+        event: eventLabel,
+        from: String(data.from ?? '').trim() || '—',
+        page: label,
+      })
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
@@ -214,7 +219,16 @@ export default {
     // через те, що один із них саме зараз недоступний.
     const [telegram, sheet] = await Promise.all([
       sendToTelegram(env, text),
-      sendToSheet(env, { event: 'Заявка', name, phone, page: label }),
+      // `from` каже, котра саме форма — спливне вікно чи та, що в секції.
+      // Без цього обидві давали однаковий рядок, і власник не бачив, який
+      // заклик спрацював.
+      sendToSheet(env, {
+        kind: 'lead',
+        event: String(data.from ?? '').trim() || 'Форма на сторінці',
+        name,
+        phone,
+        page: label,
+      }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще

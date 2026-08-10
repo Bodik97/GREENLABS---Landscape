@@ -32,7 +32,7 @@ export function ServiceCta({
         <div className="flex flex-col sm:flex-row gap-3 mt-2">
           <button
             type="button"
-            onClick={open}
+            onClick={() => open('Блок послуги')}
             className="bg-terra text-white font-display font-semibold text-[15px] px-8 py-4 rounded-lg hover:bg-[#b35c34] hover:-translate-y-0.5 active:scale-95 active:translate-y-0 transition-all duration-200"
           >
             Отримати консультацію

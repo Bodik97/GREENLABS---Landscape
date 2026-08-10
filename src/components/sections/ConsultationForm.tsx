@@ -125,7 +125,7 @@ function FieldHint({ id, dark, children }: { id: string; dark: boolean; children
   )
 }
 
-export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
+export function ConsultationForm({ dark = false, from = 'Форма на сторінці' }: { dark?: boolean; from?: string } = {}) {
   const [name, setName] = useState('')
   const [phone, setPhone] = useState('')
   // Підказка окремо під кожним полем: спільна не показує, котре з двох
@@ -251,7 +251,7 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
         headers: { 'Content-Type': 'application/json' },
         // title — щоб у заявці стояла назва сторінки, а не шлях: менеджер читає
         // «Газони», а не «/services/ozelenennia/gazon».
-        body: JSON.stringify({ name, phone, website, page: window.location.pathname, title: document.title }),
+        body: JSON.stringify({ name, phone, website, from, page: window.location.pathname, title: document.title }),
       })
       if (res.ok) {
         setState('done')

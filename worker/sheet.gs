@@ -4,7 +4,7 @@
  * Це не частина сайту — цей файл треба вставити в редактор Apps Script
  * усередині самої таблиці. Як саме — див. worker/README.md, розділ «Таблиця».
  *
- * Скрипт володіє лише колонками A–D і H. Усе інше — Статус, Менеджер,
+ * Скрипт володіє лише колонками A–D і колонкою «Форма». Усе інше — Статус, Менеджер,
  * Коментар, блок статистики — ведеться руками, і чіпати його не можна:
  * там формули, які рахують по конкретних колонках.
  */
@@ -18,8 +18,25 @@ var HEADERS = ['Час', "Ім'я", 'Телефон', 'Сторінка']
 /** Ширини для них, у пікселях. */
 var WIDTHS = [150, 190, 170, 260]
 
-/** Заголовок колонки, у яку пишемо вид звернення: заявка, дзвінок чи консультація. */
-var EVENT_HEADER = 'Подія'
+/**
+ * Заголовки колонки, у яку пишемо, з якої форми прийшла заявка.
+ *
+ * Дві назви, бо в таблиці колонка вже зветься «Подія», а по суті там тепер
+ * форма: дзвінки й відкриття вікна переїхали на окремий аркуш. Приймаємо обидві,
+ * щоб перейменування було справою власника, а не умовою роботи скрипта.
+ */
+var EVENT_HEADERS = ['Форма', 'Подія']
+
+/**
+ * Аркуш для звернень, які не є заявками.
+ *
+ * Дзвінки й відкриття форми виносимо окремо, бо в таблиці заявок один рядок
+ * має означати одну заявку. Інакше на одного клієнта припадало три рядки —
+ * відкрив форму, заповнив, ще й натиснув номер, — і лічильник «Всього заявок»
+ * рахував їх усі.
+ */
+var ACTIVITY_SHEET = 'Активність'
+var ACTIVITY_HEADERS = ['Час', 'Подія', 'Звідки', 'Сторінка']
 
 /**
  * Мітка версії. Оновлювати при кожній зміні цього файлу.
@@ -28,7 +45,7 @@ var EVENT_HEADER = 'Подія'
  * адресою /exec: редактор показує один, а веб-застосунок може віддавати
  * попереднє розгортання. Відкрийте адресу в браузері — побачите цей рядок.
  */
-var VERSION = 'sheet.gs 2026-08-10 · подія за назвою колонки'
+var VERSION = 'sheet.gs 2026-08-11 · шапка активності освіжається'
 
 function doGet() {
   return ContentService.createTextOutput(VERSION)
@@ -41,8 +58,15 @@ function doPost(e) {
   if (!e || !e.postData) return formatSheet()
 
   var data = JSON.parse(e.postData.contents)
-  var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
+  var book = SpreadsheetApp.getActiveSpreadsheet()
 
+  // Не заявка — на окремий аркуш, щоб тут рядок дорівнював заявці.
+  if (data.kind === 'event') {
+    activitySheet(book).appendRow([new Date(), data.event, data.from || '', data.page || ''])
+    return ContentService.createTextOutput('ok')
+  }
+
+  var sheet = book.getSheets()[0]
   if (sheet.getLastRow() === 0) formatSheet()
 
   var row = nextRow(sheet)
@@ -62,7 +86,7 @@ function doPost(e) {
 }
 
 /**
- * Шукає колонку «Подія» за назвою в шапці.
+ * Шукає колонку форми за назвою в шапці.
  *
  * Саме за назвою, а не за номером: таблицю веде власник, він додає й пересуває
  * свої колонки, і зашитий номер рано чи пізно вкаже не туди. Так уже сталось —
@@ -73,10 +97,41 @@ function doPost(e) {
  */
 function eventColumn(sheet) {
   var head = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0]
-  for (var i = 0; i < head.length; i++) {
-    if (String(head[i]).trim() === EVENT_HEADER) return i + 1
+  for (var n = 0; n < EVENT_HEADERS.length; n++) {
+    for (var i = 0; i < head.length; i++) {
+      if (String(head[i]).trim() === EVENT_HEADERS[n]) return i + 1
+    }
   }
   return 0
+}
+
+/**
+ * Аркуш «Активність». Створює його, якщо ще немає.
+ *
+ * Ставимо в кінець книги навмисно: заявки пишуться в getSheets()[0], і новий
+ * аркуш на першому місці мовчки перенаправив би їх не туди.
+ */
+function activitySheet(book) {
+  var sheet = book.getSheetByName(ACTIVITY_SHEET)
+  if (!sheet) {
+    sheet = book.insertSheet(ACTIVITY_SHEET, book.getNumSheets())
+    sheet.setFrozenRows(1)
+    sheet.setColumnWidth(1, 150)
+    sheet.setColumnWidth(2, 130)
+    sheet.setColumnWidth(3, 150)
+    sheet.setColumnWidth(4, 260)
+    sheet.getRange('A2:A').setNumberFormat('dd.MM.yyyy  HH:mm')
+  }
+
+  // Шапку освіжаємо щоразу, а не лише при створенні: колонок побільшало, і
+  // аркуш, зроблений раніше, лишався б із трьома — «Звідки» тоді підписано
+  // як «Сторінка». Пишемо тільки свої A–D, решту веде власник.
+  sheet.getRange(1, 1, 1, ACTIVITY_HEADERS.length)
+    .setValues([ACTIVITY_HEADERS])
+    .setFontColor(CREAM)
+    .setFontWeight('bold')
+    .setBackground(GREEN)
+  return sheet
 }
 
 /**
@@ -112,12 +167,12 @@ function formatSheet() {
     sheet.setColumnWidth(i + 1, WIDTHS[i])
   }
 
-  // Колонку «Подія» не двигаємо, якщо вона вже десь є: власник міг поставити
+  // Колонку не двигаємо, якщо вона вже десь є: власник міг поставити
   // її там, де йому зручно, і формули можуть на неї посилатись.
   var col = eventColumn(sheet)
   if (!col) {
     col = sheet.getLastColumn() + 1
-    sheet.getRange(1, col).setValue(EVENT_HEADER)
+    sheet.getRange(1, col).setValue(EVENT_HEADERS[0])
   }
   sheet.setColumnWidth(col, 100)
 

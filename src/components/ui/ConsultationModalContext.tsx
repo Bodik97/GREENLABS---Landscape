@@ -1,7 +1,12 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import { trackFormOpen } from '../../lib/track'
 
-type ConsultationModalCtx = { isOpen: boolean; open: () => void; close: () => void }
+type ConsultationModalCtx = {
+  isOpen: boolean
+  /** `from` — яка саме кнопка відкрила вікно; потрапляє у звіт про звернення. */
+  open: (from: string) => void
+  close: () => void
+}
 
 const Ctx = createContext<ConsultationModalCtx | null>(null)
 
@@ -30,7 +35,7 @@ export function ConsultationModalProvider({ children }: { children: ReactNode })
 
   // Рахуємо тільки те, що людина відкрила сама. Вікно за таймером вище
   // викликає setIsOpen напряму й у таблицю не потрапляє — це наша дія, не її.
-  const open = () => { markShown(); trackFormOpen(); setIsOpen(true) }
+  const open = (from: string) => { markShown(); trackFormOpen(from); setIsOpen(true) }
   const close = () => setIsOpen(false)
 
   return (

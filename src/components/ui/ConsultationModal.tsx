@@ -44,7 +44,7 @@ export function ConsultationModal() {
             >
               <IcoClose className="w-5 h-5" />
             </button>
-            <ConsultationForm />
+            <ConsultationForm from="Спливне вікно" />
           </m.div>
         </m.div>
       )}

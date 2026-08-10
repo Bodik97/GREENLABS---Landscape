@@ -15,9 +15,9 @@ const endpoint = import.meta.env.VITE_LEAD_ENDPOINT
  * запит. Тип text/plain — щоб не було передзапиту CORS, якого sendBeacon не
  * вміє; Worker однаково читає тіло як JSON.
  */
-function send(type: 'call' | 'form') {
+function send(type: 'call' | 'form', from: string) {
   if (!endpoint) return
-  const body = JSON.stringify({ type, page: window.location.pathname, title: document.title })
+  const body = JSON.stringify({ type, from, page: window.location.pathname, title: document.title })
 
   if (navigator.sendBeacon) {
     navigator.sendBeacon(endpoint, new Blob([body], { type: 'text/plain;charset=UTF-8' }))
@@ -27,7 +27,23 @@ function send(type: 'call' | 'form') {
 }
 
 /** Людина сама відкрила форму консультації — кнопкою, а не за таймером. */
-export const trackFormOpen = () => send('form')
+export const trackFormOpen = (from: string) => send('form', from)
+
+/**
+ * Звідки натиснули номер.
+ *
+ * Читаємо з розмітки, а не з мітки на кожному посиланні: шапку й підвал видно
+ * по самих тегах, а двом плаваючим кнопкам достатньо одного data-from на
+ * корені. Так наступне телефонне посилання, де б його не поставили,
+ * потрапить у звіт саме як «Сторінка», а не зникне.
+ */
+function phonePlace(link: Element) {
+  const marked = link.closest('[data-from]')
+  if (marked) return marked.getAttribute('data-from') || 'Сторінка'
+  if (link.closest('header')) return 'Шапка'
+  if (link.closest('footer')) return 'Підвал'
+  return 'Сторінка'
+}
 
 /**
  * Кліки по будь-якому номеру телефону.
@@ -39,7 +55,8 @@ export function trackPhoneClicks() {
   if (!endpoint) return () => {}
 
   const onClick = (e: MouseEvent) => {
-    if ((e.target as HTMLElement | null)?.closest?.('a[href^="tel:"]')) send('call')
+    const link = (e.target as HTMLElement | null)?.closest?.('a[href^="tel:"]')
+    if (link) send('call', phonePlace(link))
   }
 
   document.addEventListener('click', onClick)

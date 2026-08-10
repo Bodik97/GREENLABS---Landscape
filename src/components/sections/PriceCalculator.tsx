@@ -152,7 +152,7 @@ export function PriceCalculator({ services, above }: { services: ServiceCard[]; 
 
             <button
               type="button"
-              onClick={open}
+              onClick={() => open('Калькулятор')}
               className="bg-terra text-white font-display font-semibold text-[14px] px-6 py-3.5 rounded-lg hover:bg-[#b35c34] active:scale-95 transition-all duration-200"
             >
               Уточнити суму в менеджера
