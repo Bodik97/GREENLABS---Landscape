@@ -196,11 +196,13 @@ export function ConsultationForm({ dark = false }: { dark?: boolean } = {}) {
     const raw = e.target.value
     const digits = phoneDigits(raw)
 
-    // Дописати неправильний код оператора не можна: відхиляємо саме натискання.
-    // Але коли номер коротшає — людина щось виправляє всередині, — пускаємо, бо
-    // інакше «067» посеред редагування стає «07…», і поле заклинює намертво.
+    // Набрати неправильний код із чистого поля не можна: відхиляємо натискання
+    // одразу, на другій же цифрі. Але тільки поки цифр не більше трьох — далі
+    // людина редагує вже набраний номер, і кожен проміжний стан там законно
+    // неправильний. Стерши «097» у «+38 (097) 111-22-33», отримуємо код «111»
+    // з решти цифр, і жорстка заборона не давала б набрати новий узагалі.
     const typedForward = digits.length > phoneDigits(phone).length
-    if (typedForward && !isOperatorPrefix(digits)) {
+    if (typedForward && digits.length <= 3 && !isOperatorPrefix(digits)) {
       setPhoneHint(MSG.phoneOperator)
       caret.current = phone.length
       setPhone(phone)
