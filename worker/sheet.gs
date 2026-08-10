@@ -46,7 +46,8 @@ function doPost(e) {
     data.phone || '',
     data.page || '',
   ]])
-  sheet.getRange(row, EVENT_COL).setValue(data.event === 'call' ? 'Дзвінок' : 'Заявка')
+  // Назву події вирішує Worker — він єдиний знає про всі канали.
+  sheet.getRange(row, EVENT_COL).setValue(data.event || 'Заявка')
 
   return ContentService.createTextOutput('ok')
 }

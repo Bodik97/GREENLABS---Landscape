@@ -11,8 +11,19 @@
 
 /** Скільки заявок з однієї адреси пропускаємо за годину. */
 const RATE_LIMIT = 5
-/** Кліків по номеру з однієї адреси за годину — свій, вищий ліміт. */
-const CALL_LIMIT = 20
+/** Дій без заявки з однієї адреси за годину — свій, вищий ліміт. */
+const EVENT_LIMIT = 20
+
+/**
+ * Звернення, які не є заявкою: людина подзвонила або відкрила форму.
+ *
+ * Назви вирішуються тут, а не в таблиці: Worker — єдине місце, яке знає про
+ * обидва канали, і слово має бути одне й те саме скрізь.
+ */
+const EVENT_LABELS = {
+  call: 'Дзвінок',
+  form: 'Консультація',
+}
 const RATE_WINDOW_MS = 60 * 60 * 1000
 
 /**
@@ -126,21 +137,22 @@ export default {
     // завжди. Відповідаємо успіхом, щоб бот не шукав обхід.
     if (data.website) return new Response(JSON.stringify({ ok: true }), { headers: cors })
 
-    // Клік по номеру телефону. Ні імені, ні номера тут немає й бути не може —
-    // тому й перевіряти нічого. Кладемо лише в таблицю: у групу такі події
-    // сипались би десятками на день і топили б справжні заявки.
-    if (data.type === 'call') {
+    // Дзвінок або відкриття форми. Ні імені, ні номера тут немає й бути не
+    // може — тому й перевіряти нічого. Кладемо лише в таблицю: у групу такі
+    // події сипались би десятками на день і топили б справжні заявки.
+    const eventLabel = EVENT_LABELS[data.type]
+    if (eventLabel) {
       if (env.LEADS_KV) {
         const ip = request.headers.get('CF-Connecting-IP') ?? 'unknown'
-        const key = `call:${ip}`
+        const key = `evt:${ip}`
         const count = Number((await env.LEADS_KV.get(key)) ?? 0)
         // Ліміт свій і вищий за заявочний: людина може натиснути номер
         // кілька разів поспіль, і це не має з'їдати квоту на заявки.
-        if (count >= CALL_LIMIT) return new Response(JSON.stringify({ ok: true }), { headers: cors })
+        if (count >= EVENT_LIMIT) return new Response(JSON.stringify({ ok: true }), { headers: cors })
         await env.LEADS_KV.put(key, String(count + 1), { expirationTtl: RATE_WINDOW_MS / 1000 })
       }
 
-      await sendToSheet(env, { event: 'call', page: label })
+      await sendToSheet(env, { event: eventLabel, page: label })
       return new Response(JSON.stringify({ ok: true }), {
         headers: { ...cors, 'Content-Type': 'application/json' },
       })
@@ -191,7 +203,7 @@ export default {
     // через те, що один із них саме зараз недоступний.
     const [telegram, sheet] = await Promise.all([
       sendToTelegram(env, text),
-      sendToSheet(env, { event: 'lead', name, phone, page: label }),
+      sendToSheet(env, { event: 'Заявка', name, phone, page: label }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще
