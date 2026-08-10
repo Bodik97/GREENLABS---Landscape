@@ -15,6 +15,11 @@ var HEADERS = ['Час', 'Подія', "Ім'я", 'Телефон', 'Сторі�
 var WIDTHS = [140, 90, 180, 160, 260, 200]
 
 function doPost(e) {
+  // Запуск із редактора приходить без даних: людина натиснула «Виконати», не
+  // помітивши, що у випадайці стоїть doPost. Замість помилки про postData
+  // робимо те, заради чого туди й заходять, — наводимо лад у таблиці.
+  if (!e || !e.postData) return formatSheet()
+
   var data = JSON.parse(e.postData.contents)
   var sheet = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0]
 
