@@ -159,42 +159,84 @@ export const beforeAfterBlock = defineType({
   title: 'До / після',
   type: 'object',
   icon: TransferIcon,
-  description: 'Два кадри з однієї точки, які на сайті порівнюються повзунком.',
+  description:
+    'Два кадри однієї ділянки, які на сайті порівнюються повзунком. Знімайте з тієї самої точки: тоді повзунок показує зміну, а не дві різні картинки.',
+  fieldsets: [
+    { name: 'left', title: 'Ліва половина — «до»', options: { columns: 1 } },
+    { name: 'right', title: 'Права половина — «після»', options: { columns: 1 } },
+  ],
   fields: [
-    defineField({ name: 'heading', title: 'Заголовок', type: 'string' }),
+    defineField({
+      name: 'heading',
+      title: 'Заголовок',
+      type: 'string',
+      initialValue: 'Як змінилася ділянка',
+    }),
     defineField({
       name: 'before',
       title: 'Фото «до»',
       type: 'image',
+      fieldset: 'left',
       options: { hotspot: true },
-      validation: (rule) => rule.required(),
+      description: 'Кадр до початку робіт.',
+      validation: (rule) =>
+        rule.required().custom((value, context) => {
+          // Найчастіша помилка: у поля кладуть один і той самий файл (буває,
+          // що другий — просто затемнена копія). На сайті це виглядає як
+          // фотографія під фільтром, і порівнювати нема чого.
+          const after = (context.parent as { after?: { asset?: { _ref?: string } } })?.after?.asset?._ref
+          const before = (value as { asset?: { _ref?: string } })?.asset?._ref
+          if (before && after && before === after) {
+            return 'Це той самий файл, що й у «після». Потрібні два різні кадри.'
+          }
+          return true
+        }),
     }),
     defineField({
       name: 'beforeLabel',
-      title: 'Підпис до лівого кадру',
+      title: 'Підпис на лівому кадрі',
       type: 'string',
+      fieldset: 'left',
       description: 'Наприклад: Травень 2024. Порожньо — буде «До».',
     }),
     defineField({
       name: 'after',
       title: 'Фото «після»',
       type: 'image',
+      fieldset: 'right',
       options: { hotspot: true },
+      description: 'Той самий ракурс після робіт.',
       validation: (rule) => rule.required(),
     }),
     defineField({
       name: 'afterLabel',
-      title: 'Підпис до правого кадру',
+      title: 'Підпис на правому кадрі',
       type: 'string',
+      fieldset: 'right',
       description: 'Наприклад: Вересень 2024. Порожньо — буде «Після».',
     }),
-    defineField({ name: 'caption', title: 'Підпис під слайдером', type: 'string' }),
+    defineField({
+      name: 'caption',
+      title: 'Підпис під слайдером',
+      type: 'string',
+      description: 'Що саме на кадрі. Наприклад: Парадний в’їзд.',
+    }),
   ],
   preview: {
-    select: { heading: 'heading', caption: 'caption', media: 'after' },
-    prepare: ({ heading, caption, media }) => ({
+    select: {
+      heading: 'heading',
+      caption: 'caption',
+      beforeLabel: 'beforeLabel',
+      afterLabel: 'afterLabel',
+      media: 'after',
+    },
+    prepare: ({ heading, caption, beforeLabel, afterLabel, media }) => ({
       title: heading || 'До / після',
-      subtitle: caption || 'Порівняння двох кадрів',
+      // У списку блоків видно обидва підписи — так одразу помітно, якщо дати
+      // лишились від попереднього обʼєкта.
+      subtitle: [caption, [beforeLabel || 'До', afterLabel || 'Після'].join(' → ')]
+        .filter(Boolean)
+        .join(' · '),
       media,
     }),
   },
