@@ -49,7 +49,7 @@ export function BeforeAfterSlider({
         type="range" min={0} max={100} value={pos}
         onChange={(e) => setPos(Number(e.target.value))}
         aria-label={`Повзунок до і після — ${label}`}
-        className="absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0"
+        className="compare absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0"
       />
     </div>
   )

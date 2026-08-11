@@ -122,6 +122,31 @@ input[type='range']::-moz-range-thumb {
   box-shadow: 0 1px 6px rgba(0, 0, 0, 0.2);
 }
 
+/* Повзунок «до і після» лежить прозорим шаром поверх картинки, і правила вище
+   ламали його двічі. Висота 4px залишала для перетягування смужку в чотири
+   пікселі вгорі знімка — по самій картинці тягнути було нічим. А бігунок
+   завширшки 22px звужує хід значення на свою ширину, тож біла лінія
+   відставала від курсора на кілька пікселів. Тут бігунок нульовий, і лінія
+   йде рівно за пальцем. */
+input[type='range'].compare {
+  height: 100%;
+  border-radius: 0;
+}
+input[type='range'].compare::-webkit-slider-thumb {
+  width: 0;
+  height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+input[type='range'].compare::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
     animation-duration: 0.01ms !important;
