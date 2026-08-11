@@ -21,7 +21,10 @@ export function BeforeAfterSlider({
         <img
           src={imgBefore ?? img}
           alt={`${label} — ${beforeLabel}`}
-          className={`absolute inset-0 w-full h-full object-cover ${imgBefore ? '' : 'grayscale brightness-75 saturate-50'}`}
+          /* Без окремого знімка «до» ліва половина — той самий кадр, лише
+             приглушений. Приглушення легке: раніше воно було майже чорно-білим
+             і читалось як інша, гірша фотографія, хоча це той самий сад. */
+          className={`absolute inset-0 w-full h-full object-cover ${imgBefore ? '' : 'grayscale-[0.45] brightness-[0.95] saturate-[0.7]'}`}
           loading="lazy"
         />
       </div>
