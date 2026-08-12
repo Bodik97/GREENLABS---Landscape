@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 
 export function BeforeAfterSlider({
   img,
@@ -14,8 +14,31 @@ export function BeforeAfterSlider({
   afterLabel?: string
 }) {
   const [pos, setPos] = useState(50)
+  const boxRef = useRef<HTMLDivElement>(null)
+
+  /* Тягнемо самі, через pointer-події: нативний повзунок на дотик рухається,
+     лише коли палець влучив у бігунок, а бігунок у нас нульового розміру.
+     touch-action: pan-y лишає сторінці вертикальне гортання поверх картинки. */
+  const moveTo = (clientX: number) => {
+    const box = boxRef.current?.getBoundingClientRect()
+    if (!box) return
+    setPos(Math.min(100, Math.max(0, ((clientX - box.left) / box.width) * 100)))
+  }
+
   return (
-    <div className="relative rounded-2xl overflow-hidden aspect-4/3 select-none bg-green">
+    <div
+      ref={boxRef}
+      onPointerDown={(e) => {
+        e.currentTarget.setPointerCapture(e.pointerId)
+        moveTo(e.clientX)
+      }}
+      onPointerMove={(e) => {
+        if (e.currentTarget.hasPointerCapture(e.pointerId)) moveTo(e.clientX)
+      }}
+      onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
+      style={{ touchAction: 'pan-y' }}
+      className="relative rounded-2xl overflow-hidden aspect-4/3 select-none bg-green cursor-ew-resize"
+    >
       <img src={img} alt={`${label} — ${afterLabel}`} className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" />
       <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img
@@ -48,11 +71,12 @@ export function BeforeAfterSlider({
           <span className="absolute bottom-3 left-3 bg-terra text-white text-[10px] font-display font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full pointer-events-none">Приклад оформлення</span>
         </>
       )}
+      {/* Лишається заради клавіатури й читалок; мишу й дотик обробляє контейнер */}
       <input
         type="range" min={0} max={100} value={pos}
         onChange={(e) => setPos(Number(e.target.value))}
         aria-label={`Повзунок до і після — ${label}`}
-        className="compare absolute inset-0 w-full h-full opacity-0 cursor-ew-resize m-0"
+        className="compare absolute inset-0 w-full h-full opacity-0 m-0 pointer-events-none"
       />
     </div>
   )
