@@ -112,10 +112,17 @@ async function sendToSheet(env, lead) {
     const response = await fetch(env.SHEET_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(lead),
+      // Секретом скрипт відрізняє нас від будь-кого, хто дізнався адресу /exec.
+      body: JSON.stringify({ ...lead, secret: env.SHEET_SECRET }),
     })
-    if (!response.ok) console.error('sheet', response.status, await response.text())
-    return response.ok
+    // Код відповіді тут ні про що не каже: Apps Script віддає 200 навіть на
+    // відмову. Успіх — лише те слово, яке скрипт друкує, дописавши рядок.
+    const body = (await response.text()).trim()
+    if (!response.ok || body !== 'ok') {
+      console.error('sheet', response.status, body)
+      return false
+    }
+    return true
   } catch (error) {
     console.error('sheet', error)
     return false

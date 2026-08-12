@@ -45,10 +45,26 @@ var ACTIVITY_HEADERS = ['Час', 'Подія', 'Звідки', 'Сторінк�
  * адресою /exec: редактор показує один, а веб-застосунок може віддавати
  * попереднє розгортання. Відкрийте адресу в браузері — побачите цей рядок.
  */
-var VERSION = 'sheet.gs 2026-08-11 · шапка активності освіжається'
+var VERSION = 'sheet.gs 2026-08-12 · приймає лише запити зі спільним секретом'
 
 function doGet() {
   return ContentService.createTextOutput(VERSION)
+}
+
+/**
+ * Спільний секрет, яким Worker доводить, що запит від нього.
+ *
+ * Адреса /exec мусить бути відкрита для всіх — інакше Worker до неї не
+ * достукається. Тому донедавна вона й була єдиним захистом: хто її дізнався
+ * (лог, скрін, переслане повідомлення), той дописував у таблицю з лідами
+ * що завгодно. Тепер до адреси треба ще й знати секрет.
+ *
+ * Кладеться руками: Налаштування проєкту → Властивості скрипта → SHEET_SECRET.
+ * Поки властивості немає, скрипт не приймає нічого: мовчазна відмова краща за
+ * мовчазний дозвіл. Порядок дій — у worker/README.md.
+ */
+function sharedSecret() {
+  return PropertiesService.getScriptProperties().getProperty('SHEET_SECRET')
 }
 
 function doPost(e) {
@@ -58,6 +74,15 @@ function doPost(e) {
   if (!e || !e.postData) return formatSheet()
 
   var data = JSON.parse(e.postData.contents)
+
+  // Чужий запит. Відповідь навмисно коротка й однакова для «секрет не збігся» і
+  // «секрет не заданий» — вгадувати нема за чим. Worker розрізняє її від успіху
+  // за текстом: код відповіді тут завжди 200, такий у Apps Script веб-застосунок.
+  var expected = sharedSecret()
+  if (!expected || data.secret !== expected) {
+    return ContentService.createTextOutput('forbidden')
+  }
+
   var book = SpreadsheetApp.getActiveSpreadsheet()
 
   // Не заявка — на окремий аркуш, щоб тут рядок дорівнював заявці.
