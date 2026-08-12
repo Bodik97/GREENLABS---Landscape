@@ -47,14 +47,20 @@ export function SectionWave({
   /** Колір блока зверху — `text-*`. Без нього хвиля виступає за межі секції. */
   above?: string
 }) {
+  /* Замикаємо контур із запасом за межі viewBox: svg його однаково обрізає, зате
+     край заливки не потрапляє рівно на межу секцій. Інакше на екранах із дробовим
+     масштабом (iPhone) верхній ряд пікселів докривався лише наполовину і крізь
+     нього сірою ниткою просвічував темний фон сусідньої секції. */
   const d = above
-    ? `${CURVES[shape]} L1440,0 L0,0 Z`
-    : `${CURVES[shape]} L1440,${H} L0,${H} Z`
+    ? `${CURVES[shape]} L1440,${-H} L0,${-H} Z`
+    : `${CURVES[shape]} L1440,${H * 2} L0,${H * 2} Z`
 
   return (
     <div
       className={`pointer-events-none absolute inset-x-0 ${SIZE} ${
-        above ? `top-0 ${above}` : `-top-[45px] md:-top-[68px] ${className}`
+        // -top-px: та сама причина — заходимо на піксель у сусіда, у нього тут
+        // рівно той колір, яким ми й малюємо
+        above ? `-top-px ${above}` : `-top-[45px] md:-top-[68px] ${className}`
       }`}
     >
       <svg aria-hidden="true" viewBox={`0 0 1440 ${H}`} preserveAspectRatio="none" className="absolute inset-0 w-full h-full">
