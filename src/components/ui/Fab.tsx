@@ -14,7 +14,7 @@ export function Fab() {
   const [open, setOpen] = useState(false)
 
   return (
-    <div data-from="Кнопка збоку" className="fixed bottom-90 right-4 md:bottom-8 md:right-8 z-50">
+    <div data-from="Кнопка збоку" className="fixed bottom-23 right-4 md:bottom-8 md:right-8 z-50">
       <AnimatePresence>
         {open && (
           <m.div

@@ -9,3 +9,6 @@ photo-source
 
 # Генерується scripts/seed-services.mjs
 services.ndjson
+
+# Комерційна інформація. Репозиторій публічний.
+docs/koshtorys.md
