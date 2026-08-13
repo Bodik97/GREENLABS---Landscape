@@ -62,8 +62,10 @@ function fromPage(url: string) {
 
 const builder = createImageUrlBuilder({ projectId: PROJECT, dataset: DATASET })
 
+/** quality: за замовчуванням Sanity віддає 75, а на фото саду різниці з 70 не
+    видно — зате на сторінці послуг це десятки кілобайт на восьми картках. */
 export const imageUrl = (source: SanityImageSource, w: number, h: number) =>
-  builder.image(source).width(w).height(h).fit('crop').auto('format').url()
+  builder.image(source).width(w).height(h).fit('crop').auto('format').quality(70).url()
 
 export type SanityImage = {
   asset?: { _ref: string }
