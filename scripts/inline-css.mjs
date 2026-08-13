@@ -25,6 +25,13 @@ if (!link) {
 const css = await readFile(join(DIST, 'assets', link[1]), 'utf8')
 await writeFile(join(DIST, 'index.html'), html.replace(link[0], `<style>${css}</style>`))
 
+/* Пробували ще знижувати пріоритет самого застосунку через fetchpriority="low"
+   на script і modulepreload: сторінки пререндерені, тож для першого показу js
+   не потрібен. На вимірюванні це давало десяті частки секунди, але prerender
+   почав валитися — 10 сторінок із 57, решта з «Connection closed», бо puppeteer
+   чекає на домальований контент, а той тепер приходить надто пізно. Тобто ціна
+   такої правки — порожні сторінки в пошуку. Не варте того. */
+
 // Файл лишаємо на місці: на нього посилаються карти джерел, та й зайвий
 // об'єкт у dist нікого не вантажить — після заміни його ніхто не просить.
 const assets = await readdir(join(DIST, 'assets'))
