@@ -5,15 +5,24 @@ export function Hero() {
 
   return (
     <section className="relative min-h-screen flex items-center pb-20 md:pb-32">
-      <div
-        className="absolute inset-0 bg-green"
-        style={{
-          backgroundImage:
-            `url('${import.meta.env.BASE_URL}img/hero.webp')`,
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-        }}
-      />
+      {/* Тег img, а не фон у стилях: фон не вміє srcset, тож телефон качав ті
+          самі 1920 px, що й монітор. Це найважчий файл на сторінці і водночас
+          той, за яким браузер міряє швидкість показу. */}
+      <div className="absolute inset-0 bg-green">
+        <img
+          src={`${import.meta.env.BASE_URL}img/hero-1280.webp`}
+          srcSet={[640, 960, 1280, 1920]
+            .map((w) => `${import.meta.env.BASE_URL}img/hero-${w}.webp ${w}w`)
+            .join(', ')}
+          sizes="100vw"
+          alt=""
+          aria-hidden="true"
+          width={1920}
+          height={1080}
+          fetchPriority="high"
+          className="w-full h-full object-cover"
+        />
+      </div>
       <div className="absolute inset-0 bg-linear-to-t from-black/72 via-black/28 to-black/8" />
       <div className="absolute inset-0 bg-linear-to-r from-black/60 via-black/25 to-transparent" />
 

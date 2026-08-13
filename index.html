@@ -5,11 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><!-- figma:title --></title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600&display=swap" />
     <link rel="preconnect" href="https://cdn.sanity.io" />
-    <link rel="preload" as="image" href="/img/hero.webp" />
+    <!-- Кирилиця обох шрифтів і латиниця заголовкового: цим набрано все, що
+         видно до першого гортання. Решту підмножин забере сам css. -->
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope-cyrillic.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/manrope-latin.woff2" crossorigin />
+    <link rel="preload" as="font" type="font/woff2" href="/fonts/inter-cyrillic.woff2" crossorigin />
     <style>html,body{background-color:#C3D77E}</style>
     <!-- figma:head-end -->
   </head>
