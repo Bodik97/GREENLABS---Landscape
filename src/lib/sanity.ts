@@ -1,16 +1,38 @@
 import { useEffect, useState } from 'react'
-import { createClient } from '@sanity/client'
 import { createImageUrlBuilder, type SanityImageSource } from '@sanity/image-url'
 import type { PortableTextBlock } from '@portabletext/react'
 
-export const client = createClient({
-  projectId: 'v6s9ym4d',
-  dataset: 'production',
-  apiVersion: '2026-07-29',
-  useCdn: true,
-})
+const PROJECT = 'v6s9ym4d'
+const DATASET = 'production'
+const API_VERSION = '2026-07-29'
 
-const builder = createImageUrlBuilder(client)
+/**
+ * Запит до Sanity звичайним fetch — без офіційного клієнта.
+ *
+ * Клієнт тягне за собою rxjs і власний http-шар: разом близько 170 KB коду,
+ * які лежали в тому ж чанку, що й перший екран, заради єдиного GET-запиту.
+ * Сайт пререндериться, тож увесь контент уже є в HTML, а ці дані лише
+ * оновлюють його після показу — платити за них швидкістю першого кадру
+ * не було за що.
+ *
+ * `apicdn` замість `api` — це кешований вузол, той самий, що вмикав `useCdn`.
+ * Параметри йдуть як `$name` зі значенням у JSON, як того вимагає GROQ.
+ */
+async function sanityFetch<T>(query: string, params: Record<string, string>): Promise<T> {
+  const url = new URL(`https://${PROJECT}.apicdn.sanity.io/v${API_VERSION}/data/query/${DATASET}`)
+  url.searchParams.set('query', query)
+  // Інакше відповідь везе назад копію запиту, а він у нас до півкілобайта
+  url.searchParams.set('returnQuery', 'false')
+  for (const [key, value] of Object.entries(params)) {
+    url.searchParams.set(`$${key}`, JSON.stringify(value))
+  }
+
+  const res = await fetch(url)
+  if (!res.ok) throw new Error(`Sanity відповів ${res.status}`)
+  return (await res.json()).result as T
+}
+
+const builder = createImageUrlBuilder({ projectId: PROJECT, dataset: DATASET })
 
 export const imageUrl = (source: SanityImageSource, w: number, h: number) =>
   builder.image(source).width(w).height(h).fit('crop').auto('format').url()
@@ -261,8 +283,7 @@ export function useSanity<T>(query: string, params?: Record<string, string>) {
     let active = true
     setData(null)
     setError(false)
-    client
-      .fetch<T>(query, params ?? {})
+    sanityFetch<T>(query, params ?? {})
       .then((res) => active && setData(res))
       .catch(() => active && setError(true))
     return () => {
