@@ -74,7 +74,6 @@ export function Header() {
             alt="GREENLABS"
             width={251}
             height={208}
-            fetchPriority="high"
             className="h-10 md:h-14 w-auto object-contain"
           />
         </Link>

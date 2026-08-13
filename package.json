@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "build": "vite build && node scripts/sitemap.mjs && node scripts/prerender.mjs",
+    "build": "vite build && node scripts/inline-css.mjs && node scripts/sitemap.mjs && node scripts/prerender.mjs",
     "preview": "vite preview",
     "format": "oxfmt"
   },
