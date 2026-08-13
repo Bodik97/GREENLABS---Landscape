@@ -79,13 +79,42 @@ try {
   process.exit(1)
 }
 
+/**
+ * Відповіді Sanity, спіймані під час знімка поточної сторінки.
+ *
+ * Навіщо: без них сторінка приїжджає з готовим контентом у html, але браузер
+ * при гідратації бачить, що компонент поки віддає порожньо, і цей контент
+ * викидає — аж доки не приїде той самий запит удруге. Підвал через це стискався
+ * і за мить розтягувався назад на висоту екрана: найбільший зсув макета на
+ * сайті. Тож кладемо відповіді просто в сторінку, і перший же рендер у браузері
+ * збігається з тим, що вже намальовано.
+ *
+ * Ключ — адреса запиту: її будує той самий код, що потім шукатиме тут відповідь.
+ */
+let answers = new Map()
+
+function watchSanity(p) {
+  p.on('response', async (res) => {
+    const url = res.url()
+    if (!url.includes('.sanity.io/') || !url.includes('/data/query/')) return
+    try {
+      const body = await res.json()
+      if (body && 'result' in body) answers.set(url, body.result)
+    } catch {
+      // Не json або відповідь уже відкинуто — тоді сторінка просто дозапитає сама
+    }
+  })
+}
+
 let page = await browser.newPage()
+watchSanity(page)
 let saved = 0
 const stuck = []
 const failed = []
 
 /** Знімає одну сторінку. Кидає — значить, спроба не вдалась. */
 async function capture(path) {
+    answers = new Map()
     await page.goto(`${origin}${BASE}${path}`, { waitUntil: 'networkidle2', timeout: CONTENT_TIMEOUT })
     // Поки дані не приїхали, сторінка показує Placeholder — його зберігати немає сенсу.
     await page
@@ -110,6 +139,17 @@ async function capture(path) {
       await new Promise((r) => setTimeout(r, 700))
     })
 
+  // `<` екрануємо: інакше рядок «</script>» усередині тексту з Sanity закрив би
+  // тег раніше часу і поламав сторінку.
+  const payload = JSON.stringify(Object.fromEntries(answers)).replace(/</g, '\\u003c')
+  await page.evaluate((json) => {
+    const el = document.createElement('script')
+    el.type = 'application/json'
+    el.id = 'sanity-data'
+    el.textContent = json
+    document.head.appendChild(el)
+  }, payload)
+
   const html = await page.content()
   const dir = join(DIST, path)
   await mkdir(dir, { recursive: true })
@@ -126,6 +166,7 @@ for (const path of paths) {
     try {
       await page.close()
       page = await browser.newPage()
+      watchSanity(page)
       await capture(path)
       saved++
       console.warn(`prerender: ${path} — з другої спроби (${first.message})`)

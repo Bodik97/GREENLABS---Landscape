@@ -18,7 +18,7 @@ const API_VERSION = '2026-07-29'
  * `apicdn` замість `api` — це кешований вузол, той самий, що вмикав `useCdn`.
  * Параметри йдуть як `$name` зі значенням у JSON, як того вимагає GROQ.
  */
-async function sanityFetch<T>(query: string, params: Record<string, string>): Promise<T> {
+function queryUrl(query: string, params: Record<string, string>) {
   const url = new URL(`https://${PROJECT}.apicdn.sanity.io/v${API_VERSION}/data/query/${DATASET}`)
   url.searchParams.set('query', query)
   // Інакше відповідь везе назад копію запиту, а він у нас до півкілобайта
@@ -26,10 +26,38 @@ async function sanityFetch<T>(query: string, params: Record<string, string>): Pr
   for (const [key, value] of Object.entries(params)) {
     url.searchParams.set(`$${key}`, JSON.stringify(value))
   }
+  return url.toString()
+}
 
+async function sanityFetch<T>(url: string): Promise<T> {
   const res = await fetch(url)
   if (!res.ok) throw new Error(`Sanity відповів ${res.status}`)
   return (await res.json()).result as T
+}
+
+/**
+ * Відповіді, що приїхали разом зі сторінкою.
+ *
+ * Їх кладе scripts/prerender.mjs. Без них виходило безглуздо: у html лежить
+ * готовий контент, але перший рендер у браузері віддає порожньо (даних ще
+ * немає), React цей контент прибирає — і повертає аж коли той самий запит
+ * відпрацює вдруге. Підвал через це стискався й за мить розтягувався назад
+ * на висоту екрана.
+ *
+ * Читаємо один раз: розмітка після завантаження вже не змінюється.
+ */
+let embedded: Record<string, unknown> | undefined
+
+function fromPage(url: string) {
+  if (embedded === undefined) {
+    const el = typeof document === 'undefined' ? null : document.getElementById('sanity-data')
+    try {
+      embedded = el?.textContent ? JSON.parse(el.textContent) : {}
+    } catch {
+      embedded = {}
+    }
+  }
+  return embedded?.[url]
 }
 
 const builder = createImageUrlBuilder({ projectId: PROJECT, dataset: DATASET })
@@ -273,24 +301,36 @@ export const SERVICE_ITEM_QUERY = `*[_type == "serviceItem" && ${LIVE} && ownPag
   related[]->{ _id, title, short, "slug": slug.current, "parentSlug": parent->slug.current }
 }`
 
-/** Дані вантажаться в браузері — тому в стані завжди є `loading` і можлива помилка мережі. */
+/**
+ * Дані вантажаться в браузері — тому в стані є `loading` і можлива помилка мережі.
+ *
+ * Виняток — те, з чим сторінка приїхала: такі відповіді вже лежать у ній, тож
+ * беремо їх одразу першим рендером і нікуди не йдемо. Саме це прибирає зсув
+ * макета: намальоване в html і намальоване React збігаються з першої ж спроби.
+ */
 export function useSanity<T>(query: string, params?: Record<string, string>) {
-  const key = JSON.stringify(params ?? {})
-  const [data, setData] = useState<T | null>(null)
+  const url = queryUrl(query, params ?? {})
+  const [data, setData] = useState<T | null>(() => (fromPage(url) as T | undefined) ?? null)
   const [error, setError] = useState(false)
 
   useEffect(() => {
+    const ready = fromPage(url)
+    if (ready !== undefined) {
+      setData(ready as T)
+      setError(false)
+      return
+    }
+
     let active = true
     setData(null)
     setError(false)
-    sanityFetch<T>(query, params ?? {})
+    sanityFetch<T>(url)
       .then((res) => active && setData(res))
       .catch(() => active && setError(true))
     return () => {
       active = false
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [query, key])
+  }, [url])
 
   return { data, error, loading: !data && !error }
 }

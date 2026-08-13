@@ -1,22 +1,22 @@
-import { Suspense, lazy, useEffect } from 'react'
+import { useEffect } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { MotionConfig, LazyMotion, domAnimation, AnimatePresence, m } from 'framer-motion'
 import { Header, Footer, MobileCTA, Fab, ConsultationModal, ConsultationModalProvider, ScrollProgress, BackToTop } from './shared'
 import { ScrollToTop } from './components/ScrollToTop'
 import { trackPhoneClicks } from './lib/track'
 import HomePage from './pages/HomePage'
+import PrivatePage from './pages/PrivatePage'
+import CommercialPage from './pages/CommercialPage'
+import ServicesPage from './pages/ServicesPage'
+import ServicePage from './pages/ServicePage'
+import ServiceItemPage from './pages/ServiceItemPage'
+import AboutPage from './pages/AboutPage'
+import WorkPage from './pages/WorkPage'
+import PostPage from './pages/PostPage'
+import PrivacyPage from './pages/PrivacyPage'
+import WorksPage from './pages/WorksPage'
+import BlogPage from './pages/BlogPage'
 
-const PrivatePage = lazy(() => import('./pages/PrivatePage'))
-const CommercialPage = lazy(() => import('./pages/CommercialPage'))
-const ServicesPage = lazy(() => import('./pages/ServicesPage'))
-const ServicePage = lazy(() => import('./pages/ServicePage'))
-const ServiceItemPage = lazy(() => import('./pages/ServiceItemPage'))
-const AboutPage = lazy(() => import('./pages/AboutPage'))
-const WorkPage = lazy(() => import('./pages/WorkPage'))
-const PostPage = lazy(() => import('./pages/PostPage'))
-const PrivacyPage = lazy(() => import('./pages/PrivacyPage'))
-const WorksPage = lazy(() => import('./pages/WorksPage'))
-const BlogPage = lazy(() => import('./pages/BlogPage'))
 
 function PageCurtain() {
   const location = useLocation()
@@ -45,7 +45,6 @@ function AnimatedRoutes() {
         animate={{ opacity: 1, transition: { delay: 0.42, duration: 0.25 } }}
         exit={{ opacity: 0, transition: { duration: 0.15 } }}
       >
-        <Suspense fallback={null}>
           <Routes location={location}>
             <Route path="/" element={<HomePage />} />
             <Route path="/private" element={<PrivatePage />} />
@@ -60,7 +59,6 @@ function AnimatedRoutes() {
             <Route path="/blog/:slug" element={<PostPage />} />
             <Route path="/privacy" element={<PrivacyPage />} />
           </Routes>
-        </Suspense>
       </m.div>
     </AnimatePresence>
   )
