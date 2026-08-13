@@ -1,4 +1,5 @@
 import { PageBanner, Characteristics, ExamplesSection, Process, LeadForm, Seo } from '../shared'
+import { fileBanner } from '../lib/banner'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -34,7 +35,7 @@ export default function CommercialPage() {
         eyebrow="Комерційний об'єкт"
         title="Представницька зелень для бізнесу"
         desc="Готелі, ресторани, офіси та ЖК-комплекси. Проєктуємо й обслуговуємо озеленення, що витримує навантаження комерційного простору і працює на імідж вашого бізнесу."
-        img={`${BASE}img/banner-commercial.webp`}
+        {...fileBanner('banner-commercial')}
         breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над комерційним об'єктом" items={CHARACTERISTICS} />

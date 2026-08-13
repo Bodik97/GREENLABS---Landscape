@@ -1,20 +1,31 @@
 import { Eyebrow } from '../ui/Eyebrow'
 import { Breadcrumbs, type Crumb } from '../ui/Breadcrumbs'
 
-export function PageBanner({ eyebrow, title, desc, img, breadcrumbs }: { eyebrow: string; title: string; desc: string; img: string; breadcrumbs?: Crumb[] }) {
+export function PageBanner({ eyebrow, title, desc, img, srcSet, portrait, breadcrumbs }: { eyebrow: string; title: string; desc: string; img: string; srcSet?: string; portrait?: string; breadcrumbs?: Crumb[] }) {
   return (
     <section className="relative min-h-[70vh] flex items-end pb-16 md:pb-24 pt-32">
       {/* Саме це фото — LCP сторінки. Тегом <img> замість фону, щоб браузер
-          знайшов його сканером попереднього завантаження і взяв у роботу першим. */}
+          знайшов його сканером попереднього завантаження і взяв у роботу першим.
+
+          sizes: поки екран не ширший за співвідношення самої секції, cover
+          масштабує кадр по висоті, і той виходить завширшки 1,6 від 70vh —
+          це і є 112vh. Далі вже впирається в ширину екрана. */}
       <div className="absolute inset-0 bg-green">
-        <img
-          src={img}
-          alt=""
-          aria-hidden="true"
-          fetchPriority="high"
-          decoding="async"
-          className="w-full h-full object-cover"
-        />
+        <picture className="block w-full h-full">
+          {portrait && <source media="(max-aspect-ratio: 1/1)" srcSet={portrait} />}
+          <img
+            src={img}
+            srcSet={srcSet}
+            sizes={srcSet ? '(max-aspect-ratio: 112/100) 112vh, 100vw' : undefined}
+            alt=""
+            aria-hidden="true"
+            width={1600}
+            height={1000}
+            fetchPriority="high"
+            decoding="async"
+            className="w-full h-full object-cover"
+          />
+        </picture>
       </div>
       <div className="absolute inset-0 bg-linear-to-t from-black/75 via-black/30 to-black/10" />
 

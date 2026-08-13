@@ -18,6 +18,7 @@ import {
 import { SectionWave } from '../components/ui/SectionWave'
 import { PriceBox, PriceTag } from '../components/ui/PriceTag'
 import { useSanity, imageUrl, SERVICE_QUERY, type Service, type ServiceItemCard } from '../lib/sanity'
+import { fileBanner, sanityBanner } from '../lib/banner'
 
 /** Вид робіт із власною сторінкою — картка-посилання, решта — просто картка. */
 function ItemCard({
@@ -150,7 +151,7 @@ export default function ServicePage() {
         eyebrow="Послуга"
         title={service.title}
         desc={service.short || ''}
-        img={service.image?.asset ? imageUrl(service.image, 1600, 1000) : `${import.meta.env.BASE_URL}img/banner-services.webp`}
+        {...(service.image?.asset ? sanityBanner(service.image) : fileBanner('banner-services'))}
         breadcrumbs={crumbs}
       />
 

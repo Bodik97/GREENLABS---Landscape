@@ -19,6 +19,7 @@ import { Blocks } from '../components/blocks/Blocks'
 import { SectionWave } from '../components/ui/SectionWave'
 import { PriceBox } from '../components/ui/PriceTag'
 import { useSanity, imageUrl, SERVICE_ITEM_QUERY, type ServiceItem } from '../lib/sanity'
+import { fileBanner, sanityBanner } from '../lib/banner'
 
 export default function ServiceItemPage() {
   const { slug, item } = useParams<{ slug: string; item: string }>()
@@ -78,7 +79,7 @@ export default function ServiceItemPage() {
         eyebrow={data.parent?.title || 'Вид робіт'}
         title={data.title}
         desc={data.short || ''}
-        img={data.image?.asset ? imageUrl(data.image, 1600, 1000) : `${import.meta.env.BASE_URL}img/banner-services.webp`}
+        {...(data.image?.asset ? sanityBanner(data.image) : fileBanner('banner-services'))}
         breadcrumbs={crumbs}
       />
 

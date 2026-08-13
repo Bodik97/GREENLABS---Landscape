@@ -18,6 +18,7 @@ import {
 import { SectionWave } from '../components/ui/SectionWave'
 import { PriceTag } from '../components/ui/PriceTag'
 import { useSanity, imageUrl, SERVICES_QUERY, type ServiceCard } from '../lib/sanity'
+import { fileBanner } from '../lib/banner'
 
 const CRUMBS = [
   { name: 'Головна', path: '/' },
@@ -91,7 +92,7 @@ export default function ServicesPage() {
         eyebrow="Послуги"
         title="Оберіть послугу — покажемо ціну, терміни й що саме входить"
         desc="Проєктування, реалізація та догляд в одній команді. Кожен розділ відкривається окремою сторінкою з вилкою цін і прикладами робіт."
-        img={`${import.meta.env.BASE_URL}img/banner-services.webp`}
+        {...fileBanner('banner-services')}
         breadcrumbs={CRUMBS}
       />
 

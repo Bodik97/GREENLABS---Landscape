@@ -1,4 +1,5 @@
 import { PageBanner, Characteristics, ExamplesSection, Process, LeadForm, Seo } from '../shared'
+import { fileBanner } from '../lib/banner'
 
 const BASE = import.meta.env.BASE_URL
 
@@ -34,7 +35,7 @@ export default function PrivatePage() {
         eyebrow="Приватна ділянка"
         title="Сад вашої мрії біля дому"
         desc="Створюємо приватні сади для заміських будинків і міських садиб — від першого ескізу до бездоганної реалізації. Враховуємо стиль життя родини, клімат Львівщини та ваші побажання."
-        img={`${BASE}img/banner-private.webp`}
+        {...fileBanner('banner-private')}
         breadcrumbs={CRUMBS}
       />
       <Characteristics title="Що включає робота над приватною ділянкою" items={CHARACTERISTICS} />

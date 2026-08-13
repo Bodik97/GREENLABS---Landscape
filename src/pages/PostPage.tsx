@@ -6,6 +6,7 @@ import { PostCards } from '../components/sections/BlogSection'
 import { WorkCards } from '../components/sections/WorkCards'
 import { Placeholder } from '../components/ui/Placeholder'
 import { useSanity, imageUrl, formatDate, POST_QUERY, type Post, type PostCard } from '../lib/sanity'
+import { sanityBanner } from '../lib/banner'
 
 const CATEGORY_TITLES: Record<string, string> = {
   porady: 'Поради садівникам',
@@ -118,7 +119,7 @@ export default function PostPage() {
         eyebrow={(post.category && CATEGORY_TITLES[post.category]) || 'Блог'}
         title={post.title}
         desc={post.subtitle || post.excerpt || ''}
-        img={imageUrl(post.image, 1600, 1000)}
+        {...sanityBanner(post.image)}
         breadcrumbs={crumbs}
       />
       <Meta post={post} />

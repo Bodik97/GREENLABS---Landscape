@@ -15,6 +15,7 @@ import {
 } from '../shared'
 import { SectionWave } from '../components/ui/SectionWave'
 import { SvcPlant } from '../components/ui/Icons'
+import { fileBanner } from '../lib/banner'
 
 const WHY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   target: IcoTarget,
@@ -42,7 +43,7 @@ export default function AboutPage() {
         eyebrow="Про нас"
         title="Команда, що перетворює ділянки на живий простір"
         desc="GREENLABS — студія ландшафтного дизайну у Львові. Ми поєднуємо продуманий план і живу природу, щоб простір навколо вашого дому чи бізнесу працював на вас роками."
-        img={`${import.meta.env.BASE_URL}img/banner-about.webp`}
+        {...fileBanner('banner-about')}
         breadcrumbs={CRUMBS}
       />
 

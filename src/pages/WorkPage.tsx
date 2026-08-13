@@ -12,6 +12,7 @@ import {
   type Work,
   type WorkCard,
 } from '../lib/sanity'
+import { sanityBanner } from '../lib/banner'
 
 const SERVICE_TITLES: Record<string, string> = {
   proektuvannya: 'Проєктування та візуалізація',
@@ -198,7 +199,7 @@ export default function WorkPage() {
         eyebrow={work.location || 'Наша робота'}
         title={work.title}
         desc={work.subtitle || work.summary || ''}
-        img={imageUrl(work.image, 1600, 1000)}
+        {...sanityBanner(work.image)}
         breadcrumbs={crumbs}
       />
       <Facts work={work} />
