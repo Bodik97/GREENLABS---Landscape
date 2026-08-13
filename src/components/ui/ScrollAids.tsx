@@ -1,5 +1,4 @@
 import { useEffect, useState } from 'react'
-import { AnimatePresence, m } from 'framer-motion'
 
 function useScrollProgress() {
   const [progress, setProgress] = useState(0)
@@ -40,24 +39,25 @@ export function ScrollProgress() {
 export function BackToTop() {
   const { deep } = useScrollProgress()
 
+  // Кнопка лишається в розмітці й ховається стилями: інакше зникнення нема чим
+  // анімувати — елемента вже немає. Поява живе на обгортці, бо на самій кнопці
+  // вже висять hover і active, і вони чіпають ту саму властивість.
+  // `inert` прибирає кнопку з-під клавіатури, поки вона невидима.
   return (
-    <AnimatePresence>
-      {deep && (
-        <m.button
-          type="button"
-          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          aria-label="Нагору сторінки"
-          initial={{ opacity: 0, scale: 0.8 }}
-          animate={{ opacity: 1, scale: 1 }}
-          exit={{ opacity: 0, scale: 0.8 }}
-          transition={{ duration: 0.18 }}
-          className="fixed bottom-40 right-5.5 md:bottom-27 md:right-9.5 z-50 w-11 h-11 rounded-full bg-cream/90 backdrop-blur-sm border border-e-amber-600 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.18)] flex items-center justify-center hover:bg-cream hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
-        >
-          <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-            <path d="M8 12.5V4M4 7.5L8 3.5l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          </svg>
-        </m.button>
-      )}
-    </AnimatePresence>
+    <div
+      inert={!deep}
+      className={`pop ${deep ? 'pop-open' : ''} fixed bottom-40 right-5.5 md:bottom-27 md:right-9.5 z-50`}
+    >
+      <button
+        type="button"
+        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+        aria-label="Нагору сторінки"
+        className="w-11 h-11 rounded-full bg-cream/90 backdrop-blur-sm border border-e-amber-600 text-ink shadow-[0_4px_14px_rgba(0,0,0,0.18)] flex items-center justify-center hover:bg-cream hover:-translate-y-0.5 active:scale-95 transition-all duration-200"
+      >
+        <svg className="w-5 h-5" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+          <path d="M8 12.5V4M4 7.5L8 3.5l4 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+    </div>
   )
 }
