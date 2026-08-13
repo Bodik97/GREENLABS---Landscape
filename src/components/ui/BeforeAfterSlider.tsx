@@ -33,9 +33,21 @@ export function BeforeAfterSlider({
         moveTo(e.clientX)
       }}
       onPointerMove={(e) => {
-        if (e.currentTarget.hasPointerCapture(e.pointerId)) moveTo(e.clientX)
+        if (!e.currentTarget.hasPointerCapture(e.pointerId)) return
+        // buttons === 0 означає, що кнопку вже відпустили, а події про це ми не
+        // отримали — так буває, коли її відпустили поза вкладкою. Без перевірки
+        // повзунок після повернення курсора їхав би за ним без натиснутої кнопки.
+        // Тільки для миші: у пальця такої ситуації немає, а покладатися на те,
+        // що кожен мобільний браузер віддасть buttons=1 під час руху, не варто —
+        // помилка тут зламає саме те перетягування, заради якого все й робилось.
+        if (e.pointerType === 'mouse' && e.buttons === 0) {
+          e.currentTarget.releasePointerCapture(e.pointerId)
+          return
+        }
+        moveTo(e.clientX)
       }}
       onPointerUp={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
+      onPointerCancel={(e) => e.currentTarget.releasePointerCapture(e.pointerId)}
       style={{ touchAction: 'pan-y' }}
       className="relative rounded-2xl overflow-hidden aspect-4/3 select-none bg-green cursor-ew-resize"
     >

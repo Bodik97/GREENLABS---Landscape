@@ -36,9 +36,18 @@ A Vite development server is **always running** on `$PORT` (default 8443). You d
 Швидка перевірка ззовні: `curl -s https://greenlabs-one.vercel.app/services`
 має віддати десятки кілобайт, а не порожній `<div id="root">`.
 
-При зміні домену його треба поправити в трьох місцях —
-`src/components/ui/JsonLd.tsx`, `scripts/sitemap.mjs`, `public/robots.txt` — і
-додати новий origin у CORS Sanity (`cd studio && npx sanity cors add …`).
+При зміні домену його треба поправити в пʼяти місцях:
+
+- `src/components/ui/JsonLd.tsx`
+- `scripts/sitemap.mjs`
+- `public/robots.txt`
+- `.figma/make/site.json` — і `openGraph.image`, і адреса всередині JSON-LD у
+  `customScripts.headEnd`. Цей файл легко проґавити: він не в `src`, а вміст
+  `headEnd` лежить одним рядком-текстом, тож пошук по коду його не показує.
+- `worker/wrangler.toml`, змінна `ALLOWED_ORIGINS` — Worker відсіює запити з
+  чужих доменів, тож без цього форма мовчки перестане приймати заявки.
+
+Плюс додати новий origin у CORS Sanity (`cd studio && npx sanity cors add …`).
 
 ## Секрети
 
