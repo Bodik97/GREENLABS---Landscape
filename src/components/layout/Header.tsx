@@ -67,7 +67,16 @@ export function Header() {
 
       <div className="relative max-w-7xl mx-auto px-6 h-16 md:h-20 flex items-center gap-8">
         <Link to="/" className="flex items-center gap-2.5 shrink-0">
-          <img src={`${import.meta.env.BASE_URL}logo/logo-v2.webp`} alt="GREENLABS" className="h-10 md:h-14 w-auto object-contain" />
+          {/* 208 px висоти — стільки просить найщільніший екран під наші 56 px.
+              Вихідний файл був 400 px і важив 103 KB на кожній сторінці. */}
+          <img
+            src={`${import.meta.env.BASE_URL}logo/logo-v2-208.webp`}
+            alt="GREENLABS"
+            width={251}
+            height={208}
+            fetchPriority="high"
+            className="h-10 md:h-14 w-auto object-contain"
+          />
         </Link>
 
         <nav className="hidden md:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
