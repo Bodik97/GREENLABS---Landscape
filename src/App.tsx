@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { Header, Footer, MobileCTA, Fab, ConsultationModal, ConsultationModalProvider, ScrollProgress, BackToTop } from './shared'
 import { ScrollToTop } from './components/ScrollToTop'
@@ -16,10 +16,31 @@ import PrivacyPage from './pages/PrivacyPage'
 import WorksPage from './pages/WorksPage'
 import BlogPage from './pages/BlogPage'
 
+/**
+ * Чи це перехід у застосунку, а не перше відкриття сторінки.
+ *
+ * Різниця принципова. Анімації тепер на css, а css стартує вже під час розбору
+ * html — тобто на першому відкритті завіса й проявлення грали б поверх готового
+ * пререндереного кадру, ховаючи його на пів секунди. Сторінка від цього не
+ * ставала повільнішою насправді, але ставала повільнішою на вигляд, і Speed
+ * Index це чесно показував. На першому кадрі анімацій немає; вони потрібні лише
+ * там, де є що змінювати — при переході між сторінками.
+ */
+function useIsNavigation() {
+  const first = useRef(true)
+  useEffect(() => {
+    first.current = false
+  }, [])
+  return !first.current
+}
+
 /* key за адресою: React перестворює вузол на кожному переході, і css-анімація
    через це починається спочатку. Без цього завіса зіграла б лише раз. */
 function PageCurtain() {
   const location = useLocation()
+  const navigating = useIsNavigation()
+  if (!navigating) return null
+
   return (
     <div
       key={location.pathname}
@@ -32,8 +53,9 @@ function PageCurtain() {
 
 function AnimatedRoutes() {
   const location = useLocation()
+  const navigating = useIsNavigation()
   return (
-    <div key={location.pathname} className="animate-page-in">
+    <div key={location.pathname} className={navigating ? 'animate-page-in' : undefined}>
       <Routes location={location}>
         <Route path="/" element={<HomePage />} />
         <Route path="/private" element={<PrivatePage />} />
