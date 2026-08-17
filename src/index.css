@@ -140,6 +140,40 @@ html {
   animation: done-glow 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* ── Картка про набір команди ────────────────────────────────────────────── */
+
+/* Виїзд картки: знизу, з легким перельотом. Перельот тут доречний — картка
+   зʼявляється сама, і їй потрібна мить, щоб її помітили. Те саме пружне
+   пришвидшення, що вже працює в pop-in. */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(28px) scale(0.94); }
+  to { opacity: 1; transform: none; }
+}
+.animate-toast-in {
+  animation: toast-in 520ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Знак проростає слідом за карткою, а не разом із нею: спершу око ловить
+   форму, потім упізнає, від кого вона. */
+@keyframes sprout {
+  from { opacity: 0; transform: scale(0.4) translateY(6px); }
+  60% { transform: scale(1.08) translateY(0); }
+  to { opacity: 1; transform: none; }
+}
+.animate-sprout {
+  animation: sprout 620ms 120ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+
+/* Відблиск по кнопці. Раз на пʼять секунд, а не безперервно: рух у кутку
+   екрана має нагадувати про себе, а не миготіти під руку тому, хто читає. */
+@keyframes sheen {
+  0%, 62% { transform: translateX(-120%); }
+  86%, 100% { transform: translateX(240%); }
+}
+.animate-sheen {
+  animation: sheen 5s ease-in-out 1.2s infinite;
+}
+
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }

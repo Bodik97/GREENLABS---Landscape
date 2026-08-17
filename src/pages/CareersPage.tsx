@@ -1,5 +1,6 @@
 import type { ComponentType } from 'react'
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation } from 'react-router-dom'
 import { Link } from 'react-router-dom'
 import {
   PageBanner,
@@ -104,8 +105,36 @@ export default function CareersPage() {
   /** Обрана посада. Порожня, поки людина не тицьнула, — тоді береться перша. */
   const [picked, setPicked] = useState('')
   const formRef = useRef<HTMLDivElement>(null)
+  const { hash } = useLocation()
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ block: 'start' })
+
+  /**
+   * Прихід одразу до форми — з картки про набір, посиланням /robota#vidhuk.
+   *
+   * ScrollToTop уміє якорі, але тут його замало: він прокручує, щойно вузол
+   * зʼявився в DOM, а сторінка після того ще підростає — шрифти, банер, фото
+   * команди. Промах виходив на 400 пікселів: людина бачила заголовок секції, а
+   * поля лишались за краєм екрана.
+   *
+   * Тому доводимо двічі: одразу після появи вакансій і ще раз за півсекунди,
+   * коли макет уже влігся. Друга прокрутка спрацьовує, лише якщо промах справді
+   * помітний, — інакше сторінка смикалась би на рівному місці.
+   */
+  useEffect(() => {
+    if (hash !== '#vidhuk' || !vacancies) return
+
+    const кадр = requestAnimationFrame(scrollToForm)
+    const доводчик = setTimeout(() => {
+      const зверху = formRef.current?.getBoundingClientRect().top ?? 0
+      if (Math.abs(зверху) > 120) scrollToForm()
+    }, 500)
+
+    return () => {
+      cancelAnimationFrame(кадр)
+      clearTimeout(доводчик)
+    }
+  }, [hash, vacancies])
 
   const apply = (slug: string) => {
     setPicked(slug)

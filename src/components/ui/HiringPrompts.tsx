@@ -1,6 +1,7 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import { IcoClose } from './Icons'
+import { IcoArrow, IcoClose } from './Icons'
+import { sanityOnce, TOP_SALARY_QUERY } from '../../lib/sanity'
 
 /**
  * Ненавʼязливі нагадування про набір команди.
@@ -54,8 +55,8 @@ function PromptCard({
   return (
     <aside
       aria-label={label}
-      className="animate-fade-up fixed z-50 left-4 right-20 bottom-23 md:right-auto md:left-6 md:bottom-8 md:w-88
-                 bg-cream rounded-2xl border border-[#d9d6d0] shadow-[0_18px_40px_rgba(0,0,0,0.18)] p-5 pr-10"
+      className="animate-toast-in fixed z-50 left-4 right-20 bottom-23 md:right-auto md:left-6 md:bottom-8 md:w-88
+                 bg-cream rounded-2xl border border-[#d9d6d0] shadow-[0_18px_40px_rgba(0,0,0,0.18)] p-5 pt-4 pr-10"
     >
       <button
         type="button"
@@ -66,22 +67,20 @@ function PromptCard({
         <IcoClose className="w-4 h-4" />
       </button>
 
-      <div className="flex gap-3.5">
-        {/* Знак компанії, а не значок-емодзі: картка спливає сама, і людина має
-            за півсекунди зрозуміти, від кого вона. Той самий файл, що в шапці, —
-            він уже в кеші браузера, тож зайвого завантаження немає.
-            alt порожній: назва компанії й так стоїть у тексті поруч, а
-            повторення читач з екрана чув би двічі. */}
-        <img
-          src={`${import.meta.env.BASE_URL}logo/logo-v2-208.webp`}
-          alt=""
-          aria-hidden="true"
-          width={251}
-          height={208}
-          className="w-11 h-9 shrink-0 object-contain"
-        />
-        <div className="min-w-0">{children}</div>
-      </div>
+      {/* Знак зверху, текст під ним: так рядкам дістається вся ширина картки.
+          Збоку на телефоні лишалось 174px, і кожне речення ламалось на чотири
+          рядки.
+          alt порожній: назва компанії стоїть у самому тексті, а читач з екрана
+          чув би її двічі. */}
+      <img
+        src={`${import.meta.env.BASE_URL}logo/logo-v2-208.webp`}
+        alt=""
+        aria-hidden="true"
+        width={251}
+        height={208}
+        className="animate-sprout w-12 h-10 object-contain object-left mb-2.5"
+      />
+      {children}
     </aside>
   )
 }
@@ -104,6 +103,8 @@ function PromptCard({
 export function HiringToast() {
   const { pathname } = useLocation()
   const [shown, setShown] = useState(false)
+  /** Стеля зарплат із адмінки. 0 — ще не приїхала або її немає взагалі. */
+  const [стеля, setСтеля] = useState(0)
 
   const relevant = !pathname.startsWith('/robota') && !pathname.startsWith('/privacy')
 
@@ -117,8 +118,20 @@ export function HiringToast() {
     const закрито = Number(localStorage.getItem(TOAST_KEY))
     if (Date.now() - закрито < TOAST_SNOOZE_DAYS * 24 * 60 * 60 * 1000) return
 
-    const timer = setTimeout(() => setShown(true), TOAST_DELAY_MS)
-    return () => clearTimeout(timer)
+    let живий = true
+    const timer = setTimeout(async () => {
+      // Спершу число, потім показ: картка, що спливає без суми й дописує її за
+      // мить, смикається просто перед очима.
+      await sanityOnce<number | null>(TOP_SALARY_QUERY)
+        .then((max) => живий && setСтеля(max ?? 0))
+        .catch(() => {}) // без суми картка теж робоча, просто менш переконлива
+      if (живий) setShown(true)
+    }, TOAST_DELAY_MS)
+
+    return () => {
+      живий = false
+      clearTimeout(timer)
+    }
   }, [relevant])
 
   if (!shown || !relevant) return null
@@ -130,23 +143,46 @@ export function HiringToast() {
 
   return (
     <PromptCard onClose={dismiss} label="GREENLABS шукає майстрів">
-      {/* Текст написаний під фахівця, а не під випадкового перехожого: той, хто
-          вміє класти бруківку чи вести полив, читає не «шукаємо працівників», а
-          конкретику — які обʼєкти, яка зайнятість, чи платять вчасно. */}
-      {/* Назва в тексті, а не значком: знак поруч і так видно, а от читач з
-          екрана дізнається, хто саме шукає, лише звідси. */}
-      <p className="font-display font-semibold text-ink text-[15px] leading-snug mb-1.5">
+      {/* Назва в тексті, а не лише значком: знак зверху видно оком, але читач з
+          екрана дізнається, хто саме шукає, тільки звідси. */}
+      <p className="font-display font-semibold text-ink text-[15px] leading-snug mb-1">
         GREENLABS шукає майстрів
       </p>
-      <p className="text-stone text-[12px] font-sans leading-[1.6] mb-4">
-        Мощення, полив, озеленення. Комерційні обʼєкти й приватні сади, зайнятість цілий рік, оплата вчасно.
+
+      {/* Сума — найсильніший рядок у картці, тому окремо й помітно. Береться з
+          адмінки: вигадана тут розійшлася б із тим, що на сторінці вакансій. */}
+      {стеля > 0 && (
+        <p className="font-display font-bold text-terra text-[19px] leading-tight mb-1.5">
+          до {new Intl.NumberFormat('uk-UA').format(стеля)} ₴
+          <span className="text-stone font-sans font-normal text-[12px]"> / місяць</span>
+        </p>
+      )}
+
+      <p className="text-stone text-[12px] font-sans leading-[1.6] mb-1">
+        Мощення, полив, озеленення. Комерційні обʼєкти й приватні сади, робота цілий рік.
       </p>
+      {/* Знімаємо головні страхи майстра до того, як він відкрив форму: довга
+          анкета, вимога резюме й тиша у відповідь. */}
+      <p className="text-stone/85 text-[11px] font-sans leading-[1.55] mb-3.5">
+        Три поля, одна хвилина. Резюме не потрібне — передзвонимо за день.
+      </p>
+
+      {/* Ведемо одразу до форми, а не на початок сторінки: кожен зайвий крок
+          між рішенням і полем «Імʼя» коштує відгуку. Прокрутку до якоря вміє
+          ScrollToTop — він дочекається, поки вакансії приїдуть. */}
       <Link
-        to="/robota"
+        to="/robota#vidhuk"
         onClick={dismiss}
-        className="inline-flex items-center gap-1.5 text-terra font-display font-semibold text-[13px] hover:text-[#b35c34] transition-colors"
+        className="relative overflow-hidden inline-flex items-center gap-2 bg-terra text-white font-display font-semibold text-[13px] px-5 py-2.5 rounded-lg hover:bg-[#b35c34] active:scale-95 transition-all duration-200"
       >
-        Дивитись вакансії →
+        Залишити відгук
+        <IcoArrow className="w-3.5 h-3.5" />
+        {/* Відблиск, що зрідка пробігає кнопкою: рух у кутку екрана повертає
+            погляд, коли людина вже гортає сторінку далі. */}
+        <span
+          aria-hidden="true"
+          className="animate-sheen absolute inset-y-0 -left-8 w-8 bg-white/25 skew-x-[-20deg] pointer-events-none"
+        />
       </Link>
     </PromptCard>
   )
