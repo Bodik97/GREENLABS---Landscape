@@ -23,11 +23,13 @@ import {
   SvcCare,
 } from '../shared'
 import { SectionWave } from '../components/ui/SectionWave'
-import { VacancyForm } from '../components/sections/VacancyForm'
+import { VacancyForm, OTHER_POSITION } from '../components/sections/VacancyForm'
 import { CareersNudge } from '../components/ui/HiringPrompts'
 import { fileBanner } from '../lib/banner'
+import { useSanity, VACANCIES_QUERY, type Vacancy } from '../lib/sanity'
+import { Placeholder } from '../components/ui/Placeholder'
+import { SvcDesign, SvcLawn, SvcLight, SvcPave, SvcPlant, SvcPond, SvcWater } from '../components/ui/Icons'
 import {
-  VACANCIES,
   CAREER_BENEFITS,
   CONDITIONS,
   GROWTH_PATH,
@@ -52,8 +54,37 @@ const BENEFIT_ICONS: Record<string, ComponentType<{ className?: string }>> = {
   target: IcoTarget,
 }
 
+/** Значок вакансії: в адмінці обирають зі списку, тут назва стає малюнком. */
+const VACANCY_ICONS: Record<string, ComponentType<{ className?: string }>> = {
+  plant: SvcPlant,
+  lawn: SvcLawn,
+  pave: SvcPave,
+  water: SvcWater,
+  care: SvcCare,
+  design: SvcDesign,
+  light: SvcLight,
+  pond: SvcPond,
+}
+
 /** «25 000» замість «25000»: суму треба схопити оком, а не перерахувати нулі. */
 const money = (value: number) => new Intl.NumberFormat('uk-UA').format(value)
+
+/**
+ * Рядок про гроші в картці вакансії.
+ *
+ * Порожня нижня межа — не недогляд, а свідомий вибір: краще чесне «за
+ * домовленістю», ніж сума, нижча за ринок, від якої фахівець розвертається.
+ * Тому в адмінці поле необовʼязкове.
+ */
+function Salary({ from, to }: { from?: number; to?: number }) {
+  const підпис = !from ? 'Оплата за домовленістю' : to ? `${money(from)}–${money(to)} ₴` : `від ${money(from)} ₴`
+  return (
+    <p className="font-display font-bold text-terra text-[17px] mb-3">
+      {підпис}
+      {from ? <span className="text-stone font-sans font-normal text-[12px]"> / місяць</span> : null}
+    </p>
+  )
+}
 
 /**
  * Опис вакансії для Google Jobs.
@@ -61,22 +92,33 @@ const money = (value: number) => new Intl.NumberFormat('uk-UA').format(value)
  * Google хоче саме розмітку, а не голий рядок: список вимог у <ul> він показує
  * списком, а те саме через кому — суцільним абзацом.
  */
-const jobDescription = (summary: string, requirements: string[], schedule: string) =>
-  `<p>${summary}</p><p><strong>Вимоги:</strong></p><ul>${requirements
-    .map((r) => `<li>${r}</li>`)
-    .join('')}</ul><p><strong>Графік:</strong> ${schedule}</p>`
+const jobDescription = (v: Vacancy) =>
+  `<p>${v.summary}</p>` +
+  (v.requirements?.length
+    ? `<p><strong>Вимоги:</strong></p><ul>${v.requirements.map((r) => `<li>${r}</li>`).join('')}</ul>`
+    : '') +
+  `<p><strong>Графік:</strong> ${v.schedule}</p>`
 
 export default function CareersPage() {
-  /** Посада живе тут, а не у формі: її міняють і кнопки біля вакансій. */
-  const [position, setPosition] = useState(VACANCIES[0].id)
+  const { data: vacancies, loading, error } = useSanity<Vacancy[]>(VACANCIES_QUERY)
+  /** Обрана посада. Порожня, поки людина не тицьнула, — тоді береться перша. */
+  const [picked, setPicked] = useState('')
   const formRef = useRef<HTMLDivElement>(null)
 
   const scrollToForm = () => formRef.current?.scrollIntoView({ block: 'start' })
 
-  const apply = (id: string) => {
-    setPosition(id)
+  const apply = (slug: string) => {
+    setPicked(slug)
     scrollToForm()
   }
+
+  // Порожній масив краще за падіння: сторінка лишається живою і з формою,
+  // навіть якщо всі вакансії сховані в адмінці.
+  const список = vacancies ?? []
+  const position = picked || список[0]?.slug || OTHER_POSITION
+
+  if (loading) return <Placeholder note="Завантажуємо вакансії…" />
+  if (error) return <Placeholder note="Не вдалося завантажити вакансії. Перевірте зʼєднання і спробуйте оновити сторінку." />
 
   return (
     <>
@@ -88,17 +130,22 @@ export default function CareersPage() {
 
       {/* Окрема розмітка на кожну вакансію — так їх бачить Google Jobs. Суми
           додаються лише після того, як вилки звірені з власником. */}
-      {VACANCIES.map((v) => (
+      {список.map((v) => (
         <JsonLd
-          key={v.id}
+          key={v._id}
           data={jobPostingSchema({
-            id: v.id,
+            id: v.slug,
             title: v.title,
-            description: jobDescription(v.summary, v.requirements, v.schedule),
+            description: jobDescription(v),
             datePosted: POSTED_AT,
             validThrough: VALID_THROUGH,
             url: siteUrl('/robota'),
-            salary: SALARY_CONFIRMED ? { from: v.salaryFrom, to: v.salaryTo } : undefined,
+            // Вилка потрапляє в Google Jobs, лише коли вона є і власник її
+            // підтвердив: там це офіційна заявка роботодавця, а не орієнтир.
+            salary:
+              SALARY_CONFIRMED && v.salaryFrom
+                ? { from: v.salaryFrom, to: v.salaryTo ?? v.salaryFrom }
+                : undefined,
           })}
         />
       ))}
@@ -163,21 +210,20 @@ export default function CareersPage() {
           </Reveal>
 
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-            {VACANCIES.map((v, i) => (
-              <Reveal key={v.id} delay={(i % 3) * 60}>
+            {список.map((v, i) => {
+              const Icon = VACANCY_ICONS[v.icon ?? 'plant'] ?? SvcPlant
+              return (
+              <Reveal key={v._id} delay={(i % 3) * 60}>
                 <article className="bg-cream rounded-2xl p-6 h-full flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]">
                   <span className="text-green mb-4 inline-flex">
-                    <v.Icon className="w-8 h-8" />
+                    <Icon className="w-8 h-8" />
                   </span>
                   <h3 className="font-display font-semibold text-ink text-[18px] mb-2">{v.title}</h3>
-                  <p className="font-display font-bold text-terra text-[17px] mb-3">
-                    {money(v.salaryFrom)}–{money(v.salaryTo)} ₴
-                    <span className="text-stone font-sans font-normal text-[12px]"> / місяць</span>
-                  </p>
+                  <Salary from={v.salaryFrom} to={v.salaryTo} />
                   <p className="text-stone text-[12px] font-sans leading-[1.65] mb-5">{v.summary}</p>
 
                   <ul className="flex flex-col gap-2 mb-5">
-                    {v.requirements.map((r) => (
+                    {v.requirements?.map((r) => (
                       <li key={r} className="flex gap-2.5 text-stone text-[12px] font-sans leading-[1.55]">
                         <IcoCheck className="w-4 h-4 text-green shrink-0 mt-px" />
                         {r}
@@ -194,20 +240,28 @@ export default function CareersPage() {
                       навіть якщо вимог у них різна кількість. */}
                   <button
                     type="button"
-                    onClick={() => apply(v.id)}
+                    onClick={() => apply(v.slug)}
                     className="mt-auto w-full bg-terra text-white font-display font-semibold text-[14px] py-3.5 rounded-lg hover:bg-[#b35c34] active:scale-95 transition-all duration-200"
                   >
                     Відгукнутись
                   </button>
                 </article>
               </Reveal>
-            ))}
+              )
+            })}
           </div>
+
+          {!список.length && (
+            <p className="text-stone text-[14px] font-sans leading-[1.65] max-w-150">
+              Просто зараз відкритих вакансій немає. Але руки нам потрібні постійно — залиште відгук нижче, і ми
+              звернемось, щойно зʼявиться місце.
+            </p>
+          )}
 
           <Reveal className="mt-8">
             <p className="text-stone text-[13px] font-sans leading-[1.65]">
               Не знайшли себе в списку?{' '}
-              <button type="button" onClick={() => apply('other')} className="text-terra font-semibold underline underline-offset-2 hover:text-[#b35c34] transition-colors">
+              <button type="button" onClick={() => apply(OTHER_POSITION)} className="text-terra font-semibold underline underline-offset-2 hover:text-[#b35c34] transition-colors">
                 Напишіть нам однаково
               </button>{' '}
               — руки потрібні завжди, а посаду знайдемо під людину.
@@ -310,7 +364,7 @@ export default function CareersPage() {
 
           <Reveal className="max-w-137 mx-auto">
             <div className="bg-cream rounded-2xl p-6 md:p-9">
-              <VacancyForm position={position} onPositionChange={setPosition} />
+              <VacancyForm vacancies={список} position={position} onPositionChange={setPicked} />
             </div>
           </Reveal>
         </div>

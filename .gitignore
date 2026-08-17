@@ -7,8 +7,9 @@ dist
 .env.*
 photo-source
 
-# Генерується scripts/seed-services.mjs
+# Генерується scripts/seed-services.mjs і scripts/seed-vacancies.mjs
 services.ndjson
+vacancies.ndjson
 
 # Комерційна інформація. Репозиторій публічний.
 docs/koshtorys.md

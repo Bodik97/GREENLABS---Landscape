@@ -2,7 +2,8 @@ import React, { useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { IcoClock } from '../ui/Icons'
 import { FieldHint } from '../ui/FieldHint'
-import { VACANCIES, CAREERS_CONTACTS } from '../../data/careers'
+import { CAREERS_CONTACTS } from '../../data/careers'
+import type { Vacancy } from '../../lib/sanity'
 import {
   NAME_MAX,
   PHONE_DIGITS,
@@ -23,8 +24,8 @@ const COMMENT_MAX = 500
 export const OTHER_POSITION = 'other'
 
 /** Людська назва посади — іде в телеграм і в таблицю. */
-export const positionLabel = (id: string) =>
-  VACANCIES.find((v) => v.id === id)?.title ?? 'Інша посада'
+export const positionLabel = (vacancies: Vacancy[], slug: string) =>
+  vacancies.find((v) => v.slug === slug)?.title ?? 'Інша посада'
 
 /**
  * Форма відгуку на вакансію.
@@ -37,9 +38,11 @@ export const positionLabel = (id: string) =>
  * вакансії підставляють її сюди й прокручують екран до форми.
  */
 export function VacancyForm({
+  vacancies,
   position,
   onPositionChange,
 }: {
+  vacancies: Vacancy[]
   position: string
   onPositionChange: (value: string) => void
 }) {
@@ -146,7 +149,7 @@ export function VacancyForm({
           kind: 'vacancy',
           name,
           phone,
-          position: positionLabel(position),
+          position: positionLabel(vacancies, position),
           comment,
           website,
           page: window.location.pathname,
@@ -207,7 +210,7 @@ export function VacancyForm({
           className="text-[15px] font-sans leading-[1.6] mb-6 text-stone animate-done-in"
           style={{ animationDelay: '650ms' }}
         >
-          Відгук на посаду «<span className="font-semibold text-ink">{positionLabel(position)}</span>» прийнято.
+          Відгук на посаду «<span className="font-semibold text-ink">{positionLabel(vacancies, position)}</span>» прийнято.
           <br />
           Зателефонуємо на <span className="font-semibold text-ink whitespace-nowrap">{phone}</span>
         </p>
@@ -283,8 +286,8 @@ export function VacancyForm({
               onChange={(e) => onPositionChange(e.target.value)}
               className={`${fieldBase} ${fieldOk} appearance-none pr-10 cursor-pointer`}
             >
-              {VACANCIES.map((v) => (
-                <option key={v.id} value={v.id}>{v.title}</option>
+              {vacancies.map((v) => (
+                <option key={v.slug} value={v.slug}>{v.title}</option>
               ))}
               <option value={OTHER_POSITION}>Інша посада</option>
             </select>

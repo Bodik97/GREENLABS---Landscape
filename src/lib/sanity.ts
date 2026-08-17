@@ -273,6 +273,26 @@ export const POST_QUERY = `{
 
 export const TEAM_QUERY = `*[_type == "teamMember"] | order(order asc){ _id, name, role, photo }`
 
+// ── Вакансії ──
+
+export type Vacancy = {
+  _id: string
+  /** Технічна позначка посади. Іде в заявку кандидата, тому стала. */
+  slug: string
+  title: string
+  summary: string
+  /** Порожня — на сторінці буде «за домовленістю». */
+  salaryFrom?: number
+  salaryTo?: number
+  schedule: string
+  requirements?: string[]
+  icon?: string
+}
+
+export const VACANCIES_QUERY = `*[_type == "vacancy" && ${LIVE} && defined(slug.current)] | order(order asc){
+  _id, title, "slug": slug.current, summary, salaryFrom, salaryTo, schedule, requirements, icon
+}`
+
 // ── Послуги ──
 
 const PRICE = 'price{ from, to, unit, note, basis }'
