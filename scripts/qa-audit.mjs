@@ -13,6 +13,10 @@
  */
 import { readFileSync } from 'node:fs'
 import { glob } from 'node:fs/promises'
+import { createServer } from 'node:http'
+import { mkdtemp } from 'node:fs/promises'
+import { tmpdir } from 'node:os'
+import { extname, join } from 'node:path'
 import puppeteer from 'puppeteer'
 
 const сторінки = []
@@ -24,7 +28,52 @@ if (!сторінки.length) {
   process.exit(1)
 }
 
-const browser = await puppeteer.launch({ args: ['--no-sandbox'] })
+/**
+ * Сторінки відкриваються з сервера, а не через setContent.
+ *
+ * Різниця принципова: так React справді запускається, і видно те, що бачить
+ * людина після гідратації. Саме на цьому попався подвійний JSON-LD — у html
+ * лежав один блок, а після запуску React їх ставало два.
+ */
+const MIME = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.svg': 'image/svg+xml',
+  '.webp': 'image/webp',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.ico': 'image/x-icon',
+  '.woff2': 'font/woff2',
+  '.xml': 'application/xml',
+  '.txt': 'text/plain; charset=utf-8',
+}
+const оболонка = readFileSync('dist/index.html', 'utf8')
+const server = createServer(async (req, res) => {
+  const шлях = decodeURIComponent(new URL(req.url, 'http://localhost').pathname)
+  try {
+    const тіло = readFileSync(join('dist', шлях))
+    res.writeHead(200, { 'Content-Type': MIME[extname(шлях)] ?? 'application/octet-stream' })
+    res.end(тіло)
+  } catch {
+    res.writeHead(200, { 'Content-Type': MIME['.html'] })
+    res.end(оболонка)
+  }
+})
+await new Promise((r) => server.listen(0, r))
+const origin = `http://localhost:${server.address().port}`
+
+// --disable-web-security з тієї ж причини, що й у пререндері: сторінки
+// відкриваються з localhost, а в CORS Sanity дозволено лише бойовий домен.
+// Без цього дані не приїжджають, сторінка лишається на заглушці — і огляд
+// звітує про порожні заголовки там, де насправді все гаразд.
+// Профіль свій на кожен запуск: зі сталим шляхом другий огляд падав із
+// «browser is already running», а він цілком може йти паралельно зі збіркою.
+const профіль = await mkdtemp(join(tmpdir(), 'greenlabs-qa-'))
+const browser = await puppeteer.launch({
+  args: ['--no-sandbox', '--disable-web-security', `--user-data-dir=${профіль}`],
+})
 const page = await browser.newPage()
 
 /** Знахідки по всіх сторінках: текст проблеми → на яких адресах трапилась. */
@@ -36,7 +85,7 @@ const додати = (проблема, адреса) => {
 
 for (const шлях of сторінки) {
   const адреса = '/' + шлях.replace(/^dist\/?/, '').replace(/index\.html$/, '')
-  await page.setContent(readFileSync(шлях, 'utf8'), { waitUntil: 'domcontentloaded' })
+  await page.goto(origin + адреса, { waitUntil: 'networkidle2' })
 
   const звіт = await page.evaluate(() => {
     const out = { проблеми: [] }
@@ -80,6 +129,21 @@ for (const шлях of сторінки) {
       if (!b.textContent.trim() && !b.getAttribute('aria-label')) out.проблеми.push('кнопка без назви')
     }
 
+    /* Пререндер кладе розмітку в html, React може додати її ще раз — і краулер,
+       який виконує JavaScript, порахує все двічі. */
+    const схеми = [...document.querySelectorAll('script[type="application/ld+json"]')].map((s) => {
+      try {
+        const d = JSON.parse(s.textContent)
+        return `${d['@type']}|${s.textContent.length}`
+      } catch {
+        return 'непридатний до розбору'
+      }
+    })
+    for (const дубль of new Set(схеми.filter((x, i) => схеми.indexOf(x) !== i))) {
+      out.проблеми.push(`розмітка задвоєна: ${дубль.split('|')[0]}`)
+    }
+    if (схеми.includes('непридатний до розбору')) out.проблеми.push('JSON-LD не розбирається')
+
     if (!document.documentElement.lang) out.проблеми.push('немає lang у <html>')
     if (!document.querySelector('title')?.textContent.trim()) out.проблеми.push('порожній <title>')
     if (!document.querySelector('meta[name="description"]')?.content) out.проблеми.push('немає опису сторінки')
@@ -91,6 +155,7 @@ for (const шлях of сторінки) {
 }
 
 await browser.close()
+server.close()
 
 console.log(`qa-audit: переглянуто ${сторінки.length} сторінок\n`)
 if (!знахідки.size) {

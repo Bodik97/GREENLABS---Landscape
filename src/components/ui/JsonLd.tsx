@@ -8,17 +8,48 @@ import { useEffect } from 'react'
  * пререндером (scripts/prerender.mjs): без нього краулер не побачить скрипт,
  * бо той зʼявляється вже після виконання React.
  */
+/**
+ * Знаходить у head розмітку, яку вже запік пререндер, і бере її під опіку.
+ *
+ * Без цього виходило по дві копії кожного блоку: одну кладе пререндер у html,
+ * другу дописує React при гідратації. Краулер, який виконує JavaScript, бачив
+ * пʼять вакансій як десять. Гірше інше — при переході на іншу сторінку React
+ * прибирав лише свою копію, а запечена лишалась, і на «Про нас» висіли б
+ * вакансії з «Роботи».
+ *
+ * Хто вже під опікою — памʼятаємо тут, а не атрибутом у розмітці. Атрибут
+ * здавався простішим, але він потрапляв у знімок пререндеру: наступного разу
+ * компонент бачив «чужу» позначку на власному ж блоці, вважав його зайнятим і
+ * додавав другу копію. Помітка в памʼяті нікуди не серіалізується.
+ *
+ * Потрібна вона на випадок двох однакових блоків на одній сторінці: без неї
+ * обидва всиновили б один і той самий вузол, а другий лишився б без розмітки.
+ */
+const усиновлені = new WeakSet<HTMLScriptElement>()
+
+function adopt(json: string) {
+  return [...document.head.querySelectorAll<HTMLScriptElement>('script[type="application/ld+json"]')].find(
+    (s) => s.textContent === json && !усиновлені.has(s),
+  )
+}
+
 export function JsonLd({ data }: { data: object | null }) {
   const json = data ? JSON.stringify(data) : null
 
   useEffect(() => {
     if (!json) return
-    const script = document.createElement('script')
-    script.type = 'application/ld+json'
-    script.textContent = json
-    document.head.appendChild(script)
+
+    const існує = adopt(json)
+    const script = існує ?? document.createElement('script')
+    усиновлені.add(script)
+    if (!існує) {
+      script.type = 'application/ld+json'
+      script.textContent = json
+      document.head.appendChild(script)
+    }
     return () => {
-      document.head.removeChild(script)
+      усиновлені.delete(script)
+      script.remove()
     }
   }, [json])
 
