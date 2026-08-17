@@ -34,6 +34,17 @@ const EVENT_LABELS = {
 const RATE_WINDOW_MS = 60 * 60 * 1000
 
 /**
+ * Стеля на розмір тіла запиту.
+ *
+ * Найбільша чесна заявка — це ім'я, номер, посада й тисяча символів про себе,
+ * тобто пара кілобайт. Усе, що більше, надіслано не формою. Перевіряємо до
+ * розбору json: інакше мегабайти спершу опиняються в пам'яті ізолята, і аж
+ * тоді ми кажемо «забагато». Заголовка може й не бути — тоді пропускаємо далі,
+ * це запобіжник від дурного навантаження, а не повний захист.
+ */
+const MAX_BODY_BYTES = 32 * 1024
+
+/**
  * Коди мобільних операторів України.
  *
  * Дублює список із форми навмисно: перевірка в браузері зручна людині, але
@@ -66,6 +77,34 @@ function corsHeaders(request, env) {
 
 const escapeHtml = (value) =>
   String(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+
+/**
+ * Однорядкове поле: ім'я, телефон, посада.
+ *
+ * Переноси рядків звідси прибираємо, і це не косметика. Повідомлення в
+ * телеграм — це рядки виду «Телефон: …», і перенос усередині значення дозволяє
+ * дописати туди власний рядок. Розмітку escapeHtml знешкоджує, а от підроблений
+ * «Телефон: +380000000000» окремим рядком виглядає точно як справжній, і
+ * менеджер зателефонує не тому. Заразом викидаємо керівні символи.
+ */
+const oneLine = (value) =>
+  String(value ?? '')
+    .replace(/[\u0000-\u001F\u007F]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+
+/**
+ * Багаторядкове поле: розповідь про себе.
+ *
+ * Тут переноси законні — людина пише абзацами. Прибираємо лише керівні символи
+ * (крім самого переносу) і стискаємо порожні рядки, щоб одним відгуком не можна
+ * було розтягнути повідомлення на кілька екранів.
+ */
+const multiLine = (value) =>
+  String(value ?? '')
+    .replace(/[\u0000-\u0009\u000B-\u001F\u007F]/g, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
 
 /**
  * Людська назва сторінки, з якої прийшла заявка.
@@ -136,6 +175,13 @@ export default {
     if (request.method === 'OPTIONS') return new Response(null, { status: 204, headers: cors })
     if (request.method !== 'POST') return json(405, { error: 'method_not_allowed' })
 
+    if (Number(request.headers.get('Content-Length') ?? 0) > MAX_BODY_BYTES) {
+      return new Response(JSON.stringify({ error: 'too_large' }), {
+        status: 413,
+        headers: { ...cors, 'Content-Type': 'application/json' },
+      })
+    }
+
     let data
     try {
       data = await request.json()
@@ -146,9 +192,9 @@ export default {
       })
     }
 
-    const name = String(data.name ?? '').trim()
-    const phone = String(data.phone ?? '').trim()
-    const page = String(data.page ?? '').trim()
+    const name = oneLine(data.name)
+    const phone = oneLine(data.phone)
+    const page = oneLine(data.page)
     const label = pageLabel(page, String(data.title ?? '').trim())
 
     /**
@@ -162,8 +208,8 @@ export default {
     const isVacancy = data.kind === 'vacancy'
     // Обрізаємо, а не відхиляємо: людина написала забагато — це не привід
     // втратити кандидата, а телеграм має ліміт на довжину повідомлення.
-    const position = String(data.position ?? '').trim().slice(0, 100) || 'Не вказано'
-    const comment = String(data.comment ?? '').trim().slice(0, 1000)
+    const position = oneLine(data.position).slice(0, 100) || 'Не вказано'
+    const comment = multiLine(data.comment).slice(0, 1000)
 
     // Приховане поле: людина його не бачить і не заповнює, бот заповнює майже
     // завжди. Відповідаємо успіхом, щоб бот не шукав обхід.

