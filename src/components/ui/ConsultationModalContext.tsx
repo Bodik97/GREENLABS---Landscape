@@ -25,6 +25,11 @@ export function ConsultationModalProvider({ children }: { children: ReactNode })
   useEffect(() => {
     if (sessionStorage.getItem(TIME_TRIGGER_KEY)) return
     const timer = setTimeout(() => {
+      // Сторінку читає не клієнт, а кандидат на роботу: пропозиція прорахувати
+      // вартість саду там недоречна, і в неї є власне нагадування. Дивимось на
+      // адресу саме тут, а не на монтажі: таймер один на всю сесію і має
+      // пережити переходи між сторінками, а не перезапускатись на кожному.
+      if (window.location.pathname.endsWith('/robota')) return
       if (!shownRef.current) {
         markShown()
         setIsOpen(true)

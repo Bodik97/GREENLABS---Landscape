@@ -1,7 +1,8 @@
+import type { ReactNode } from 'react'
 import { Eyebrow } from '../ui/Eyebrow'
 import { Breadcrumbs, type Crumb } from '../ui/Breadcrumbs'
 
-export function PageBanner({ eyebrow, title, desc, img, srcSet, portrait, breadcrumbs }: { eyebrow: string; title: string; desc: string; img: string; srcSet?: string; portrait?: string; breadcrumbs?: Crumb[] }) {
+export function PageBanner({ eyebrow, title, desc, img, srcSet, portrait, breadcrumbs, action }: { eyebrow: string; title: string; desc: string; img: string; srcSet?: string; portrait?: string; breadcrumbs?: Crumb[]; action?: ReactNode }) {
   return (
     <section className="relative min-h-[70vh] flex items-end pb-16 md:pb-24 pt-32">
       {/* Саме це фото — LCP сторінки. Тегом <img> замість фону, щоб браузер
@@ -42,6 +43,13 @@ export function PageBanner({ eyebrow, title, desc, img, srcSet, portrait, breadc
         <p className="animate-fade-up text-white/80 text-[16px] md:text-[18px] font-sans leading-[1.65] max-w-125" style={{ animationDelay: '160ms' }}>
           {desc}
         </p>
+        {/* Кнопка просто в банері — потрібна там, де сторінка веде до однієї дії
+            (сторінка вакансій). На решті сторінок банер лишається без неї. */}
+        {action && (
+          <div className="animate-fade-up mt-8" style={{ animationDelay: '240ms' }}>
+            {action}
+          </div>
+        )}
       </div>
     </section>
   )

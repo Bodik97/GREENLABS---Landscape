@@ -78,7 +78,7 @@ export function Header() {
           />
         </Link>
 
-        <nav className="hidden md:flex items-center gap-6 xl:gap-8 flex-1 justify-center">
+        <nav className="hidden md:flex items-center gap-5 lg:gap-6 xl:gap-8 flex-1 justify-center">
           {NAV.map((n) => (
             <NavLink
               key={n.label}
@@ -96,12 +96,13 @@ export function Header() {
         </nav>
 
         <div className="hidden md:flex items-center gap-5 shrink-0 ml-auto">
-          {/* На планшеті номер прибираємо: разом із пʼятьма пунктами меню він
-              не вміщався, і «Про нас» ламалось на два рядки. Подзвонити звідти
+          {/* На планшеті й ноутбуці номер прибираємо: разом із шістьма пунктами
+              меню він не вміщався, і «Про нас» ламалось на два рядки. Поріг
+              підняли до xl, коли зʼявився пункт «Робота». Подзвонити звідти
               все одно можна — знизу закріплена кнопка «Зателефонувати». */}
           <a
             href="tel:+380976952473"
-            className={`hidden lg:inline text-[13px] font-sans font-medium transition-colors hover:opacity-60 ${textCls}`}
+            className={`hidden xl:inline text-[13px] font-sans font-medium transition-colors hover:opacity-60 ${textCls}`}
           >
             +38 (097) 695-24-73
           </a>

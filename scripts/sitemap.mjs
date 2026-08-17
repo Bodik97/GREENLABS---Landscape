@@ -6,7 +6,7 @@ const ORIGIN = 'https://greenlabs-one.vercel.app'
 const BASE = (process.env.FIGMA_PUBLIC_URL ?? '').replace(/\/$/, '')
 const SITE = ORIGIN + BASE
 
-const STATIC = ['/', '/services', '/works', '/blog', '/private', '/commercial', '/about', '/privacy']
+const STATIC = ['/', '/services', '/works', '/blog', '/private', '/commercial', '/about', '/robota', '/privacy']
 
 const QUERY = `{
   "works": *[_type == "project" && hidden != true && defined(slug.current)].slug.current,

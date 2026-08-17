@@ -15,6 +15,8 @@ import PostPage from './pages/PostPage'
 import PrivacyPage from './pages/PrivacyPage'
 import WorksPage from './pages/WorksPage'
 import BlogPage from './pages/BlogPage'
+import CareersPage from './pages/CareersPage'
+import { HiringToast } from './components/ui/HiringPrompts'
 
 /**
  * Чи це перехід у застосунку, а не перше відкриття сторінки.
@@ -68,6 +70,7 @@ function AnimatedRoutes() {
         <Route path="/works/:slug" element={<WorkPage />} />
         <Route path="/blog" element={<BlogPage />} />
         <Route path="/blog/:slug" element={<PostPage />} />
+        <Route path="/robota" element={<CareersPage />} />
         <Route path="/privacy" element={<PrivacyPage />} />
       </Routes>
     </div>
@@ -92,6 +95,7 @@ export default function App() {
           <MobileCTA />
           <BackToTop />
           <Fab />
+          <HiringToast />
         </div>
         <ConsultationModal />
       </ConsultationModalProvider>

@@ -39,13 +39,35 @@ var ACTIVITY_SHEET = 'Активність'
 var ACTIVITY_HEADERS = ['Час', 'Подія', 'Звідки', 'Сторінка']
 
 /**
+ * Аркуш для відгуків на вакансії.
+ *
+ * Теж окремо, і з тієї ж причини, що й «Активність»: кандидати — це не клієнти.
+ * Змішавши їх в одному списку, власник читав би вперемішку «хочу газон» і
+ * «хочу працювати», а лічильник заявок рахував би одне за інше.
+ */
+var VACANCY_SHEET = 'Вакансії'
+var VACANCY_HEADERS = ['Час', "Ім'я", 'Телефон', 'Посада', 'Коментар', 'Джерело']
+var VACANCY_WIDTHS = [150, 170, 170, 200, 320, 200]
+
+/**
+ * Куди дублювати відгук листом. Кладеться руками:
+ * Налаштування проєкту → Властивості скрипта → NOTIFY_EMAIL.
+ *
+ * Порожньо — листи просто не йдуть, і це нормальний робочий стан: основний
+ * канал усе одно телеграм, лист лише підстраховує.
+ */
+function notifyEmail() {
+  return PropertiesService.getScriptProperties().getProperty('NOTIFY_EMAIL')
+}
+
+/**
  * Мітка версії. Оновлювати при кожній зміні цього файлу.
  *
  * Потрібна, бо інакше неможливо дізнатись, який код справді відповідає за
  * адресою /exec: редактор показує один, а веб-застосунок може віддавати
  * попереднє розгортання. Відкрийте адресу в браузері — побачите цей рядок.
  */
-var VERSION = 'sheet.gs 2026-08-12 · приймає лише запити зі спільним секретом'
+var VERSION = 'sheet.gs 2026-08-17 · відгуки на вакансії на окремому аркуші'
 
 function doGet() {
   return ContentService.createTextOutput(VERSION)
@@ -88,6 +110,20 @@ function doPost(e) {
   // Не заявка — на окремий аркуш, щоб тут рядок дорівнював заявці.
   if (data.kind === 'event') {
     activitySheet(book).appendRow([new Date(), data.event, data.from || '', data.page || ''])
+    return ContentService.createTextOutput('ok')
+  }
+
+  // Відгук на вакансію — теж окремо.
+  if (data.kind === 'vacancy') {
+    vacancySheet(book).appendRow([
+      new Date(),
+      data.name || '',
+      data.phone || '',
+      data.position || '',
+      data.comment || '',
+      data.source || '',
+    ])
+    sendVacancyEmail(data)
     return ContentService.createTextOutput('ok')
   }
 
@@ -157,6 +193,61 @@ function activitySheet(book) {
     .setFontWeight('bold')
     .setBackground(GREEN)
   return sheet
+}
+
+/**
+ * Аркуш «Вакансії». Створює його, якщо ще немає.
+ *
+ * Як і «Активність», ставимо в кінець книги: заявки клієнтів пишуться в
+ * getSheets()[0], і новий аркуш попереду мовчки перехопив би їх.
+ */
+function vacancySheet(book) {
+  var sheet = book.getSheetByName(VACANCY_SHEET)
+  if (!sheet) {
+    sheet = book.insertSheet(VACANCY_SHEET, book.getNumSheets())
+    sheet.setFrozenRows(1)
+    for (var i = 0; i < VACANCY_WIDTHS.length; i++) {
+      sheet.setColumnWidth(i + 1, VACANCY_WIDTHS[i])
+    }
+    sheet.getRange('A2:A').setNumberFormat('dd.MM.yyyy  HH:mm')
+    // Телефон текстом — інакше таблиця з'їдає плюс і дужки.
+    sheet.getRange('C2:C').setNumberFormat('@')
+    sheet.getRange('A2:F').setVerticalAlignment('top').setWrap(true)
+  }
+
+  sheet.getRange(1, 1, 1, VACANCY_HEADERS.length)
+    .setValues([VACANCY_HEADERS])
+    .setFontColor(CREAM)
+    .setFontWeight('bold')
+    .setBackground(GREEN)
+  return sheet
+}
+
+/**
+ * Дублює відгук листом власнику.
+ *
+ * У try навмисно: рядок у таблиці на цей момент уже дописано, і виняток тут
+ * означав би, що Worker вважає запис невдалим і скаржиться на втрату — при
+ * тому, що заявка на місці. Лист вторинний, таблиця первинна.
+ */
+function sendVacancyEmail(data) {
+  var to = notifyEmail()
+  if (!to) return
+  try {
+    MailApp.sendEmail({
+      to: to,
+      subject: 'Відгук на вакансію: ' + (data.position || 'посада не вказана'),
+      body:
+        "Ім'я: " + (data.name || '—') + '\n' +
+        'Телефон: ' + (data.phone || '—') + '\n' +
+        'Посада: ' + (data.position || '—') + '\n' +
+        'Про себе: ' + (data.comment || '—') + '\n' +
+        'Звідки: ' + (data.source || '—') + '\n\n' +
+        'Рядок уже в таблиці, аркуш «' + VACANCY_SHEET + '».',
+    })
+  } catch (err) {
+    console.error('mail', err)
+  }
 }
 
 /**

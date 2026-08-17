@@ -151,6 +151,20 @@ export default {
     const page = String(data.page ?? '').trim()
     const label = pageLabel(page, String(data.title ?? '').trim())
 
+    /**
+     * Відгук на вакансію, а не заявка від клієнта.
+     *
+     * Перевірки імені й номера в них спільні — різниця лише в тому, що йде
+     * далі: сюди додаються посада й коментар, повідомлення в телеграм інше, а
+     * в таблиці рядок лягає на окремий аркуш. Змішувати їх із заявками не
+     * можна: у власника один список — це клієнти, інший — кандидати.
+     */
+    const isVacancy = data.kind === 'vacancy'
+    // Обрізаємо, а не відхиляємо: людина написала забагато — це не привід
+    // втратити кандидата, а телеграм має ліміт на довжину повідомлення.
+    const position = String(data.position ?? '').trim().slice(0, 100) || 'Не вказано'
+    const comment = String(data.comment ?? '').trim().slice(0, 1000)
+
     // Приховане поле: людина його не бачить і не заповнює, бот заповнює майже
     // завжди. Відповідаємо успіхом, щоб бот не шукав обхід.
     if (data.website) return new Response(JSON.stringify({ ok: true }), { headers: cors })
@@ -224,12 +238,18 @@ export default {
     const time = new Date().toLocaleString('uk-UA', { timeZone: 'Europe/Kyiv' })
     // Жирним саме значення, а не підпис: менеджер вихоплює очима ім'я й номер,
     // а не слово «Телефон», яке в кожному повідомленні те саме.
-    const text =
-      `🌿 <b>Нова заявка з сайту</b>\n\n` +
-      `Ім'я: <b>${escapeHtml(name)}</b>\n` +
-      `Телефон: <b>${escapeHtml(phone)}</b>\n` +
-      `Сторінка: <b>${escapeHtml(label)}</b>\n\n` +
-      `Час: ${time}`
+    const text = isVacancy
+      ? `🧑‍🌾 <b>Відгук на вакансію</b>\n\n` +
+        `Ім'я: <b>${escapeHtml(name)}</b>\n` +
+        `Телефон: <b>${escapeHtml(phone)}</b>\n` +
+        `Посада: <b>${escapeHtml(position)}</b>\n` +
+        (comment ? `\nПро себе:\n${escapeHtml(comment)}\n` : '') +
+        `\nЧас: ${time}`
+      : `🌿 <b>Нова заявка з сайту</b>\n\n` +
+        `Ім'я: <b>${escapeHtml(name)}</b>\n` +
+        `Телефон: <b>${escapeHtml(phone)}</b>\n` +
+        `Сторінка: <b>${escapeHtml(label)}</b>\n\n` +
+        `Час: ${time}`
 
     // Обидва канали смикаємо одночасно й незалежно: заявка не має губитись
     // через те, що один із них саме зараз недоступний.
@@ -238,13 +258,15 @@ export default {
       // `from` каже, котра саме форма — спливне вікно чи та, що в секції.
       // Без цього обидві давали однаковий рядок, і власник не бачив, який
       // заклик спрацював.
-      sendToSheet(env, {
-        kind: 'lead',
-        event: String(data.from ?? '').trim() || 'Форма на сторінці',
-        name,
-        phone,
-        page: label,
-      }),
+      sendToSheet(env, isVacancy
+        ? { kind: 'vacancy', name, phone, position, comment, source: label }
+        : {
+            kind: 'lead',
+            event: String(data.from ?? '').trim() || 'Форма на сторінці',
+            name,
+            phone,
+            page: label,
+          }),
     ])
 
     // «Дякуємо» показуємо, лише якщо заявка десь осіла. Якщо ніде — краще

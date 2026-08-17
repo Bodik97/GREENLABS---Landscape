@@ -4,6 +4,7 @@ export const NAV = [
   { label: 'Портфоліо', href: '/works' },
   { label: 'Про нас', href: '/about' },
   { label: 'Блог', href: '/blog' },
+  { label: 'Робота', href: '/robota' },
 ]
 
 export const PROCESS = [

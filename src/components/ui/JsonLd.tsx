@@ -68,6 +68,70 @@ export const serviceSchema = ({
 })
 
 /**
+ * Вакансія — для Google Jobs.
+ *
+ * `baseSalary` тут необовʼязковий навмисно: вилка в структурованих даних — це
+ * заявка роботодавця, яку Google показує як факт. Поки цифри на сторінці не
+ * звірені з власником (див. SALARY_CONFIRMED у data/careers.tsx), поле не
+ * додається взагалі — краще оголошення без суми, ніж із вигаданою.
+ */
+export const jobPostingSchema = ({
+  id,
+  title,
+  description,
+  datePosted,
+  validThrough,
+  url,
+  salary,
+}: {
+  id: string
+  title: string
+  description: string
+  datePosted: string
+  validThrough: string
+  url: string
+  salary?: { from: number; to: number }
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'JobPosting',
+  title,
+  description,
+  identifier: { '@type': 'PropertyValue', name: 'GREENLABS', value: id },
+  datePosted,
+  validThrough,
+  employmentType: 'FULL_TIME',
+  hiringOrganization: {
+    '@type': 'Organization',
+    name: 'GREENLABS',
+    sameAs: ORIGIN,
+    logo: `${ORIGIN}/logo/logo-v2-208.webp`,
+  },
+  jobLocation: {
+    '@type': 'Place',
+    address: {
+      '@type': 'PostalAddress',
+      addressLocality: 'Львів',
+      addressRegion: 'Львівська область',
+      addressCountry: 'UA',
+    },
+  },
+  directApply: true,
+  url,
+  ...(salary && {
+    baseSalary: {
+      '@type': 'MonetaryAmount',
+      currency: 'UAH',
+      value: {
+        '@type': 'QuantitativeValue',
+        minValue: salary.from,
+        maxValue: salary.to,
+        unitText: 'MONTH',
+      },
+    },
+  }),
+})
+
+/**
  * Покрокова технологія з чеклиста «Як ми це робимо».
  * Повертає null, якщо такого блока на сторінці немає — порожній HowTo шкідливий.
  */
