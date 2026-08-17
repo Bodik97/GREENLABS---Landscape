@@ -22,6 +22,17 @@ const TOAST_DELAY_MS = 12_000
 const NUDGE_DELAY_MS = 45_000
 
 /**
+ * Через скільки днів картка про набір повертається до того, хто її закрив.
+ *
+ * Спершу закриття памʼяталось назавжди. Для реклами це ввічливо, але тут інша
+ * задача: людина, яка відмахнулась у травні, у серпні вже могла шукати роботу —
+ * і ми б їй більше нічого не показали. Два тижні — достатньо довго, щоб не
+ * дратувати, і достатньо коротко, щоб не втратити того, у кого змінились
+ * обставини.
+ */
+const TOAST_SNOOZE_DAYS = 14
+
+/**
  * Чи це збірковий краулер, а не людина.
  *
  * Пререндер (scripts/prerender.mjs) тримає сторінку відкритою десятки секунд і
@@ -87,8 +98,8 @@ function PromptCard({
  * хто передасть знайомому. Ціна питання — одна картка, яку закривають одним
  * дотиком; вигода — люди, яких інакше не знайти.
  *
- * Закриття памʼятаємо в localStorage, тобто назавжди для цього браузера:
- * нагадувати про набір щосесії — це вже настирливо.
+ * Закриття памʼятаємо на TOAST_SNOOZE_DAYS: нагадувати щосесії настирливо, а
+ * замовкнути назавжди — марно втратити людину, у якої змінились обставини.
  */
 export function HiringToast() {
   const { pathname } = useLocation()
@@ -98,7 +109,13 @@ export function HiringToast() {
 
   useEffect(() => {
     if (!relevant || isCrawler()) return
-    if (localStorage.getItem(TOAST_KEY)) return
+
+    // У ключі лежить час закриття. Стара мітка «1» не є числом — Number дає
+    // NaN, будь-яке порівняння з ним хибне, і картка просто зʼявиться знову.
+    // Саме те, що треба: у тих, хто закрив її до цієї зміни, відлік почнеться
+    // заново, а не триватиме вічно.
+    const закрито = Number(localStorage.getItem(TOAST_KEY))
+    if (Date.now() - закрито < TOAST_SNOOZE_DAYS * 24 * 60 * 60 * 1000) return
 
     const timer = setTimeout(() => setShown(true), TOAST_DELAY_MS)
     return () => clearTimeout(timer)
@@ -107,7 +124,7 @@ export function HiringToast() {
   if (!shown || !relevant) return null
 
   const dismiss = () => {
-    localStorage.setItem(TOAST_KEY, '1')
+    localStorage.setItem(TOAST_KEY, String(Date.now()))
     setShown(false)
   }
 
