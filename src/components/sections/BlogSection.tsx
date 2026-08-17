@@ -36,7 +36,7 @@ export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more, ab
                 <Link to={`/blog/${b.slug}`} className="group block">
                   <div className="rounded-2xl overflow-hidden bg-green aspect-16/10 mb-5">
                     <img
-                      src={imageUrl(b.image, 700, 438)}
+                      src={imageUrl(b.image, 700, 438)} width={700} height={438}
                       alt={b.image?.alt || b.title}
                       className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                       loading="lazy"

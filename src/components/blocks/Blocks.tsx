@@ -232,7 +232,7 @@ function BlockBody({ block, fallbackAlt, onCream }: { block: Block; fallbackAlt:
           <figure>
             <div className="rounded-2xl overflow-hidden bg-green aspect-21/9">
               <img
-                src={imageUrl(block.image, 1800, 771)}
+                src={imageUrl(block.image, 1800, 771)} width={1800} height={771}
                 alt={block.image.alt || fallbackAlt}
                 className="w-full h-full object-cover"
                 loading="lazy"

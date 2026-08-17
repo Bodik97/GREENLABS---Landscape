@@ -35,7 +35,7 @@ function ServiceTile({ service, index }: { service: ServiceCard; index: number }
         {service.image?.asset && (
           <div className="aspect-4/3 overflow-hidden">
             <img
-              src={imageUrl(service.image, 720, 540)}
+              src={imageUrl(service.image, 720, 540)} width={720} height={540}
               alt={service.image.alt || service.title}
               className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               loading="lazy"

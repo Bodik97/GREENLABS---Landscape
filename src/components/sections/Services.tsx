@@ -62,7 +62,7 @@ export function Services({ above }: { above?: string } = {}) {
                   <div className="aspect-video overflow-hidden relative">
                     {s.image?.asset && (
                       <img
-                        src={imageUrl(s.image, 640, 360)}
+                        src={imageUrl(s.image, 640, 360)} width={640} height={360}
                         alt={s.image.alt || s.title}
                         className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                         loading="lazy"

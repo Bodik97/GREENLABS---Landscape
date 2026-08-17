@@ -92,7 +92,7 @@ function Team({ work }: { work: Work }) {
             <div className="w-11 h-11 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">
               {t.member?.photo?.asset && (
                 <img
-                  src={imageUrl(t.member.photo, 120, 120)}
+                  src={imageUrl(t.member.photo, 120, 120)} width={120} height={120}
                   alt={t.member.name}
                   className="w-full h-full object-cover"
                   loading="lazy"

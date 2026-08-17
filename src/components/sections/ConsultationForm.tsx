@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from 'react'
+import React, { useId, useLayoutEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Eyebrow } from '../ui/Eyebrow'
 import { IcoClock } from '../ui/Icons'
@@ -32,6 +32,18 @@ export function ConsultationForm({ dark = false, from = 'Форма на сто�
   /** Перше речення в помилці — далі йде телефон, він потрібен у будь-якому разі. */
   const [errorLead, setErrorLead] = useState(MSG.failed)
   const { close } = useConsultationModal()
+
+  /**
+   * Свої id на кожен примірник форми.
+   *
+   * Без них підпис не звʼязаний із полем, і читач з екрана каже «поле вводу»
+   * замість «Телефон». Сталі id тут не годяться: форма буває на сторінці двічі
+   * — у секції внизу і в спливному вікні, — а два однакові id ламають звʼязок
+   * обом.
+   */
+  const uid = useId()
+  const nameId = `${uid}-name`
+  const phoneId = `${uid}-phone`
 
   const endpoint = import.meta.env.VITE_LEAD_ENDPOINT
 
@@ -258,21 +270,21 @@ export function ConsultationForm({ dark = false, from = 'Форма на сто�
       <form onSubmit={submit} noValidate className="relative flex flex-col gap-6 w-full">
         <div className="flex flex-col gap-4">
           <div>
-            <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Ваше ім'я</label>
-            <input type="text" value={name} onChange={changeName} placeholder="Олена Петрівна" required maxLength={NAME_MAX}
-              aria-invalid={!!nameHint} aria-describedby={nameHint ? 'name-hint' : undefined}
+            <label htmlFor={nameId} className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Ваше ім'я</label>
+            <input id={nameId} type="text" value={name} onChange={changeName} placeholder="Олена Петрівна" required maxLength={NAME_MAX} autoComplete="name"
+              aria-invalid={!!nameHint} aria-describedby={nameHint ? `${nameId}-hint` : undefined}
               className={`w-full bg-parchment border rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 transition-colors ${nameHint ? 'border-terra focus:border-terra focus:ring-terra/30' : 'border-[#d9d6d0] focus:border-green focus:ring-green/30'}`} />
-            {nameHint && <FieldHint id="name-hint" dark={dark}>{nameHint}</FieldHint>}
+            {nameHint && <FieldHint id={`${nameId}-hint`} dark={dark}>{nameHint}</FieldHint>}
           </div>
           <div>
-            <label className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
+            <label htmlFor={phoneId} className={`text-[11px] font-display font-semibold uppercase tracking-wider block mb-1.5 ${label}`}>Телефон</label>
             {/* Без maxLength: повний номер має рівно стільки символів, скільки
                 дозволяв би ліміт, і браузер переставав пускати ввід усередину
                 готового номера. Довжину й так тримає маска — десять цифр. */}
-            <input ref={phoneRef} type="tel" value={phone} onChange={changePhone} onKeyDown={keyDownPhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric"
-              aria-invalid={!!phoneHint} aria-describedby={phoneHint ? 'phone-hint' : undefined}
+            <input ref={phoneRef} id={phoneId} type="tel" value={phone} onChange={changePhone} onKeyDown={keyDownPhone} placeholder="+38 (0XX) XXX-XX-XX" required inputMode="numeric" autoComplete="tel"
+              aria-invalid={!!phoneHint} aria-describedby={phoneHint ? `${phoneId}-hint` : undefined}
               className={`w-full bg-parchment border rounded-lg px-4 py-3 text-[14px] font-sans text-ink placeholder:text-stone/60 focus:outline-none focus:ring-2 transition-colors ${phoneHint ? 'border-terra focus:border-terra focus:ring-terra/30' : 'border-[#d9d6d0] focus:border-green focus:ring-green/30'}`} />
-            {phoneHint && <FieldHint id="phone-hint" dark={dark}>{phoneHint}</FieldHint>}
+            {phoneHint && <FieldHint id={`${phoneId}-hint`} dark={dark}>{phoneHint}</FieldHint>}
           </div>
         </div>
 

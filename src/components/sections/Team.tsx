@@ -23,7 +23,7 @@ export function Team({ above }: { above?: string } = {}) {
                 <div className="w-24 h-24 md:w-28 md:h-28 rounded-full overflow-hidden mx-auto mb-4 bg-green ring-2 ring-[#d9d6d0] group-hover:ring-green transition-all duration-300">
                   {m.photo?.asset && (
                     <img
-                      src={imageUrl(m.photo, 220, 220)}
+                      src={imageUrl(m.photo, 220, 220)} width={220} height={220}
                       alt={m.photo.alt || m.name}
                       className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                       loading="lazy"

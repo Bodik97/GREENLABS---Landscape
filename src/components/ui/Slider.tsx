@@ -45,7 +45,7 @@ export function Slider({ images, alt }: { images: SanityImage[]; alt: string }) 
           <figure key={img._key ?? i} className="shrink-0 w-full snap-start">
             <div className="aspect-4/3">
               <img
-                src={imageUrl(img, 1400, 1050)}
+                src={imageUrl(img, 1400, 1050)} width={1400} height={1050}
                 alt={img.alt || alt}
                 className="w-full h-full object-cover"
                 loading={i === 0 ? 'eager' : 'lazy'}

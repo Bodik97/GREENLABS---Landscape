@@ -7,11 +7,14 @@ import { IcoPin, IcoPhone, IcoMail, IcoClock, IcoFacebook, IcoInstagram } from '
 export function Footer() {
   const { data: services } = useSanity<ServiceCard[]>(SERVICES_QUERY)
 
+  /* Порожню адресу не показуємо зовсім: значок, що веде в нікуди, гірший за
+     його відсутність — людина тицяє, нічого не стається, і довіри меншає.
+     Зʼявиться сторінка у Facebook — досить вписати адресу сюди. */
   const socials = [
-    { label: 'Facebook', href: '#', Icon: IcoFacebook },
+    { label: 'Facebook', href: '', Icon: IcoFacebook },
     { label: 'Instagram', href: 'https://www.instagram.com/landspace_design10', Icon: IcoInstagram },
     { label: 'Email', href: 'mailto:labs17@gmail.com', Icon: IcoMail },
-  ]
+  ].filter((s) => s.href)
 
   return (
     <footer className="relative bg-green pt-16 pb-8">
@@ -42,7 +45,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Меню</h4>
+            <h3 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Меню</h3>
             <ul className="flex flex-col gap-3">
               {NAV.map((n) => (
                 <li key={n.label}>
@@ -55,7 +58,7 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Послуги</h4>
+            <h3 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Послуги</h3>
             <ul className="flex flex-col gap-3">
               {services?.slice(0, 6).map((s) => (
                 <li key={s._id}>
@@ -68,10 +71,13 @@ export function Footer() {
           </div>
 
           <div>
-            <h4 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Контакти</h4>
+            <h3 className="font-display font-semibold text-cream text-[11px] tracking-[0.12em] uppercase mb-5">Контакти</h3>
             <ul className="flex flex-col gap-4">
+              {/* Місто без href: адреси з номером будинку в нас немає, а
+                  посилання, що нікуди не веде, лише дратує. Зʼявиться точка на
+                  мапі — сюди стане звичайний href. */}
               {[
-                { lbl: 'Адреса', val: 'Львів', href: '#', Icon: IcoPin },
+                { lbl: 'Адреса', val: 'Львів', href: '', Icon: IcoPin },
                 { lbl: 'Телефон', val: '+38 (097) 695-24-73', href: 'tel:+380976952473', Icon: IcoPhone },
                 { lbl: 'Email', val: 'labs17@gmail.com', href: 'mailto:labs17@gmail.com', Icon: IcoMail },
               ].map((c) => (
@@ -79,7 +85,11 @@ export function Footer() {
                   <c.Icon className="w-4 h-4 text-terra shrink-0 mt-0.5" />
                   <div>
                     <p className="text-cream/55 text-[10px] font-display uppercase tracking-wider mb-0.5">{c.lbl}</p>
-                    <a href={c.href} className="text-cream/72 text-[12px] font-sans hover:text-cream transition-colors">{c.val}</a>
+                    {c.href ? (
+                      <a href={c.href} className="text-cream/72 text-[12px] font-sans hover:text-cream transition-colors">{c.val}</a>
+                    ) : (
+                      <p className="text-cream/72 text-[12px] font-sans">{c.val}</p>
+                    )}
                   </div>
                 </li>
               ))}
@@ -97,9 +107,12 @@ export function Footer() {
 
         <div className="pt-8 flex flex-col md:flex-row md:items-center justify-between gap-3">
           <p className="text-cream/55 text-[11px] font-sans">© 2026 GREENLABS Ландшафт. Всі права захищено.</p>
+          {/* «Публічна оферта» звідси прибрана: сторінки з нею немає, а
+              посилання стояло на «#». Людина, яка шукає саме цей документ,
+              натискала й не отримувала нічого — гірше, ніж не побачити його
+              зовсім. Зʼявиться текст оферти — повернути сюди рядок як <Link>. */}
           <div className="flex gap-5">
             <Link to="/privacy" className="text-cream/55 text-[11px] font-sans hover:text-cream/60 transition-colors">Політика конфіденційності</Link>
-            <a href="#" className="text-cream/55 text-[11px] font-sans hover:text-cream/60 transition-colors">Публічна оферта</a>
           </div>
         </div>
       </div>

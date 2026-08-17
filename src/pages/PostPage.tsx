@@ -30,7 +30,7 @@ function Meta({ post }: { post: Post }) {
             <div className="w-12 h-12 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">
               {post.author.photo?.asset && (
                 <img
-                  src={imageUrl(post.author.photo, 120, 120)}
+                  src={imageUrl(post.author.photo, 120, 120)} width={120} height={120}
                   alt={post.author.name}
                   className="w-full h-full object-cover"
                   loading="lazy"
@@ -71,7 +71,7 @@ function AuthorBio({ post }: { post: Post }) {
           <div className="w-16 h-16 rounded-full overflow-hidden bg-green shrink-0 ring-1 ring-[#d9d6d0]">
             {post.author.photo?.asset && (
               <img
-                src={imageUrl(post.author.photo, 160, 160)}
+                src={imageUrl(post.author.photo, 160, 160)} width={160} height={160}
                 alt={post.author.name}
                 className="w-full h-full object-cover"
                 loading="lazy"

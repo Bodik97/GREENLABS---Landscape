@@ -39,7 +39,13 @@ export default function BlogPage() {
       )}
 
       {!loading && !error && (
-        <PostCards items={posts ?? []} bg="bg-cream" above="text-green" />
+        <>
+          {/* Заголовок лише для читача з екрана: видимий тут зайвий, бо банер
+              і так каже «Блог», а без нього назви статей (h3) йшли одразу за
+              h1 сторінки — і рівень пропускався. */}
+          <h2 className="sr-only">Статті</h2>
+          <PostCards items={posts ?? []} bg="bg-cream" above="text-green" />
+        </>
       )}
     </>
   )

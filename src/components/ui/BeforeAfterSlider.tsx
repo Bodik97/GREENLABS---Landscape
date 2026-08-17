@@ -51,11 +51,17 @@ export function BeforeAfterSlider({
       style={{ touchAction: 'pan-y' }}
       className="relative rounded-2xl overflow-hidden aspect-4/3 select-none bg-green cursor-ew-resize"
     >
-      <img src={img} alt={`${label} — ${afterLabel}`} className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" />
+      {/* Розміри 800×600 — рівно ті, що в самих файлах, і рівно те
+          співвідношення, яке тримає контейнер (aspect-4/3). Місце тут резервує
+          контейнер, тож макет і так не стрибає, але з розмірами браузер знає
+          пропорцію ще до завантаження кадру. */}
+      <img src={img} alt={`${label} — ${afterLabel}`} width={800} height={600} className="absolute inset-0 w-full h-full object-cover pointer-events-none" loading="lazy" />
       <div className="absolute inset-0 overflow-hidden pointer-events-none" style={{ clipPath: `inset(0 ${100 - pos}% 0 0)` }}>
         <img
           src={imgBefore ?? img}
           alt={`${label} — ${beforeLabel}`}
+          width={800}
+          height={600}
           /* Без окремого знімка «до» ліва половина — той самий кадр, лише
              приглушений. Приглушення легке: раніше воно було майже чорно-білим
              і читалось як інша, гірша фотографія, хоча це той самий сад. */

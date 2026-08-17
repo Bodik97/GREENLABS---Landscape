@@ -11,7 +11,7 @@ export function WorkTile({ work }: { work: WorkCard }) {
     <Link to={`/works/${work.slug}`} className="group block">
       <div className="relative rounded-2xl overflow-hidden bg-green aspect-4/3 mb-4">
         <img
-          src={imageUrl(work.image, 800, 600)}
+          src={imageUrl(work.image, 800, 600)} width={800} height={600}
           alt={work.image?.alt || work.title}
           className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           loading="lazy"
