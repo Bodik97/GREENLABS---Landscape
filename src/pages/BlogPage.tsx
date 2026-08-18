@@ -1,4 +1,5 @@
 import { PageHeader, Seo } from '../shared'
+import { fileBanner } from '../lib/banner'
 import { SectionWave } from '../components/ui/SectionWave'
 import { PostCards } from '../components/sections/BlogSection'
 import { useSanity, ALL_POSTS_QUERY, type PostCard } from '../lib/sanity'
@@ -19,6 +20,7 @@ export default function BlogPage() {
         breadcrumbs={CRUMBS}
       />
       <PageHeader
+        {...fileBanner('banner-blog')}
         eyebrow="Блог"
         title="Корисні матеріали"
         desc="Розбираємо питання, які найчастіше чуємо на консультаціях — від вибору рослин до догляду за готовим садом."

@@ -19,11 +19,11 @@ export function Hero() {
           по висоті, тож малюнок виходить завширшки 16/9 висоти — це і є 178vh. */}
       <div className="absolute inset-0 bg-green">
         <picture className="block w-full h-full">
-          <source media="(max-aspect-ratio: 1/1)" srcSet={`${import.meta.env.BASE_URL}img/hero-portrait.webp`} />
+          <source media="(max-aspect-ratio: 1/1)" srcSet={`${import.meta.env.BASE_URL}img/hero-v2-portrait.webp`} />
           <img
-            src={`${import.meta.env.BASE_URL}img/hero-1280.webp`}
+            src={`${import.meta.env.BASE_URL}img/hero-v2-1280.webp`}
             srcSet={[640, 960, 1280, 1920]
-              .map((w) => `${import.meta.env.BASE_URL}img/hero-${w}.webp ${w}w`)
+              .map((w) => `${import.meta.env.BASE_URL}img/hero-v2-${w}.webp ${w}w`)
               .join(', ')}
             sizes="(max-aspect-ratio: 16/9) 178vh, 100vw"
             alt=""

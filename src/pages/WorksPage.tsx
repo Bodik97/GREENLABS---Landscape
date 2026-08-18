@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { PageHeader, Reveal, Seo } from '../shared'
+import { fileBanner } from '../lib/banner'
 import { SectionWave } from '../components/ui/SectionWave'
 import { WorkTile } from '../components/sections/WorkCards'
 import { useSanity, WORKS_QUERY, type WorkCard } from '../lib/sanity'
@@ -35,6 +36,7 @@ export default function WorksPage() {
         breadcrumbs={CRUMBS}
       />
       <PageHeader
+        {...fileBanner('banner-works')}
         eyebrow="Портфоліо"
         title="Наші роботи"
         desc="Реалізовані проєкти у Львові та області. Оберіть тип робіт, щоб побачити схожі на ваш випадок."
