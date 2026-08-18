@@ -1,7 +1,6 @@
 import { useEffect, useState, type ReactNode } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 import { IcoArrow, IcoClose } from './Icons'
-import { sanityOnce, TOP_SALARY_QUERY } from '../../lib/sanity'
 
 /**
  * Ненавʼязливі нагадування про набір команди.
@@ -103,8 +102,6 @@ function PromptCard({
 export function HiringToast() {
   const { pathname } = useLocation()
   const [shown, setShown] = useState(false)
-  /** Стеля зарплат із адмінки. 0 — ще не приїхала або її немає взагалі. */
-  const [стеля, setСтеля] = useState(0)
 
   const relevant = !pathname.startsWith('/robota') && !pathname.startsWith('/privacy')
 
@@ -118,20 +115,8 @@ export function HiringToast() {
     const закрито = Number(localStorage.getItem(TOAST_KEY))
     if (Date.now() - закрито < TOAST_SNOOZE_DAYS * 24 * 60 * 60 * 1000) return
 
-    let живий = true
-    const timer = setTimeout(async () => {
-      // Спершу число, потім показ: картка, що спливає без суми й дописує її за
-      // мить, смикається просто перед очима.
-      await sanityOnce<number | null>(TOP_SALARY_QUERY)
-        .then((max) => живий && setСтеля(max ?? 0))
-        .catch(() => {}) // без суми картка теж робоча, просто менш переконлива
-      if (живий) setShown(true)
-    }, TOAST_DELAY_MS)
-
-    return () => {
-      живий = false
-      clearTimeout(timer)
-    }
+    const timer = setTimeout(() => setShown(true), TOAST_DELAY_MS)
+    return () => clearTimeout(timer)
   }, [relevant])
 
   if (!shown || !relevant) return null
@@ -149,17 +134,16 @@ export function HiringToast() {
         GREENLABS шукає майстрів
       </p>
 
-      {/* Сума — найсильніший рядок у картці, тому окремо й помітно. Береться з
-          адмінки: вигадана тут розійшлася б із тим, що на сторінці вакансій. */}
-      {стеля > 0 && (
-        <p className="font-display font-bold text-terra text-[19px] leading-tight mb-1.5">
-          до {new Intl.NumberFormat('uk-UA').format(стеля)} ₴
-          <span className="text-stone font-sans font-normal text-[12px]"> / місяць</span>
-        </p>
-      )}
+      {/* Замість суми — спеціальності, і тим самим помітним рядком. Майстер
+          шукає в оголошенні не «працівників», а власне ремесло: побачив своє —
+          читає далі. Суму навмисно не називаємо: вона на сторінці вакансій, де
+          видно, за яку саме роботу. */}
+      <p className="font-display font-bold text-terra text-[17px] leading-tight mb-1.5">
+        Мощення · Полив · Озеленення
+      </p>
 
       <p className="text-stone text-[12px] font-sans leading-[1.6] mb-1">
-        Мощення, полив, озеленення. Комерційні обʼєкти й приватні сади, робота цілий рік.
+        Комерційні обʼєкти й приватні сади. Робота цілий рік, оплата вчасно.
       </p>
       {/* Знімаємо головні страхи майстра до того, як він відкрив форму: довга
           анкета, вимога резюме й тиша у відповідь. */}

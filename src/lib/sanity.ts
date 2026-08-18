@@ -293,24 +293,6 @@ export const VACANCIES_QUERY = `*[_type == "vacancy" && ${LIVE} && defined(slug.
   _id, title, "slug": slug.current, summary, salaryFrom, salaryTo, schedule, requirements, icon
 }`
 
-/**
- * Найбільша зарплата серед відкритих вакансій — одне число.
- *
- * Потрібне картці про набір, яка спливає на всіх сторінках. Тому запит
- * навмисно куций: рахує Sanity, назад їде число, а не пʼять документів.
- */
-export const TOP_SALARY_QUERY = `math::max(*[_type == "vacancy" && ${LIVE}].salaryTo)`
-
-/**
- * Разовий запит поза хуком.
- *
- * Потрібен там, де дані стають потрібні не одразу, а за подією: картка про
- * набір питає стелю зарплат аж тоді, коли збирається зʼявитись. Через useSanity
- * це означало б запит на кожній сторінці — заради рядка, який здебільшого ніхто
- * не побачить.
- */
-export const sanityOnce = <T,>(query: string) => sanityFetch<T>(queryUrl(query, {}))
-
 // ── Послуги ──
 
 const PRICE = 'price{ from, to, unit, note, basis }'
