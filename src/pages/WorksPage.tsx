@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { PageHeader, Reveal, Seo } from '../shared'
+import { PageBanner, Reveal, Seo } from '../shared'
 import { fileBanner } from '../lib/banner'
 import { SectionWave } from '../components/ui/SectionWave'
 import { WorkTile } from '../components/sections/WorkCards'
@@ -35,7 +35,7 @@ export default function WorksPage() {
         description="Реалізовані ландшафтні проєкти GREENLABS у Львові та області: приватні сади, комерційні території, озеленення, полив, мощення та освітлення."
         breadcrumbs={CRUMBS}
       />
-      <PageHeader
+      <PageBanner
         {...fileBanner('banner-works')}
         eyebrow="Портфоліо"
         title="Наші роботи"

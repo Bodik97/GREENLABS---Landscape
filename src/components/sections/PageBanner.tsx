@@ -3,8 +3,17 @@ import { Eyebrow } from '../ui/Eyebrow'
 import { Breadcrumbs, type Crumb } from '../ui/Breadcrumbs'
 
 export function PageBanner({ eyebrow, title, desc, img, srcSet, portrait, breadcrumbs, action }: { eyebrow: string; title: string; desc: string; img: string; srcSet?: string; portrait?: string; breadcrumbs?: Crumb[]; action?: ReactNode }) {
+  // Висота на десктопі фіксована в пікселях, а не у відсотках екрана. Було
+  // min-h-[70vh], і банери стояли на різній висоті: 560 px там, де заголовок
+  // короткий, і 713 px там, де до нього додається кнопка. Просто зафіксувати
+  // 70vh не можна — на невисокому ноутбуці вмісту забракло б місця, і верх
+  // ховався б за шапку. 680 px підібрані під найнасиченіший банер: хлібні
+  // крихти, мітка, три рядки заголовка, опис і кнопка.
+  //
+  // На телефоні лишається min-h: там рядки переносяться непередбачувано, і
+  // жорстка висота різала б текст.
   return (
-    <section className="relative min-h-[70vh] flex items-end pb-16 md:pb-24 pt-32">
+    <section className="relative min-h-[70vh] md:h-[680px] flex items-end pb-16 md:pb-24 pt-32">
       {/* Саме це фото — LCP сторінки. Тегом <img> замість фону, щоб браузер
           знайшов його сканером попереднього завантаження і взяв у роботу першим.
 

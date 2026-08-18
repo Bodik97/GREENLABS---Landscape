@@ -5,7 +5,7 @@ import { IcoArrow } from '../ui/Icons'
 import { Eyebrow } from '../ui/Eyebrow'
 import { useSanity, imageUrl, formatDate, POSTS_QUERY, type PostCard } from '../../lib/sanity'
 
-/** Без `title` шапка не малюється — на сторінці блогу її роль виконує `PageHeader`. */
+/** Без `title` шапка не малюється — на сторінці блогу її роль виконує банер. */
 export function PostCards({ items, bg = 'bg-cream', id, eyebrow, title, more, above }: {
   items: PostCard[]
   bg?: string

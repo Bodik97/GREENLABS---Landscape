@@ -1,4 +1,4 @@
-import { PageHeader, Seo } from '../shared'
+import { PageBanner, Seo } from '../shared'
 import { fileBanner } from '../lib/banner'
 import { SectionWave } from '../components/ui/SectionWave'
 import { PostCards } from '../components/sections/BlogSection'
@@ -19,7 +19,7 @@ export default function BlogPage() {
         description="Статті студії GREENLABS: як обрати стиль саду, які рослини витримують клімат Львівщини, коли висаджувати й скільки коштує догляд."
         breadcrumbs={CRUMBS}
       />
-      <PageHeader
+      <PageBanner
         {...fileBanner('banner-blog')}
         eyebrow="Блог"
         title="Корисні матеріали"

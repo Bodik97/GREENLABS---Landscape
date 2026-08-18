@@ -23,7 +23,6 @@ export * from './components/layout/MobileCTA'
 
 // Sections
 export * from './components/sections/PageBanner'
-export * from './components/sections/PageHeader'
 export * from './components/sections/ExamplesSection'
 export * from './components/sections/Process'
 export * from './components/sections/LeadForm'
