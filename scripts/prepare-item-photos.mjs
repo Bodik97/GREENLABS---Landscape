@@ -50,6 +50,9 @@ const PHOTOS = {
   'abonementnyi-dohliad': 'fraem-gmbh-LVJnIiIeyO0-unsplash.jpg',
   'pokis-hazonu': 'andres-siimon-zfwyrIA6bFw-unsplash.jpg',
   'stryzhka-kushchiv': 'fraem-gmbh-rBY5Ek86oOI-unsplash.jpg',
+  // Кадр саме про обрізку: ножиці в роботі, а не готовий кущ. Із вільних
+  // знімків це єдиний, що показує саму дію, а не результат.
+  'obrizka-derev': 'peter-beukema-JB-QHEehcwI-unsplash.jpg',
   'pidzhyvlennia-roslyn': 'ries-bosch-3pACJiVZxe8-unsplash.jpg',
   // Проєктування
   'kontseptsiia-ta-planuvannia-zon': 'kayla-duhon-zsqF_j9ZHXw-unsplash.jpg',
