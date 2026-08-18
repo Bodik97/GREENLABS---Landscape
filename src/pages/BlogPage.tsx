@@ -29,7 +29,7 @@ export default function BlogPage() {
 
       {(loading || error) && (
         <section className="relative py-20 bg-cream">
-          <SectionWave shape="calm" className="text-cream" above="text-green" />
+          <SectionWave shape="calm" className="text-cream" />
           <div className="relative max-w-7xl mx-auto px-6">
             <p className="text-stone text-[14px] font-sans">
               {loading
@@ -46,7 +46,7 @@ export default function BlogPage() {
               і так каже «Блог», а без нього назви статей (h3) йшли одразу за
               h1 сторінки — і рівень пропускався. */}
           <h2 className="sr-only">Статті</h2>
-          <PostCards items={posts ?? []} bg="bg-cream" above="text-green" />
+          <PostCards items={posts ?? []} bg="bg-cream" />
         </>
       )}
     </>

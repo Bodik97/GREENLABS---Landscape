@@ -5,6 +5,7 @@ import { UserIcon } from '@sanity/icons/User'
 import { EyeClosedIcon } from '@sanity/icons/EyeClosed'
 import { TagIcon } from '@sanity/icons/Tag'
 import { ComponentIcon } from '@sanity/icons/Component'
+import { UsersIcon } from '@sanity/icons/Users'
 
 // id обов'язково задаємо явно: з кириличних назв Sanity його не виводить
 export const structure: StructureResolver = (S) =>
@@ -117,6 +118,38 @@ export const structure: StructureResolver = (S) =>
             ]),
         ),
       S.divider(),
+      S.listItem()
+        .id('vacancies')
+        .title('Вакансії')
+        .icon(UsersIcon)
+        .child(
+          S.list()
+            .id('vacancies-list')
+            .title('Вакансії')
+            .items([
+              S.listItem()
+                .id('vacancies-open')
+                .title('Відкриті')
+                .icon(UsersIcon)
+                .child(
+                  S.documentTypeList('vacancy')
+                    .id('vacancies-open-list')
+                    .title('Відкриті вакансії')
+                    .filter('_type == "vacancy" && hidden != true')
+                    .defaultOrdering([{ field: 'order', direction: 'asc' }]),
+                ),
+              S.listItem()
+                .id('vacancies-hidden')
+                .title('Закриті')
+                .icon(EyeClosedIcon)
+                .child(
+                  S.documentTypeList('vacancy')
+                    .id('vacancies-hidden-list')
+                    .title('Закриті вакансії')
+                    .filter('_type == "vacancy" && hidden == true'),
+                ),
+            ]),
+        ),
       S.listItem()
         .id('team')
         .title('Команда')

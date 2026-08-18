@@ -44,7 +44,7 @@ export default function WorksPage() {
       />
 
       <section className="relative py-16 md:py-20 bg-cream">
-        <SectionWave shape="calm" className="text-cream" above="text-green" />
+        <SectionWave shape="calm" className="text-cream" />
         <div className="relative max-w-7xl mx-auto px-6">
           {/* Заголовок лише для читача з екрана. Видимого тут немає — усе під
               банером і так очевидно оком, — але без нього після h1 одразу йшов
