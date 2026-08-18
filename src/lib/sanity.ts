@@ -287,10 +287,12 @@ export type Vacancy = {
   schedule: string
   requirements?: string[]
   icon?: string
+  /** Без фото картка показує значок — див. CareersPage. */
+  image?: SanityImage
 }
 
 export const VACANCIES_QUERY = `*[_type == "vacancy" && ${LIVE} && defined(slug.current)] | order(order asc){
-  _id, title, "slug": slug.current, summary, salaryFrom, salaryTo, schedule, requirements, icon
+  _id, title, "slug": slug.current, summary, salaryFrom, salaryTo, schedule, requirements, icon, image
 }`
 
 // ── Послуги ──

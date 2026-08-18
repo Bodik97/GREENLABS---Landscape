@@ -70,6 +70,22 @@ export const vacancy = defineType({
     }),
 
     defineField({
+      name: 'image',
+      title: 'Фото',
+      type: 'image',
+      options: { hotspot: true },
+      description:
+        'Люди на роботі, а не порожній інструмент: кандидат шукає в кадрі себе. Без фото картка покаже значок — теж нормально, але з фото відгукуються охочіше.',
+      fields: [
+        defineField({
+          name: 'alt',
+          title: 'Опис для SEO',
+          type: 'string',
+          description: 'Що на фото — для пошуковиків і для тих, хто читає сайт з екрана.',
+        }),
+      ],
+    }),
+    defineField({
       name: 'schedule',
       title: 'Графік',
       type: 'string',
@@ -108,11 +124,11 @@ export const vacancy = defineType({
   ],
   orderings: [{ title: 'За порядком', name: 'orderAsc', by: [{ field: 'order', direction: 'asc' }] }],
   preview: {
-    select: { title: 'title', from: 'salaryFrom', to: 'salaryTo', hidden: 'hidden' },
-    prepare({ title, from, to, hidden }) {
+    select: { title: 'title', from: 'salaryFrom', to: 'salaryTo', hidden: 'hidden', media: 'image' },
+    prepare({ title, from, to, hidden, media }) {
       const гроші = (n?: number) => (n ? new Intl.NumberFormat('uk-UA').format(n) : '')
       const сума = from ? `${гроші(from)}–${гроші(to) || '…'} ₴` : 'за домовленістю'
-      return { title, subtitle: hidden ? `${сума} · схована` : сума }
+      return { title, subtitle: hidden ? `${сума} · схована` : сума, media }
     },
   },
 })

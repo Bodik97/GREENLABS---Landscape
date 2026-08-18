@@ -51,6 +51,7 @@ export function VacancyForm({
   const [comment, setComment] = useState('')
   const [nameHint, setNameHint] = useState('')
   const [phoneHint, setPhoneHint] = useState('')
+  const nameRef = useRef<HTMLInputElement>(null)
   const phoneRef = useRef<HTMLInputElement>(null)
   /** Куди повернути курсор після того, як маска перемалює поле. */
   const caret = useRef<number | null>(null)
@@ -133,7 +134,12 @@ export function VacancyForm({
         : ''
     setNameHint(badName)
     setPhoneHint(badPhone)
-    if (badName || badPhone) return
+    // Курсор у перше поле з помилкою. На телефоні підказка часто лишається за
+    // краєм екрана, і людина бачить лише те, що кнопка «не працює».
+    if (badName || badPhone) {
+      ;(badName ? nameRef : phoneRef).current?.focus()
+      return
+    }
 
     if (!endpoint) {
       setState('error')
@@ -252,7 +258,7 @@ export function VacancyForm({
             Ваше ім'я
           </label>
           <input
-            id="vacancy-name" type="text" value={name} onChange={changeName} placeholder="Андрій"
+            ref={nameRef} id="vacancy-name" type="text" value={name} onChange={changeName} placeholder="Андрій"
             required maxLength={NAME_MAX} autoComplete="name"
             aria-invalid={!!nameHint} aria-describedby={nameHint ? 'vacancy-name-hint' : undefined}
             className={`${fieldBase} ${nameHint ? fieldBad : fieldOk}`}
@@ -334,6 +340,12 @@ export function VacancyForm({
         </p>
       )}
 
+      {/* Найчастіше заперечення робітника — «навіщо вам мій номер». Відповідь
+          має стояти там, де воно виникає: просто над кнопкою. */}
+      <p className="text-stone text-[12px] font-sans leading-[1.55] -mb-2">
+        Номер потрібен лише щоб передзвонити. Нікуди не передаємо й у розсилки не додаємо.
+      </p>
+
       <button
         type="submit"
         disabled={state === 'sending'}
@@ -341,6 +353,16 @@ export function VacancyForm({
       >
         {state === 'sending' ? 'Надсилаємо…' : 'Надіслати відгук'}
       </button>
+
+      <p className="text-[13px] font-sans text-stone text-center -mt-2">
+        Не любите форми?{' '}
+        <a
+          href={CAREERS_CONTACTS.phoneHref}
+          className="font-semibold text-terra underline underline-offset-2 whitespace-nowrap hover:text-[#b35c34] transition-colors"
+        >
+          Зателефонуйте: {CAREERS_CONTACTS.phone}
+        </a>
+      </p>
 
       <p className="text-[11px] font-sans text-stone">
         Натискаючи кнопку, ви погоджуєтесь із нашою{' '}

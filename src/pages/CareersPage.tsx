@@ -9,6 +9,7 @@ import {
   Eyebrow,
   Team,
   FaqSection,
+  CountUp,
   JsonLd,
   jobPostingSchema,
   siteUrl,
@@ -27,7 +28,7 @@ import { SectionWave } from '../components/ui/SectionWave'
 import { VacancyForm, OTHER_POSITION } from '../components/sections/VacancyForm'
 import { CareersNudge } from '../components/ui/HiringPrompts'
 import { fileBanner } from '../lib/banner'
-import { useSanity, VACANCIES_QUERY, type Vacancy } from '../lib/sanity'
+import { useSanity, imageUrl, VACANCIES_QUERY, type Vacancy } from '../lib/sanity'
 import { Placeholder } from '../components/ui/Placeholder'
 import { SvcDesign, SvcLawn, SvcLight, SvcPave, SvcPlant, SvcPond, SvcWater } from '../components/ui/Icons'
 import {
@@ -152,8 +153,8 @@ export default function CareersPage() {
   return (
     <>
       <Seo
-        title="Робота озеленювачем і садівником у Львові — вакансії GREENLABS"
-        description="GREENLABS набирає команду у Львові: садівники, озеленювачі, майстри мощення, монтажники поливу, різнороби. Гідна оплата вчасно, навчання коштом компанії, цілорічна робота. Залиште відгук — передзвонимо за день."
+        title="Робота озеленювачем і садівником у Львові — вакансії"
+        description="Вакансії у Львові: садівник, озеленювач, майстер мощення, монтажник поливу, різнороб. Робота цілий рік, оплата вчасно. Залиште відгук — передзвонимо за день."
         breadcrumbs={CRUMBS}
       />
 
@@ -181,8 +182,8 @@ export default function CareersPage() {
 
       <PageBanner
         eyebrow="Робота в GREENLABS"
-        title="Приєднуйтесь до команди, яка озеленює Львів"
-        desc="Шукаємо людей, які люблять роботу руками й хочуть у ній рости. Стабільна зайнятість цілий рік, оплата вчасно, навчання коштом компанії."
+        title="Робота в озелененні у Львові — приєднуйтесь до команди"
+        desc="Відкриті вакансії у Львові: садівник, озеленювач, майстер мощення, монтажник систем поливу, різноробочий. Стабільна зайнятість цілий рік, оплата вчасно, навчання коштом компанії."
         {...fileBanner('banner-about')}
         breadcrumbs={CRUMBS}
         action={
@@ -243,10 +244,27 @@ export default function CareersPage() {
               const Icon = VACANCY_ICONS[v.icon ?? 'plant'] ?? SvcPlant
               return (
               <Reveal key={v._id} delay={(i % 3) * 60}>
-                <article className="bg-cream rounded-2xl p-6 h-full flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]">
-                  <span className="text-green mb-4 inline-flex">
-                    <Icon className="w-8 h-8" />
-                  </span>
+                <article className="bg-cream rounded-2xl overflow-hidden h-full flex flex-col transition-all duration-300 hover:-translate-y-1 hover:shadow-[0_12px_32px_rgba(0,0,0,0.08)]">
+                  {/* Фото, якщо його додали в адмінці; якщо ні — той самий
+                      значок, що був. Кандидат шукає в кадрі себе, тож фото
+                      працює краще, але порожньої дірки в картці бути не має. */}
+                  {v.image?.asset ? (
+                    <img
+                      src={imageUrl(v.image, 720, 420)}
+                      alt={v.image.alt || v.title}
+                      width={720}
+                      height={420}
+                      loading="lazy"
+                      decoding="async"
+                      className="w-full aspect-[12/7] object-cover"
+                    />
+                  ) : null}
+                  <div className="p-6 flex flex-col flex-1">
+                  {!v.image?.asset && (
+                    <span className="text-green mb-4 inline-flex">
+                      <Icon className="w-8 h-8" />
+                    </span>
+                  )}
                   <h3 className="font-display font-semibold text-ink text-[18px] mb-2">{v.title}</h3>
                   <Salary from={v.salaryFrom} to={v.salaryTo} />
                   <p className="text-stone text-[12px] font-sans leading-[1.65] mb-5">{v.summary}</p>
@@ -274,6 +292,7 @@ export default function CareersPage() {
                   >
                     Відгукнутись
                   </button>
+                  </div>
                 </article>
               </Reveal>
               )
@@ -312,8 +331,11 @@ export default function CareersPage() {
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {CONDITIONS.map((fact, i) => (
               <Reveal key={fact.label} delay={i * 70} className="text-center lg:text-left">
+                {/* Той самий лічильник, що на сторінці послуг: число набігає від
+                    нуля, коли блок доходить до екрана. Значення без цифр — на
+                    кшталт «Сезонні» — він показує як є, без анімації. */}
                 <p className="font-display font-bold text-cream text-[24px] md:text-[30px] leading-none mb-2">
-                  {fact.value}
+                  <CountUp value={fact.value} />
                 </p>
                 <p className="text-cream/60 text-[12px] md:text-[13px] font-sans leading-snug">{fact.label}</p>
               </Reveal>
@@ -379,6 +401,37 @@ export default function CareersPage() {
 
       {/* Форма відгуку */}
       <section ref={formRef} id="vidhuk" className="relative py-24 bg-green scroll-mt-20">
+        {/* Фото за формою — те саме, що в клієнтській заявці на решті сайту.
+            Секція була суцільно зеленою й через це читалась як службова
+            вставка, хоча це головна дія сторінки. Тегом <img>, а не фоном у
+            стилях: так браузер вибирає розмір під екран і вантажить кадр лише
+            коли до нього дійшли — секція в самому низу. */}
+        <div className="absolute inset-0 overflow-hidden">
+          <picture className="block w-full h-full">
+            {/* На вертикальному екрані широкий кадр майже весь пішов би під
+                обрізку — там окремий портретний. */}
+            <source media="(max-aspect-ratio: 1/1)" srcSet={`${import.meta.env.BASE_URL}img/lead-form-portrait.webp`} />
+            <img
+              src={`${import.meta.env.BASE_URL}img/lead-form-1280.webp`}
+              srcSet={[640, 960, 1280, 1920]
+                .map((w) => `${import.meta.env.BASE_URL}img/lead-form-${w}.webp ${w}w`)
+                .join(', ')}
+              sizes="100vw"
+              alt=""
+              aria-hidden="true"
+              width={1920}
+              height={1080}
+              loading="lazy"
+              decoding="async"
+              className="w-full h-full object-cover"
+            />
+          </picture>
+        </div>
+        {/* Затемнення щільніше, ніж у клієнтській формі: тут поверх лежить не
+            лише заголовок, а й світла картка з полями. */}
+        <div className="absolute inset-0 bg-linear-to-b from-green/85 via-green/70 to-green/90" />
+        {/* Після затемнення: інакше воно лягає й на хвилю, і на стику
+            зʼявляється смуга іншого відтінку. */}
         <SectionWave shape="calm" className="text-green" above="text-parchment" />
         <div className="relative max-w-7xl mx-auto px-6">
           <Reveal className="mb-10 text-center">

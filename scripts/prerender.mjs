@@ -14,8 +14,9 @@
  * можна було тільки вручну, тож краще не викотитись зовсім, ніж викотитись без
  * половини сенсу.
  */
-import { readFile, writeFile, mkdir } from 'node:fs/promises'
+import { readFile, writeFile, mkdir, mkdtemp } from 'node:fs/promises'
 import { createServer } from 'node:http'
+import { tmpdir } from 'node:os'
 import { extname, join } from 'node:path'
 import puppeteer from 'puppeteer'
 
@@ -67,8 +68,12 @@ let browser
 try {
   // --disable-web-security: сторінку відкриваємо з localhost, а в CORS Sanity дозволено
   // тільки бойовий домен. Це разовий білд-краулер, не браузер користувача.
+  // Профіль свій на кожен запуск. Зі сталим шляхом обірваний білд лишав по
+  // собі замок, і кожна наступна збірка падала з «browser is already running» —
+  // на своїй машині це виглядало як зламаний пререндер, хоча ламався лише
+  // Chrome. Тека потрібна саме тому, що без неї не діє --disable-web-security.
   browser = await puppeteer.launch({
-    args: ['--no-sandbox', '--disable-web-security', '--user-data-dir=/tmp/greenlabs-prerender'],
+    args: ['--no-sandbox', '--disable-web-security', `--user-data-dir=${await mkdtemp(join(tmpdir(), 'greenlabs-prerender-'))}`],
     // Сторінка не має займати більше хвилини; далі краще впасти в повтор,
     // ніж чекати три хвилини дефолтного таймауту протоколу.
     protocolTimeout: 60_000,
